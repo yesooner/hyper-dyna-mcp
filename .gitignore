@@ -14,3 +14,6 @@ runs/*
 lib/hypermesh-mcp/
 reports/08_*.txt
 reports/09_*.txt
+claude.md
+reports.md
+workflows/

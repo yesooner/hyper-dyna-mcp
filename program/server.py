@@ -58,6 +58,34 @@ except ImportError:
     generate_post_processing = None  # type: ignore[assignment]
     generate_export_png = None  # type: ignore[assignment]
 
+try:
+    from program.tools.hm_gui import (
+        execute_tcl_gui,
+        save_listener_tcl,
+        generate_listener_tcl,
+    )
+except ImportError:
+    execute_tcl_gui = None  # type: ignore[assignment]
+    save_listener_tcl = None  # type: ignore[assignment]
+    generate_listener_tcl = None  # type: ignore[assignment]
+
+try:
+    from program.tools.lsprepost_ipc import (
+        send_command as lsprepost_send_command,
+        open_d3plot,
+        export_png as lsprepost_export_png,
+        execute_tcl_in_gui as lsprepost_execute_tcl,
+        save_bridge_journal,
+        close_bridge,
+    )
+except ImportError:
+    lsprepost_send_command = None  # type: ignore[assignment]
+    open_d3plot = None  # type: ignore[assignment]
+    lsprepost_export_png = None  # type: ignore[assignment]
+    lsprepost_execute_tcl = None  # type: ignore[assignment]
+    save_bridge_journal = None  # type: ignore[assignment]
+    close_bridge = None  # type: ignore[assignment]
+
 server = Server("dyna-mcp")
 
 
@@ -276,6 +304,62 @@ async def list_tools() -> list[Tool]:
                 "required": ["d3plot_path", "output_dir"],
             },
         ),
+        # --- GUI interaction tools ---
+        Tool(
+            name="start_hypermesh_gui_listener",
+            description="Generate and save the HyperMesh GUI listener Tcl script",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "port": {"type": "integer", "default": 47881, "description": "Listener port"},
+                },
+            },
+        ),
+        Tool(
+            name="execute_tcl_gui",
+            description="Execute Tcl in HyperMesh GUI via socket listener (requires listener running)",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "script": {"type": "string", "description": "Tcl script to execute"},
+                    "model_path": {"type": "string", "description": "Path to .hm file to load first"},
+                    "output_hm_path": {"type": "string", "description": "Path to save .hm file after"},
+                    "timeout": {"type": "integer", "default": 120},
+                },
+                "required": ["script"],
+            },
+        ),
+        Tool(
+            name="start_lsprepost_bridge",
+            description="Generate and save the LS-PrePost bridge journal cfile",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "poll_interval": {"type": "number", "default": 1.0, "description": "Poll interval in seconds"},
+                },
+            },
+        ),
+        Tool(
+            name="lsprepost_command",
+            description="Send a command to LS-PrePost via file-queue IPC (requires bridge running)",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "action": {
+                        "type": "string",
+                        "enum": ["open_d3plot", "view", "export_png", "plot_deformed", "plot_stress", "plot_energy", "tcl", "exit"],
+                        "description": "Command action",
+                    },
+                    "path": {"type": "string", "description": "File path (for open_d3plot, export_png)"},
+                    "view": {"type": "string", "description": "View name (for view action)"},
+                    "width": {"type": "integer", "default": 1920},
+                    "height": {"type": "integer", "default": 1080},
+                    "script": {"type": "string", "description": "Tcl script (for tcl action)"},
+                    "timeout": {"type": "number", "default": 30},
+                },
+                "required": ["action"],
+            },
+        ),
     ]
 
 
@@ -461,6 +545,70 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             views=arguments.get("views"),
         )
         return [TextContent(type="text", text=content)]
+
+    # --- GUI interaction handlers ---
+
+    elif name == "start_hypermesh_gui_listener":
+        if save_listener_tcl is None:
+            return [TextContent(type="text", text="Error: hm_gui not available")]
+        path = save_listener_tcl(port=arguments.get("port", 47881))
+        return [TextContent(type="text", text=(
+            f"Listener Tcl saved to: {path}\n\n"
+            "To activate:\n"
+            "1. Open HyperMesh GUI\n"
+            "2. In HyperMesh Tcl console, run:\n"
+            f"   source \"{path}\"\n"
+            "3. You should see: 'Dyna-mcp GUI listener ready on 127.0.0.1:47881'\n"
+            "4. Then use execute_tcl_gui to send commands"
+        ))]
+
+    elif name == "execute_tcl_gui":
+        if execute_tcl_gui is None:
+            return [TextContent(type="text", text="Error: hm_gui not available")]
+        result = execute_tcl_gui(
+            script=arguments["script"],
+            model_path=arguments.get("model_path"),
+            output_hm_path=arguments.get("output_hm_path"),
+            timeout=arguments.get("timeout", 120),
+        )
+        import json
+        return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
+
+    elif name == "start_lsprepost_bridge":
+        if save_bridge_journal is None:
+            return [TextContent(type="text", text="Error: lsprepost_ipc not available")]
+        path = save_bridge_journal(poll_interval=arguments.get("poll_interval", 1.0))
+        return [TextContent(type="text", text=(
+            f"Bridge journal saved to: {path}\n\n"
+            "To activate:\n"
+            f"1. Launch LS-PrePost:\n"
+            f"   lsprepost4.13 cfile={path}\n"
+            "2. The bridge will poll for commands\n"
+            "3. Then use lsprepost_command to send commands"
+        ))]
+
+    elif name == "lsprepost_command":
+        if lsprepost_send_command is None:
+            return [TextContent(type="text", text="Error: lsprepost_ipc not available")]
+        action = arguments["action"]
+        kwargs = {}
+        if "path" in arguments:
+            kwargs["path"] = arguments["path"]
+        if "view" in arguments:
+            kwargs["view"] = arguments["view"]
+        if "width" in arguments:
+            kwargs["width"] = arguments["width"]
+        if "height" in arguments:
+            kwargs["height"] = arguments["height"]
+        if "script" in arguments:
+            kwargs["script"] = arguments["script"]
+        result = lsprepost_send_command(
+            action=action,
+            timeout=arguments.get("timeout", 30),
+            **kwargs,
+        )
+        import json
+        return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
 
     return [TextContent(type="text", text=f"Unknown tool: {name}")]
 
