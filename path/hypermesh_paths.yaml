@@ -1,0 +1,7 @@
+# HyperMesh 2021 paths
+
+hypermesh:
+  install_dir: "E:/HM2021/2021/hwdesktop"
+  hmbatch_exe: "E:/HM2021/2021/hwdesktop/hm/bin/win64/hmbatch.exe"
+  template_dir: ""  # TODO: LS-DYNA export template directory
+  version: "2021"

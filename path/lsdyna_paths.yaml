@@ -1,0 +1,8 @@
+# LS-DYNA paths (ANSYS 2022R2 environment)
+
+lsdyna:
+  solver_exe: "E:/ANSYS2022/ANSYS Inc/v222/ansys/bin/winx64/lsdyna.exe"
+  license: ""        # TODO: ANSYS license server
+  version: "R13.1"
+  ncpus_default: 4
+  memory_default: "200m"

@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+.venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+runs/*
+!runs/.gitkeep
+*.log
+lib/hypermesh-mcp/
+reports/08_*.txt
+reports/09_*.txt
