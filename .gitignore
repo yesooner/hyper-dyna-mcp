@@ -10,6 +10,8 @@ build/
 .mypy_cache/
 runs/*
 !runs/.gitkeep
+logs/*
+!logs/.gitkeep
 *.log
 lib/hypermesh-mcp/
 reports/08_*.txt

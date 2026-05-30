@@ -103,3 +103,44 @@ All configured in `path/*.yaml`:
 | Validation | `workflows/workflow_validation.md` | Check paths, env, tests, results |
 
 Decision flow: discussion → `workflow_selected.md` → execution → validation → reports + Obsidian log.
+
+## Handoff Convention
+
+When user says **"handoff"**, output a structured summary and save to `logs/handoff/`:
+
+### Output format
+
+```markdown
+# Handoff — YYYY-MM-DD HH:MM:SS
+
+## Session Summary
+- 主要完成内容（3-5 条）
+- 遇到的问题和解决方案
+
+## Current State
+- 代码状态（哪些模块完成/进行中/待做）
+- 测试状态（通过数/失败数）
+- Git 状态（最近提交）
+
+## Pending Tasks
+- 下一步要做的事情（按优先级排列）
+
+## Key Files
+- 本次修改的关键文件列表
+
+## Notes
+- 需要下一个 session 注意的事项
+```
+
+### File naming
+
+```
+logs/handoff/handoff_YYYYMMDD.md
+```
+
+### Rules
+
+1. **不写全局 JSON** — 只写本地 `logs/handoff/` 目录
+2. **自动记录时间** — 用 `datetime.now()` 生成时间戳
+3. **归纳而非罗列** — 总结关键信息，不重复代码细节
+4. **中文输出** — 摘要用中文，代码/路径用英文
