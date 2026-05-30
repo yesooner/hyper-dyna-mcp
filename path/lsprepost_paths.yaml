@@ -1,9 +1,5 @@
-# LS-PrePost paths (ANSYS 2022R2 — two versions)
+# LS-PrePost paths (ANSYS 2022R2)
 
 lsprepost:
-  exe: "E:/ANSYS2022/ANSYS Inc/v222/ansys/bin/winx64/lsprepost4.13"
-  version: "4.13"
-
-lsprepost_alt:
-  exe: "E:/ANSYS2022/ANSYS Inc/v222/ansys/bin/winx64/lsprepost48"
+  exe: "E:/ANSYS2022/ANSYS Inc/v222/ansys/bin/winx64/lsprepost48/lsprepost4.8_x64.exe"
   version: "4.8"
