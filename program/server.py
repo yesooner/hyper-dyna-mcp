@@ -70,21 +70,10 @@ except ImportError:
     generate_listener_tcl = None  # type: ignore[assignment]
 
 try:
-    from program.tools.lsprepost_ipc import (
-        send_command as lsprepost_send_command,
-        open_d3plot,
-        export_png as lsprepost_export_png,
-        execute_tcl_in_gui as lsprepost_execute_tcl,
-        save_bridge_journal,
-        close_bridge,
-    )
+    from program.tools.lsprepost_ipc import generate_cfile_commands, write_cfile
 except ImportError:
-    lsprepost_send_command = None  # type: ignore[assignment]
-    open_d3plot = None  # type: ignore[assignment]
-    lsprepost_export_png = None  # type: ignore[assignment]
-    lsprepost_execute_tcl = None  # type: ignore[assignment]
-    save_bridge_journal = None  # type: ignore[assignment]
-    close_bridge = None  # type: ignore[assignment]
+    generate_cfile_commands = None  # type: ignore[assignment]
+    write_cfile = None  # type: ignore[assignment]
 
 server = Server("dyna-mcp")
 
@@ -329,33 +318,7 @@ async def list_tools() -> list[Tool]:
                 "required": ["script"],
             },
         ),
-        Tool(
-            name="start_lsprepost_bridge",
-            description="Generate and save the LS-PrePost bridge journal cfile",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "poll_interval": {"type": "number", "default": 1.0, "description": "Poll interval in seconds"},
-                },
-            },
-        ),
-        Tool(
-            name="lsprepost_command",
-            description="Send a command to LS-PrePost via file-queue IPC (requires bridge running)",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "action": {
-                        "type": "string",
-                        "enum": ["open_d3plot", "view", "export_png", "plot_deformed", "plot_stress", "plot_energy", "tcl", "exit"],
-                        "description": "Command action",
-                    },
-                    "path": {"type": "string", "description": "File path (for open_d3plot, export_png)"},
-                    "view": {"type": "string", "description": "View name (for view action)"},
-                    "width": {"type": "integer", "default": 1920},
-                    "height": {"type": "integer", "default": 1080},
-                    "script": {"type": "string", "description": "Tcl script (for tcl action)"},
-                    "timeout": {"type": "number", "default": 30},
+        # (LS-PrePost IPC removed — LS-PrePost 4.8 does not support Tcl via cfile)
                 },
                 "required": ["action"],
             },
@@ -570,42 +533,6 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             model_path=arguments.get("model_path"),
             output_hm_path=arguments.get("output_hm_path"),
             timeout=arguments.get("timeout", 120),
-        )
-        import json
-        return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
-
-    elif name == "start_lsprepost_bridge":
-        if save_bridge_journal is None:
-            return [TextContent(type="text", text="Error: lsprepost_ipc not available")]
-        path = save_bridge_journal(poll_interval=arguments.get("poll_interval", 1.0))
-        return [TextContent(type="text", text=(
-            f"Bridge journal saved to: {path}\n\n"
-            "To activate:\n"
-            f"1. Launch LS-PrePost:\n"
-            f"   lsprepost4.13 cfile={path}\n"
-            "2. The bridge will poll for commands\n"
-            "3. Then use lsprepost_command to send commands"
-        ))]
-
-    elif name == "lsprepost_command":
-        if lsprepost_send_command is None:
-            return [TextContent(type="text", text="Error: lsprepost_ipc not available")]
-        action = arguments["action"]
-        kwargs = {}
-        if "path" in arguments:
-            kwargs["path"] = arguments["path"]
-        if "view" in arguments:
-            kwargs["view"] = arguments["view"]
-        if "width" in arguments:
-            kwargs["width"] = arguments["width"]
-        if "height" in arguments:
-            kwargs["height"] = arguments["height"]
-        if "script" in arguments:
-            kwargs["script"] = arguments["script"]
-        result = lsprepost_send_command(
-            action=action,
-            timeout=arguments.get("timeout", 30),
-            **kwargs,
         )
         import json
         return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
