@@ -66,6 +66,7 @@ class KKeyword:
     comments: list[str] = field(default_factory=list)
     data_lines: list[str] = field(default_factory=list)
     options: list[str] = field(default_factory=list)
+    parsed_fields: dict = field(default_factory=dict)
 
     @property
     def is_long_format(self) -> bool:
@@ -82,6 +83,14 @@ class KKeyword:
         if card_index >= len(self.data_lines):
             return []
         return _parse_data_line(self.data_lines[card_index])
+
+    def parse_field_values(self) -> dict:
+        """Parse all data lines using keyword_fields mapping."""
+        from program.tools.keyword_fields import parse_fields
+        if not self.data_lines:
+            return {}
+        self.parsed_fields = parse_fields(self.name, self.data_lines[0])
+        return self.parsed_fields
 
 
 @dataclass
@@ -116,6 +125,21 @@ class KFile:
 
     def get_elements(self) -> list[KKeyword]:
         return self.get_keywords_by_prefix("ELEMENT_")
+
+    def get_contacts(self) -> list[KKeyword]:
+        return self.get_keywords_by_prefix("CONTACT_")
+
+    def get_boundaries(self) -> list[KKeyword]:
+        return self.get_keywords_by_prefix("BOUNDARY_")
+
+    def get_loads(self) -> list[KKeyword]:
+        return self.get_keywords_by_prefix("LOAD_")
+
+    def get_curves(self) -> list[KKeyword]:
+        return self.get_keywords_by_prefix("DEFINE_CURVE")
+
+    def get_sets(self) -> list[KKeyword]:
+        return self.get_keywords_by_prefix("SET_")
 
     def get_material_ids(self) -> set[int]:
         """Extract all defined material IDs."""
@@ -375,6 +399,11 @@ def parse_k_content(content: str) -> KFile:
     # Save last keyword
     if current_keyword:
         kfile.keywords.append(current_keyword)
+
+    # Auto-parse field values for all keywords
+    for kw in kfile.keywords:
+        if kw.data_lines:
+            kw.parse_field_values()
 
     return kfile
 
