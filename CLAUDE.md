@@ -135,7 +135,7 @@ When user says **"handoff"**, output a structured summary and save to `logs/hand
 ### File naming
 
 ```
-D:/Zotero/ZoteroNote/Agent/dyna mcp/handoff/handoff_YYYYMMDD.md
+D:/Zotero/ZoteroNote/Agent/dyna mcp/handoff/handoff_YYMMDD.md
 ```
 
 ### Rules
