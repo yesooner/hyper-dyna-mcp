@@ -107,6 +107,37 @@ class ContactAutomatic:
     mstyp: int = 0  # master type
     fs: float = 0.0  # static friction
     fd: float = 0.0  # dynamic friction
+    contact_type: str = "AUTOMATIC_SURFACE_TO_SURFACE"
+
+
+@dataclass
+class DefineCurve:
+    """Load curve definition."""
+    lcid: int  # load curve ID
+    sfa: float = 1.0  # scale factor for abscissa
+    sfo: float = 1.0  # scale factor for ordinate
+    points: list[tuple[float, float]] = field(default_factory=list)  # (A, O) pairs
+
+
+@dataclass
+class SetNodeList:
+    """Node set definition."""
+    sid: int  # set ID
+    nodes: list[int] = field(default_factory=list)
+
+
+@dataclass
+class SetSegment:
+    """Segment set definition."""
+    sid: int  # set ID
+    segments: list[list[int]] = field(default_factory=list)  # [[N1,N2,N3,N4,PID], ...]
+
+
+@dataclass
+class SetPartList:
+    """Part set definition."""
+    sid: int  # set ID
+    parts: list[int] = field(default_factory=list)
 
 
 @dataclass
@@ -122,6 +153,10 @@ class KModel:
     boundaries: list[BoundaryCondition] = field(default_factory=list)
     loads: list[LoadSegment] = field(default_factory=list)
     contacts: list[ContactAutomatic] = field(default_factory=list)
+    curves: list[DefineCurve] = field(default_factory=list)
+    set_node_lists: list[SetNodeList] = field(default_factory=list)
+    set_segments: list[SetSegment] = field(default_factory=list)
+    set_part_lists: list[SetPartList] = field(default_factory=list)
     termination_time: float = 0.001
     d3plot_dt: float = 0.0001
 
@@ -275,6 +310,54 @@ def _gen_contacts(model: KModel) -> list[str]:
     return lines
 
 
+def _gen_curves(model: KModel) -> list[str]:
+    if not model.curves:
+        return []
+    lines = []
+    for curve in model.curves:
+        lines.append("*DEFINE_CURVE")
+        lines.append("$     LCID       SIDR       SFA       SFO      OFFA      OFFO")
+        lines.append(
+            f" {curve.lcid:8d}         0 {curve.sfa:10.4f} {curve.sfo:10.4f}       0.0       0.0"
+        )
+        for a, o in curve.points:
+            lines.append(f" {a:20.6f} {o:20.6f}")
+    return lines
+
+
+def _gen_sets(model: KModel) -> list[str]:
+    lines = []
+
+    # Part sets
+    for ps in model.set_part_lists:
+        lines.append("*SET_PART_LIST")
+        lines.append("$     SID")
+        lines.append(f" {ps.sid:8d}")
+        if ps.parts:
+            parts_str = "".join(f"{p:8d}" for p in ps.parts)
+            lines.append(parts_str)
+
+    # Node sets
+    for ns in model.set_node_lists:
+        lines.append("*SET_NODE_LIST")
+        lines.append("$     SID")
+        lines.append(f" {ns.sid:8d}")
+        if ns.nodes:
+            nodes_str = "".join(f"{n:8d}" for n in ns.nodes)
+            lines.append(nodes_str)
+
+    # Segment sets
+    for ss in model.set_segments:
+        lines.append("*SET_SEGMENT")
+        lines.append("$     SID")
+        lines.append(f" {ss.sid:8d}")
+        for seg in ss.segments:
+            seg_str = "".join(f"{n:8d}" for n in seg)
+            lines.append(seg_str)
+
+    return lines
+
+
 # --- Main API ---
 
 
@@ -318,6 +401,11 @@ def generate_k_content(model: KModel) -> str:
     if model.parts:
         blocks.append(_gen_parts(model))
 
+    # Sets
+    set_lines = _gen_sets(model)
+    if set_lines:
+        blocks.append(set_lines)
+
     # Boundary conditions
     bc_lines = _gen_boundaries(model)
     if bc_lines:
@@ -327,6 +415,11 @@ def generate_k_content(model: KModel) -> str:
     load_lines = _gen_loads(model)
     if load_lines:
         blocks.append(load_lines)
+
+    # Curves
+    curve_lines = _gen_curves(model)
+    if curve_lines:
+        blocks.append(curve_lines)
 
     # Contacts
     contact_lines = _gen_contacts(model)
