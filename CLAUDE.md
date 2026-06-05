@@ -129,13 +129,7 @@ When user says **"handoff"**, output a structured summary and save to `logs/hand
 - 本次修改的关键文件列表
 
 ## Notes
-- 需要下一个 session 注意的事项
-```
-
-### File naming
-
-```
-D:/Zotero/ZoteroNote/Agent/dyna mcp/handoff/handoff_YYMMDD.md
+- 需要下一个 session 注意的事
 ```
 
 ### Rules
