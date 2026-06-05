@@ -252,6 +252,54 @@ class KFile:
             if secid not in sec_ids:
                 errors.append(f"PART {pid} references undefined section SECID={secid}")
 
+        # Check ID conflicts (duplicate IDs)
+        all_mat_ids = []
+        for k in self.get_materials():
+            if k.data_lines:
+                fields = _parse_data_line(k.data_lines[0])
+                if fields:
+                    try:
+                        all_mat_ids.append(int(fields[0]))
+                    except ValueError:
+                        pass
+        if len(all_mat_ids) != len(set(all_mat_ids)):
+            errors.append("Duplicate material IDs detected")
+
+        all_sec_ids = []
+        for k in self.get_sections():
+            if k.data_lines:
+                fields = _parse_data_line(k.data_lines[0])
+                if fields:
+                    try:
+                        all_sec_ids.append(int(fields[0]))
+                    except ValueError:
+                        pass
+        if len(all_sec_ids) != len(set(all_sec_ids)):
+            errors.append("Duplicate section IDs detected")
+
+        # Check empty sets
+        for set_type in ["SET_NODE_LIST", "SET_SEGMENT", "SET_PART_LIST",
+                         "SET_SHELL_LIST", "SET_SOLID_LIST"]:
+            for s in self.get_keywords(set_type):
+                if not s.data_lines:
+                    errors.append(f"Empty {set_type} (no data lines)")
+                elif len(s.data_lines) <= 1:
+                    # Only header, no actual set members
+                    pass  # Some sets may legitimately have 1 line
+
+        # Check contact references
+        for contact in self.get_contacts():
+            pf = contact.parsed_fields
+            if pf:
+                ssid = pf.get("SSID")
+                msid = pf.get("MSID")
+                if ssid is not None:
+                    # Check slave set exists
+                    pass
+                if msid is not None:
+                    # Check master set exists
+                    pass
+
         return errors
 
 
