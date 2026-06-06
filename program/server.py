@@ -319,10 +319,6 @@ async def list_tools() -> list[Tool]:
             },
         ),
         # (LS-PrePost IPC removed — LS-PrePost 4.8 does not support Tcl via cfile)
-                },
-                "required": ["action"],
-            },
-        ),
     ]
 
 
