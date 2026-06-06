@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Dyna-mcp is an MCP server for CAE (Computer-Aided Engineering) workflow automation, bridging natural language planning with HyperMesh pre-processing, LS-DYNA keyword file handling, LS-PrePost post-processing, and Obsidian logging.
+hyper-dyna-mcp is an MCP server for CAE (Computer-Aided Engineering) workflow automation, bridging natural language planning with HyperMesh pre-processing, LS-DYNA keyword file handling, LS-PrePost post-processing, and Obsidian logging.
 
 **Phase 1 scope:** Path management, environment checking, LS-DYNA .k file parsing/validation/generation, LS-DYNA solver command generation (dry_run only), Obsidian log backflow.
 

@@ -1,10 +1,10 @@
 # Local project paths
 project:
-  root: "F:/Dyna-mcp"
+  root: "F:/hyper-dyna-mcp"
   conda_env: "dyna_mcp"
   python_version: "3.11"
 
 run:
   default_dry_run: true
-  runs_dir: "F:/Dyna-mcp/runs"
-  reports_dir: "F:/Dyna-mcp/reports"
+  runs_dir: "F:/hyper-dyna-mcp/runs"
+  reports_dir: "F:/hyper-dyna-mcp/reports"

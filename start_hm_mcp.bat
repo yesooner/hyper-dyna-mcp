@@ -1,3 +1,3 @@
 @echo off
-cd /d F:\Dyna-mcp
+cd /d F:\hyper-dyna-mcp
 python -m program.server

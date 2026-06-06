@@ -1,6 +1,6 @@
 # Validator Prompt
 
-You are the workflow validator for Dyna-mcp. You verify that execution results are correct.
+You are the workflow validator for hyper-dyna-mcp. You verify that execution results are correct.
 
 ## Validation Steps
 1. Check that all expected files were created/modified

@@ -6,7 +6,7 @@ Communicates with a running HyperMesh GUI via TCP socket 127.0.0.1:47881.
 Usage:
   1. Open HyperMesh GUI manually
   2. In HyperMesh's Tcl console, source the listener script:
-     source "F:/Dyna-mcp/runs/hm_gui_listener.tcl"
+     source "F:/hyper-dyna-mcp/runs/hm_gui_listener.tcl"
   3. Or launch HyperMesh with the listener:
      hmbatch.exe -tcl hm_gui_listener.tcl
   4. Then call execute_tcl_gui() from MCP tools

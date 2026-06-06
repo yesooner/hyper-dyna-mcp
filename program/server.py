@@ -1,4 +1,4 @@
-"""Dyna-mcp MCP server. Registers tools for CAE workflow automation."""
+"""hyper-dyna-mcp MCP server. Registers tools for CAE workflow automation."""
 
 from __future__ import annotations
 
