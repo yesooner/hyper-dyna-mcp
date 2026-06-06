@@ -1,0 +1,18 @@
+{
+  "id": "433765ae6caf",
+  "ok": false,
+  "timestamp": 1780723343.274151,
+  "payload": {
+    "error": "Unknown command type: unknown_type",
+    "allowed": [
+      "ping",
+      "execute_tcl",
+      "execute_hmbatch",
+      "get_model_info",
+      "export_keyword",
+      "parse_k_file",
+      "write_k_file",
+      "stop"
+    ]
+  }
+}
