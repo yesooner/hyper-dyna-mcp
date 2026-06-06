@@ -1,20 +1,34 @@
 # hyper-dyna-mcp for HyperMesh
-# Usage: source "F:/hyper-dyna-mcp/hmcustom.tcl"
+# Auto-detects project path from this file's location
 
-# === Socket mode (existing) ===
+# Auto-detect project root from this file's location
+set ::HDM_ROOT [file dirname [info script]]
+if {![info exists ::mcp_hm_port]} {
+    set ::mcp_hm_port 47882
+}
+
+# === Socket mode ===
 
 proc mcp_start {} {
-    source "F:/hyper-dyna-mcp/runs/mcp.tcl"
+    if {[info exists ::mcp_hm_server]} {
+        catch {close $::mcp_hm_server}
+        unset -nocomplain ::mcp_hm_server
+        after 200
+    }
+    source "$::HDM_ROOT/runs/mcp.tcl"
 }
 
 proc mcp_status {} {
-    if {[catch {set sock [socket 127.0.0.1 47881]; close $sock} err]} {
+    set port 47882
+    if {[info exists ::mcp_hm_port]} {
+        set port $::mcp_hm_port
+    }
+    if {[catch {set sock [socket 127.0.0.1 $port]; close $sock} err]} {
         puts "Socket: NOT running"
     } else {
-        puts "Socket: Active on port 47881"
+        puts "Socket: Active on port $port"
     }
-    # Also check file IPC status
-    set status_file "F:/hyper-dyna-mcp/ipc/status.json"
+    set status_file "$::HDM_ROOT/ipc/status.json"
     if {[file exists $status_file]} {
         set fp [open $status_file r]
         set data [read $fp]
@@ -29,13 +43,13 @@ proc mcp_status {} {
 
 proc mcp_loop {} {
     puts "Starting file IPC loop (blocking)..."
-    cd "F:/hyper-dyna-mcp"
+    cd $::HDM_ROOT
     exec python -m program.plugin_loop &
     puts "IPC loop started."
 }
 
 proc mcp_stop {} {
-    set flag "F:/hyper-dyna-mcp/ipc/stop.flag"
+    set flag "$::HDM_ROOT/ipc/stop.flag"
     set fp [open $flag w]
     puts $fp "stop"
     close $fp

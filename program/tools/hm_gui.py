@@ -1,7 +1,7 @@
 """HyperMesh GUI listener mode — socket-based interactive execution.
 
 Adapted from times1234/hypermesh-mcp execute_tcl_gui pattern.
-Communicates with a running HyperMesh GUI via TCP socket 127.0.0.1:47881.
+Communicates with a running HyperMesh GUI via TCP socket 127.0.0.1:47882.
 
 Usage:
   1. Open HyperMesh GUI manually
@@ -14,6 +14,7 @@ Usage:
 
 from __future__ import annotations
 
+import os
 import socket
 import time
 from pathlib import Path
@@ -28,7 +29,7 @@ from program.tools.hm_policy import check_meshing_rules
 from program.tools.hm_tcl_generator import quote_tcl_path
 
 DEFAULT_GUI_HOST = "127.0.0.1"
-DEFAULT_GUI_PORT = 47881
+DEFAULT_GUI_PORT = int(os.environ.get("HDM_GUI_PORT", "47882"))
 _RUNS_DIR = Path(__file__).resolve().parents[2] / "runs"
 
 
@@ -52,8 +53,12 @@ def generate_listener_tcl(
     return f"""
 # Dyna-mcp HyperMesh GUI listener
 # Source this file inside a visible HyperMesh session
-set ::mcp_hm_host "{host}"
-set ::mcp_hm_port {port}
+if {{![info exists ::mcp_hm_host]}} {{
+    set ::mcp_hm_host "{host}"
+}}
+if {{![info exists ::mcp_hm_port]}} {{
+    set ::mcp_hm_port {port}
+}}
 
 proc ::mcp_hm_restore_puts {{}} {{
     if {{[llength [info commands ::_mcp_orig_puts]] > 0}} {{
@@ -110,7 +115,9 @@ proc ::mcp_hm_accept {{chan addr client_port}} {{
 }}
 
 if {{[info exists ::mcp_hm_server]}} {{
-    catch {{close ::mcp_hm_server}}
+    catch {{close $::mcp_hm_server}}
+    unset -nocomplain ::mcp_hm_server
+    after 200
 }}
 set ::mcp_hm_server [socket -server ::mcp_hm_accept -myaddr $::mcp_hm_host $::mcp_hm_port]
 puts "Dyna-mcp GUI listener ready on $::mcp_hm_host:$::mcp_hm_port"
@@ -143,7 +150,7 @@ def send_tcl_to_gui(
     Args:
         script: Tcl script to execute in HyperMesh GUI.
         host: Listener host (default 127.0.0.1).
-        port: Listener port (default 47881).
+        port: Listener port (default 47882).
         timeout: Socket timeout in seconds.
 
     Returns:
@@ -234,6 +241,30 @@ def query_model_info(host: str = DEFAULT_GUI_HOST, port: int = DEFAULT_GUI_PORT)
                 info["window_title"] = val
 
     return info
+
+
+def activate_lsdyne_template(host: str = DEFAULT_GUI_HOST, port: int = DEFAULT_GUI_PORT, timeout: int = 15) -> dict:
+    """Activate LS-DYNA solver template in HyperMesh.
+
+    Must be called before any LS-DYNA card image operations.
+    Uses *templatefileset to load the HyperMesh LS-DYNA template.
+    """
+    script = '''
+    set template_path {E:/HM2021/2021/hwdesktop/templates/feoutput/ls-dyna971/dyna.key}
+    if {![file exists $template_path]} {
+        error "LS-DYNA template not found: $template_path"
+    }
+    set code [catch {*templatefileset $template_path} err]
+    puts "TEMPLATE_RESULT=$code"
+    puts "TEMPLATE_MESSAGE=$err"
+    catch {puts "SOLVER=[hm_getsolver]"}
+    catch {puts "TEMPLATE_TYPE=[hm_info templatetype]"}
+    '''
+    result = send_tcl_to_gui(script, host=host, port=port, timeout=timeout)
+    return {
+        "success": result.get("success", False),
+        "response": result.get("response", ""),
+    }
 
 
 # --- High-level API ---
