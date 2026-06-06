@@ -300,7 +300,7 @@ async def list_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "port": {"type": "integer", "default": 47881, "description": "Listener port"},
+                    "port": {"type": "integer", "default": 47882, "description": "Listener port"},
                 },
             },
         ),
@@ -510,14 +510,15 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     elif name == "start_hypermesh_gui_listener":
         if save_listener_tcl is None:
             return [TextContent(type="text", text="Error: hm_gui not available")]
-        path = save_listener_tcl(port=arguments.get("port", 47881))
+        port = arguments.get("port", 47882)
+        path = save_listener_tcl(port=port)
         return [TextContent(type="text", text=(
             f"Listener Tcl saved to: {path}\n\n"
             "To activate:\n"
             "1. Open HyperMesh GUI\n"
             "2. In HyperMesh Tcl console, run:\n"
             f"   source \"{path}\"\n"
-            "3. You should see: 'Dyna-mcp GUI listener ready on 127.0.0.1:47881'\n"
+            f"3. You should see: 'Dyna-mcp GUI listener ready on 127.0.0.1:{port}'\n"
             "4. Then use execute_tcl_gui to send commands"
         ))]
 

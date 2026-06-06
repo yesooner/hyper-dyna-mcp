@@ -1,4 +1,0 @@
-# Test various LS-PrePost commands
-# Try opening keyword file
-keyword F:/Dyna-mcp/output/model_original.k
-capture F:/Dyna-mcp/output/test1.png

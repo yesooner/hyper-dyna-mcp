@@ -10,7 +10,7 @@ zotero_mapping: on-demand
 ## Output Paths
 
 - handoff: D:/Zotero/ZoteroNote/Agent/dyna mcp/handoff/handoff_YYMMDD.md
-- plan: D:/Zotero/ZoteroNote/Agent/dyna mcp/plan/plan_YYMM.md
+- plan: D:/Zotero/ZoteroNote/Agent/dyna mcp/plan/plan_YYMMDD.md
 
 ## Manual Parsing
 

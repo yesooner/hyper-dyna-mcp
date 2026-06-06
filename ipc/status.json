@@ -1,6 +1,6 @@
 {
-  "state": "stopped",
-  "message": "stop.flag detected",
-  "timestamp": 1780723343.8788042,
+  "state": "running",
+  "message": "blocking loop started",
+  "timestamp": 1780742933.235859,
   "project": "hyper-dyna-mcp"
 }

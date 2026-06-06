@@ -20,7 +20,7 @@ except ImportError:
 from program.tools.path_tools import load_yaml
 
 DEFAULT_GUI_HOST = "127.0.0.1"
-DEFAULT_GUI_PORT = 47881
+DEFAULT_GUI_PORT = 47882
 _LISTENER_PATH = Path(__file__).resolve().parents[2] / "runs" / "mcp.tcl"
 
 

@@ -16,6 +16,12 @@ except ImportError:
     import logging
     logger = logging.getLogger(__name__)
 
+from program.tools.hm_lsdyna_mapping import (
+    get_verified_mapping,
+    has_verified_mapping,
+    render_verified_keyword,
+)
+
 TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "templates" / "keyword"
 
 # --- Keyword category → subdirectory mapping ---
@@ -89,6 +95,9 @@ class HmTemplateEngine:
         Returns:
             Tcl script string with parameters filled.
         """
+        if has_verified_mapping(keyword):
+            return render_verified_keyword(keyword, params)
+
         template = self.load_template(keyword)
 
         # Fill {{PARAM}} placeholders
@@ -125,10 +134,29 @@ class HmTemplateEngine:
 
     def has_template(self, keyword: str) -> bool:
         """Check if a template exists for the keyword."""
+        if has_verified_mapping(keyword):
+            return True
         return _keyword_to_path(keyword).exists()
 
     def get_template_info(self, keyword: str) -> dict[str, Any]:
         """Get template metadata (placeholder names, file path)."""
+        mapping = get_verified_mapping(keyword)
+        if mapping is not None:
+            return {
+                "exists": True,
+                "keyword": mapping.keyword,
+                "source": "verified_hypermesh_mapping",
+                "entity_type": mapping.entity_type,
+                "cardimage": mapping.cardimage,
+                "id_param": mapping.id_param,
+                "fields": mapping.fields,
+                "optional_fields": mapping.optional_fields or {},
+                "unsupported_fields": list(mapping.unsupported_fields),
+                "placeholders": mapping.placeholders,
+                "description": f"Verified HyperMesh mapping to {mapping.cardimage}",
+                "parameters": ", ".join(mapping.placeholders),
+            }
+
         path = _keyword_to_path(keyword)
         if not path.exists():
             return {"exists": False, "keyword": keyword}

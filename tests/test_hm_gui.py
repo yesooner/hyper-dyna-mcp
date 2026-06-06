@@ -22,6 +22,17 @@ def test_generate_listener_tcl_custom_port():
     assert "50000" in script
 
 
+def test_generate_listener_tcl_closes_server_channel():
+    script = generate_listener_tcl()
+    assert "close $::mcp_hm_server" in script
+    assert "close ::mcp_hm_server" not in script
+
+
+def test_generate_listener_tcl_allows_runtime_port_override():
+    script = generate_listener_tcl(port=50000)
+    assert 'if {![info exists ::mcp_hm_port]}' in script
+
+
 def test_save_listener_tcl():
     path = save_listener_tcl()
     assert path.exists()
@@ -32,7 +43,7 @@ def test_save_listener_tcl():
 
 def test_send_tcl_to_gui_refused():
     """Connection refused when no listener is running."""
-    result = send_tcl_to_gui('puts "hello"', timeout=2)
+    result = send_tcl_to_gui('puts "hello"', port=57982, timeout=2)
     assert result["success"] is False
     assert "refused" in result["error"].lower() or "error" in result["error"].lower()
 
@@ -45,5 +56,5 @@ def test_execute_tcl_gui_empty():
 
 def test_execute_tcl_gui_refused():
     """Connection refused when no listener is running."""
-    result = execute_tcl_gui('puts "hello"', timeout=2)
+    result = execute_tcl_gui('puts "hello"', port=57982, timeout=2)
     assert result["success"] is False
