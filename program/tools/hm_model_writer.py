@@ -67,13 +67,28 @@ def _build_setvalue_lines(
 
 
 def _execute_script(lines: list[str], timeout: int = 15) -> dict:
-    """Join Tcl lines and execute via GUI socket."""
-    script = "\n".join(lines)
-    if not script.strip():
+    """Execute Tcl lines one by one via GUI socket to avoid crashes.
+
+    Sending multiple *setvalue commands at once can cause HyperMesh
+    segmentation faults. Each command is sent individually.
+    """
+    import time
+    if not lines:
         return {"success": False, "error": "Empty script"}
-    logger.debug(f"hm_model_writer script:\n{script}")
-    result = execute_tcl_gui(script, timeout=timeout)
-    return result
+
+    last_result = {"success": True}
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        logger.debug(f"hm_model_writer: {line}")
+        result = execute_tcl_gui(line, timeout=timeout)
+        if not result.get("success"):
+            logger.warning(f"Command failed: {line[:60]} → {result.get('response', '')[:100]}")
+            last_result = result
+        time.sleep(0.05)  # 50ms delay between commands
+
+    return last_result
 
 
 # ---------------------------------------------------------------------------

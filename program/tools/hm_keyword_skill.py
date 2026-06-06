@@ -54,13 +54,22 @@ def hm_set_keyword(
     except FileNotFoundError as e:
         return {"success": False, "error": str(e)}
 
-    result = execute_tcl_gui(script, timeout=timeout)
+    # Execute line by line to avoid HyperMesh crashes
+    import time
+    lines = [l.strip() for l in script.split("\n") if l.strip() and not l.strip().startswith("#")]
+    last_result = {"success": True, "response": ""}
+    for line in lines:
+        result = execute_tcl_gui(line, timeout=timeout)
+        if not result.get("success"):
+            last_result = result
+        time.sleep(0.05)
+
     return {
-        "success": result.get("success", False),
+        "success": last_result.get("success", False),
         "keyword": keyword,
         "params": params,
-        "response": result.get("response", ""),
-        "error": result.get("error"),
+        "response": last_result.get("response", ""),
+        "error": last_result.get("error"),
     }
 
 
