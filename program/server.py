@@ -75,6 +75,22 @@ except ImportError:
     generate_cfile_commands = None  # type: ignore[assignment]
     write_cfile = None  # type: ignore[assignment]
 
+try:
+    from program.tools.hm_keyword_skill import hm_set_keyword, hm_keyword_help, hm_check_model
+    from program.tools.hm_model_converter import convert_model_to_lsdyne
+    from program.tools.hm_model_reader import read_all_materials, read_all_components
+    from program.tools.hm_model_writer import set_material, set_control, set_database
+except ImportError:
+    hm_set_keyword = None  # type: ignore[assignment]
+    hm_keyword_help = None  # type: ignore[assignment]
+    hm_check_model = None  # type: ignore[assignment]
+    convert_model_to_lsdyne = None  # type: ignore[assignment]
+    read_all_materials = None  # type: ignore[assignment]
+    read_all_components = None  # type: ignore[assignment]
+    set_material = None  # type: ignore[assignment]
+    set_control = None  # type: ignore[assignment]
+    set_database = None  # type: ignore[assignment]
+
 server = Server("dyna-mcp")
 
 
@@ -293,6 +309,51 @@ async def list_tools() -> list[Tool]:
                 "required": ["d3plot_path", "output_dir"],
             },
         ),
+        # --- LS-DYNA keyword tools ---
+        Tool(
+            name="hm_set_keyword",
+            description="Set an LS-DYNA keyword in HyperMesh via Tcl template (e.g., MAT_ELASTIC, SECTION_SHELL, CONTACT_AUTOMATIC_SURFACE_TO_SURFACE)",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "keyword": {"type": "string", "description": "LS-DYNA keyword name (e.g., MAT_ELASTIC)"},
+                    "params": {"type": "object", "description": "Keyword parameters (e.g., {MID: 1, RHO: 7.85e-9, E: 210000, PR: 0.3})"},
+                    "timeout": {"type": "integer", "default": 15},
+                },
+                "required": ["keyword", "params"],
+            },
+        ),
+        Tool(
+            name="hm_keyword_help",
+            description="Get help text for an LS-DYNA keyword (fields, description, manual reference)",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "keyword": {"type": "string", "description": "LS-DYNA keyword name"},
+                },
+                "required": ["keyword"],
+            },
+        ),
+        Tool(
+            name="hm_check_model",
+            description="Check current model state in HyperMesh GUI (components, nodes, elements, materials, properties)",
+            inputSchema={"type": "object", "properties": {}},
+        ),
+        Tool(
+            name="hm_convert_model",
+            description="Convert HyperMesh model to LS-DYNA format (activate template, set card images)",
+            inputSchema={"type": "object", "properties": {}},
+        ),
+        Tool(
+            name="hm_read_materials",
+            description="Read all materials from HyperMesh GUI (card image, RHO, E, PR)",
+            inputSchema={"type": "object", "properties": {}},
+        ),
+        Tool(
+            name="hm_read_components",
+            description="Read all components from HyperMesh GUI (name, PID, MID)",
+            inputSchema={"type": "object", "properties": {}},
+        ),
         # --- GUI interaction tools ---
         Tool(
             name="start_hypermesh_gui_listener",
@@ -426,6 +487,52 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             model_file=arguments.get("model_file"),
         )
         return [TextContent(type="text", text=f"Command: {' '.join(cmd)}")]
+
+    elif name == "hm_set_keyword":
+        if hm_set_keyword is None:
+            return [TextContent(type="text", text="Error: hm_keyword_skill not available")]
+        result = hm_set_keyword(
+            keyword=arguments["keyword"],
+            params=arguments["params"],
+            timeout=arguments.get("timeout", 15),
+        )
+        import json
+        return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
+
+    elif name == "hm_keyword_help":
+        if hm_keyword_help is None:
+            return [TextContent(type="text", text="Error: hm_keyword_skill not available")]
+        result = hm_keyword_help(keyword=arguments["keyword"])
+        import json
+        return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
+
+    elif name == "hm_check_model":
+        if hm_check_model is None:
+            return [TextContent(type="text", text="Error: hm_keyword_skill not available")]
+        result = hm_check_model()
+        import json
+        return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
+
+    elif name == "hm_convert_model":
+        if convert_model_to_lsdyne is None:
+            return [TextContent(type="text", text="Error: hm_model_converter not available")]
+        result = convert_model_to_lsdyne()
+        import json
+        return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
+
+    elif name == "hm_read_materials":
+        if read_all_materials is None:
+            return [TextContent(type="text", text="Error: hm_model_reader not available")]
+        result = read_all_materials()
+        import json
+        return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
+
+    elif name == "hm_read_components":
+        if read_all_components is None:
+            return [TextContent(type="text", text="Error: hm_model_reader not available")]
+        result = read_all_components()
+        import json
+        return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
 
     elif name == "execute_hmbatch":
         if run_hmbatch is None:
