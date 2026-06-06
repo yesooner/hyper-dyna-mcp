@@ -14,14 +14,20 @@ MCP server for LS-DYNA pre-processing automation via HyperMesh GUI.
 ## Quick Start
 
 ```bash
-# 1. Start HyperMesh GUI
-# 2. In HyperMesh Tcl console:
+# 1. Double-click start_mcp.bat (starts MCP server)
+# 2. Open HyperMesh GUI
+# 3. In HyperMesh Tcl console:
 source F:/hyper-dyna-mcp/hmcustom.tcl
 mcp_start
 
-# 3. Start MCP server
-E:/anaconda3/anzhuang/envs/hyper-dyna/python.exe -m program.server
+# Or: HyperMesh → MCP tab → Start MCP button
 ```
+
+### HyperMesh GUI Integration
+
+- **MCP Tab**: Auto-created via `hm_framework addtab` with Start/Check buttons
+- **Listener**: Socket on port 47882 with auto-retry on bind failure
+- **IPC Fallback**: Socket fails 3x → auto-switch to file queue → auto-recover
 
 ## MCP Tools (19)
 
