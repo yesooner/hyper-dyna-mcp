@@ -23,28 +23,22 @@ def read_material(mid: int, timeout: int = 10) -> dict[str, Any]:
     - density (not RHO)
     - cardimage (MATL1, MATL96, etc.)
     """
-    script = f'''
-    set info {{}}
-    catch {{dict set info cardimage [hm_getvalue mats id={mid} dataname=cardimage]}}
-    catch {{dict set info density [hm_getvalue mats id={mid} dataname=density]}}
-    catch {{dict set info Rho [hm_getvalue mats id={mid} dataname=Rho]}}
-    catch {{dict set info E [hm_getvalue mats id={mid} dataname=E]}}
-    catch {{dict set info Nu [hm_getvalue mats id={mid} dataname=Nu]}}
-    puts "MAT_INFO=[array get info]"
-    '''
-    result = execute_tcl_gui(script, timeout=timeout)
-    if not result.get("success"):
-        return {"success": False, "mid": mid, "error": result.get("error")}
-
+    # Query each field individually to avoid Tcl dict parsing issues
+    fields = ["cardimage", "density", "Rho", "E", "Nu"]
     info: dict[str, Any] = {"success": True, "mid": mid}
-    for line in result.get("response", "").split("\n"):
-        if "MAT_INFO=" in line:
-            data = line.split("MAT_INFO=", 1)[1].strip()
-            # Parse Tcl dict: key value key value ...
-            import re
-            for m in re.finditer(r"(\w+)\s+(\{[^}]+\}|\S+)", data):
-                info[m.group(1)] = m.group(2).strip("{}")
-            break
+
+    for fname in fields:
+        script = f'puts [hm_getvalue mats id={mid} dataname={fname}]'
+        result = execute_tcl_gui(script, timeout=timeout)
+        if result.get("success"):
+            # Extract value from response (OK\nvalue\n\nvalue\n\n)
+            resp = result.get("response", "")
+            for line in resp.split("\n"):
+                line = line.strip()
+                if line and line != "OK" and line != "ERROR":
+                    info[fname] = line
+                    break
+
     return info
 
 

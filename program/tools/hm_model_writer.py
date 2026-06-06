@@ -95,6 +95,36 @@ def _execute_script(lines: list[str], timeout: int = 15) -> dict:
 # Material
 # ---------------------------------------------------------------------------
 
+# LS-DYNA field name → HyperMesh dataname mapping
+# Different material types use different internal names
+_MATERIAL_FIELD_MAP = {
+    # Common fields
+    "RHO": "density",
+    "E": "E",
+    "PR": "Nu",
+    # MAT_ELASTIC specific
+    "DA": "DA",
+    "DB": "DB",
+    # MAT_PIECEWISE_LINEAR_PLASTICITY specific
+    "SIGY": "SIGY",
+    "ETAN": "ETAN",
+    "FAIL": "FAIL",
+    "TDEL": "TDEL",
+    # MAT_RIGID specific
+    "N": "N",
+    "COUPLE": "COUPLE",
+    # MAT_JOHNSON_COOK specific
+    "G": "G",
+    "A": "A",
+    "B": "B",
+}
+
+
+def _map_field_name(lsdyna_name: str) -> str:
+    """Map LS-DYNA field name to HyperMesh dataname."""
+    return _MATERIAL_FIELD_MAP.get(lsdyna_name, lsdyna_name)
+
+
 def set_material(
     mid: int,
     mat_type: str,
@@ -117,7 +147,8 @@ def set_material(
         f"*setvalue mats id={mid} STATUS=2",
     ]
     for key, value in params.items():
-        lines.append(f"*setvalue mats id={mid} dataname={key} value={value}")
+        hm_name = _map_field_name(key)
+        lines.append(f"*setvalue mats id={mid} dataname={hm_name} value={value}")
 
     result = _execute_script(lines, timeout=timeout)
     return {
