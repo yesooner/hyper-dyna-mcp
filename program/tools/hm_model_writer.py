@@ -392,13 +392,13 @@ def set_load(
 # ---------------------------------------------------------------------------
 
 CONTROL_CARD_MAP: dict[str, str] = {
-    "TERMINATION": "CONTROL_TERMINATION",
-    "TIMESTEP": "CONTROL_TIMESTEP",
-    "HOURGLASS": "CONTROL_HOURGLASS",
-    "CONTACT": "CONTROL_CONTACT",
-    "ACCURACY": "CONTROL_ACCURACY",
-    "ENERGY": "CONTROL_ENERGY",
-    "SHELL": "CONTROL_SHELL",
+    "TERMINATION": "Termin",
+    "TIMESTEP": "Timestep",
+    "HOURGLASS": "Hourglass",
+    "CONTACT": "Contact",
+    "ACCURACY": "Accuracy",
+    "ENERGY": "Energy",
+    "SHELL": "Shell",
 }
 
 
@@ -410,7 +410,7 @@ def set_control(
     """Set control cards in HyperMesh.
 
     Control cards are global cards. In HyperMesh they are set via
-    *setvalue on the 'global' entity or via specific control card entities.
+    *setvalue on the 'cards' entity type with the profile-specific cardimage.
 
     Args:
         control_type: Control card type, e.g. "TERMINATION", "TIMESTEP".
@@ -421,17 +421,18 @@ def set_control(
         dict with success, control_type, response.
     """
     cardimage = CONTROL_CARD_MAP.get(control_type, control_type)
-    if not cardimage.startswith("CONTROL_"):
-        cardimage = f"CONTROL_{cardimage}"
 
-    # Control cards are global entities in HyperMesh
-    # They use 'global' entity type with cardimage
+    # Control cards are cards entities in HyperMesh with profile-specific cardimage
     lines = [
-        f"*setvalue global cardimage={cardimage}",
-        f"*setvalue global STATUS=2",
+        f"*createentity cards name=CONTROL_{control_type} cardimage={cardimage}",
+        f"*createmark cards 1 \"by name\" \"CONTROL_{control_type}\"",
+        "set _ctrl_ids [hm_getmark cards 1]",
+        "set _ctrl_id [lindex $_ctrl_ids end]",
+        f"*setvalue cards id=$_ctrl_id STATUS=2",
     ]
     for key, value in params.items():
-        lines.append(f"*setvalue global dataname={key} value={value}")
+        lines.append(f"*setvalue cards id=$_ctrl_id dataname={key} value={value}")
+    lines.append(f'puts "HM_CONTROL_CREATED type={control_type} id=$_ctrl_id"')
 
     result = _execute_script(lines, timeout=timeout)
     return {
@@ -448,17 +449,17 @@ def set_control(
 # ---------------------------------------------------------------------------
 
 DATABASE_CARD_MAP: dict[str, str] = {
-    "BINARY_D3PLOT": "DATABASE_BINARY_D3PLOT",
-    "D3PLOT": "DATABASE_BINARY_D3PLOT",
-    "GLSTAT": "DATABASE_GLSTAT",
-    "MATSUM": "DATABASE_MATSUM",
-    "SLEOUT": "DATABASE_SLEOUT",
-    "ELOUT": "DATABASE_ELOUT",
-    "RCFORC": "DATABASE_RCFORC",
-    "ABSTAT": "DATABASE_ABSTAT",
-    "JNTFORC": "DATABASE_JNTFORC",
-    "BINARY_D3THDT": "DATABASE_BINARY_D3THDT",
-    "BINARY_D3DUMP": "DATABASE_BINARY_D3DUMP",
+    "BINARY_D3PLOT": "DBplot",
+    "D3PLOT": "DBplot",
+    "GLSTAT": "DBglst",
+    "MATSUM": "DBmats",
+    "SLEOUT": "DBsleo",
+    "ELOUT": "DBelou",
+    "RCFORC": "DBrcfo",
+    "ABSTAT": "DBabst",
+    "JNTFORC": "DBjntf",
+    "BINARY_D3THDT": "DBthdt",
+    "BINARY_D3DUMP": "DBdump",
 }
 
 
@@ -470,7 +471,7 @@ def set_database(
     """Set database output cards in HyperMesh.
 
     Database cards control LS-DYNA output intervals and formats.
-    They are global cards similar to control cards.
+    They are cards entities similar to control cards.
 
     Args:
         db_type: Database card type, e.g. "D3PLOT", "GLSTAT", "MATSUM".
@@ -481,15 +482,19 @@ def set_database(
         dict with success, db_type, response.
     """
     cardimage = DATABASE_CARD_MAP.get(db_type, db_type)
-    if not cardimage.startswith("DATABASE_"):
-        cardimage = f"DATABASE_{cardimage}"
 
+    # Database cards are cards entities in HyperMesh with profile-specific cardimage
+    full_name = db_type if db_type.startswith("DATABASE_") else f"DATABASE_{db_type}"
     lines = [
-        f"*setvalue global cardimage={cardimage}",
-        f"*setvalue global STATUS=2",
+        f"*createentity cards name={full_name} cardimage={cardimage}",
+        f"*createmark cards 1 \"by name\" \"{full_name}\"",
+        "set _db_ids [hm_getmark cards 1]",
+        "set _db_id [lindex $_db_ids end]",
+        f"*setvalue cards id=$_db_id STATUS=2",
     ]
     for key, value in params.items():
-        lines.append(f"*setvalue global dataname={key} value={value}")
+        lines.append(f"*setvalue cards id=$_db_id dataname={key} value={value}")
+    lines.append(f'puts "HM_DATABASE_CREATED type={db_type} id=$_db_id"')
 
     result = _execute_script(lines, timeout=timeout)
     return {

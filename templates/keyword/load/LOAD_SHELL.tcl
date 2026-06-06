@@ -1,7 +1,15 @@
 # LS-DYNA R13 *LOAD_SHELL
 # Category: load
-# Parameters: LCID, SF
+# Entity type: loadcols
+# Card image: LOAD_SHELL
+# Parameters: LCID(int), SF(float)
 
-*createentity groups name="SHELL_{{SID}}" cardimage=LOAD_SHELL
-*setvalue groups id={{SID}} dataname=LCID value={{LCID}}
-*setvalue groups id={{SID}} dataname=SF value={{SF}}
+*createentity loadcols name="LOAD_SHELL_{{LCID}}" cardimage=LOAD_SHELL
+*createmark loadcols 1 "by name" "LOAD_SHELL_{{LCID}}"
+set _lc_ids [hm_getmark loadcols 1]
+set _lc_id [lindex $_lc_ids end]
+if {$_lc_id eq ""} { error "Failed to create LOAD_SHELL" }
+*setvalue loadcols id=$_lc_id STATUS=2
+*setvalue loadcols id=$_lc_id dataname=LCID value={{LCID}}
+*setvalue loadcols id=$_lc_id dataname=SF value={{SF}}
+puts "HM_KEYWORD_CREATED keyword=LOAD_SHELL entity=loadcols id=$_lc_id"
