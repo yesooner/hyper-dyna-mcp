@@ -1,0 +1,11 @@
+{
+  "id": "69406a2393c2",
+  "ok": true,
+  "timestamp": 1780764349.2860782,
+  "payload": {
+    "type": "execute_tcl",
+    "success": true,
+    "response": "OK\n",
+    "error": null
+  }
+}

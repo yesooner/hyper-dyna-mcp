@@ -1,8 +1,9 @@
 # Local project paths
 project:
   root: "F:/hyper-dyna-mcp"
-  conda_env: "dyna_mcp"
-  python_version: "3.11"
+  conda_env: "hyper-dyna"
+  python_exe: "E:/anaconda3/anzhuang/envs/hyper-dyna/python.exe"
+  python_version: "3.13"
 
 run:
   default_dry_run: true

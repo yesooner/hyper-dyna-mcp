@@ -1,0 +1,11 @@
+{
+  "id": "e543aec3225c",
+  "ok": true,
+  "timestamp": 1780764267.1411502,
+  "payload": {
+    "type": "execute_tcl",
+    "success": true,
+    "response": "OK\nsock2488 ERROR: empty script\nCOMP_1=cid 1 name {Part          1 for Mat         2 and Elem Type         1} pid 1 mid 4\nCOMP_2=cid 2 name {Part          2 for Mat         1 and Elem Type         1} pid 1 mid 2\nCOMP_3=cid 3 name {Part          3 for Mat         4 and Elem Type         1} pid 1 mid 1\nCOMP_4=cid 4 name {Part          4 for Mat         3 and Elem Type         1} pid 1 mid 3\nCOMP_10000183=cid 10000183 name Undefined_1 pid 0 mid 0\n\n",
+    "error": null
+  }
+}

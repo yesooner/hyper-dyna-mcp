@@ -12,6 +12,15 @@ zotero_mapping: on-demand
 - handoff: D:/Zotero/ZoteroNote/Agent/dyna mcp/handoff/handoff_YYMMDD.md
 - plan: D:/Zotero/ZoteroNote/Agent/dyna mcp/plan/plan_YYMMDD.md
 
+## Docs → OB 映射规则
+
+| 本地路径 | OB 路径 | 说明 |
+|---------|---------|------|
+| docs/superpowers/plans/ | plan/ | 实现计划 |
+| docs/superpowers/specs/ | specs/ | 设计规格 |
+| reports/ | reports/ | 验证报告 |
+| 其他 docs/ | 对应目录 | 按内容分类 |
+
 ## Manual Parsing
 
 - Source: F:/hyper-dyna-mcp/lsdyna-maunal/ (3 volumes, LS-DYNA R13)

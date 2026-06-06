@@ -1,3 +1,3 @@
 @echo off
 cd /d F:\hyper-dyna-mcp
-python -m program.server
+"E:\anaconda3\anzhuang\envs\hyper-dyna\python.exe" -m program.server

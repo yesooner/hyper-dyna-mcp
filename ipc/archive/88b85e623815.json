@@ -1,0 +1,1 @@
+{"id": "88b85e623815", "type": "execute_tcl", "script": "*createentity cards name=\"DATABASE_BINARY_D3PLOT\" cardimage=DBplot", "timeout": 30}

@@ -26,24 +26,23 @@ Any new session MUST read these files first:
 - **Uncertain HyperMesh Tcl commands → TODO.** Do not fabricate HM commands from memory.
 - **No solver execution in Phase 1.** LS-DYNA runner only generates commands, never runs them.
 - **Python environments must be created and managed via conda only.** No venv, no system Python. All `pip install` must be in an activated conda env. Lock the conda env name in `path/local_paths.yaml`.
+- **This repository's fixed Python environment is `hyper-dyna`.** Use `E:\anaconda3\anzhuang\envs\hyper-dyna\python.exe` or `conda run -n hyper-dyna ...` for all Python, pip, pytest, MCP server, and helper commands. Do not use bare `python`, `pip`, or `pytest` in Claude Code sessions for this repository.
 - **K language / Tcl are the native automation languages for LS-DYNA / HyperMesh.** Python is only a thin orchestration layer (MCP server, file I/O, path management). Do not attempt to replace K or Tcl with Python logic.
 
 ## Build & Run
 
 ```powershell
 # Environment setup
-conda create -n dyna_mcp python=3.11 -y
-conda activate dyna_mcp
-pip install -e ".[dev]"
+conda activate hyper-dyna
 
 # Run MCP server
-python -m program.server
+E:\anaconda3\anzhuang\envs\hyper-dyna\python.exe -m program.server
 
 # Run tests
-pytest
+E:\anaconda3\anzhuang\envs\hyper-dyna\python.exe -m pytest
 
 # Lint
-ruff check program/ tests/
+conda run -n hyper-dyna ruff check program/ tests/
 ```
 
 ## Architecture

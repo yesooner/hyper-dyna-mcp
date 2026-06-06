@@ -1,0 +1,11 @@
+{
+  "id": "0aef3d0396f1",
+  "ok": true,
+  "timestamp": 1780764431.0499883,
+  "payload": {
+    "type": "execute_tcl",
+    "success": false,
+    "response": "",
+    "error": "IPC wait_result timed out after 40s"
+  }
+}

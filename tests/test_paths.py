@@ -7,7 +7,8 @@ from program.tools.path_tools import load_yaml, validate_path
 def test_load_local_paths():
     data = load_yaml("local_paths")
     assert "project" in data
-    assert data["project"]["conda_env"] == "dyna_mcp"
+    assert data["project"]["conda_env"] == "hyper-dyna"
+    assert data["project"]["python_exe"].endswith("/envs/hyper-dyna/python.exe")
 
 
 def test_load_obsidian_paths():
