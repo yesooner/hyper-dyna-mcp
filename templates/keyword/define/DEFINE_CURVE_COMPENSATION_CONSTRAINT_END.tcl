@@ -1,0 +1,5 @@
+# LS-DYNA R13 *DEFINE_CURVE_COMPENSATION_CONSTRAINT_END
+# Category: define
+# Auto-generated generic template
+
+*createentity groups name="DEFINE_CURVE_COMPENSATION_CONSTRAINT_END_{{LCID}}" cardimage=DEFINE_CURVE_COMPENSATION_CONSTRAINT_END

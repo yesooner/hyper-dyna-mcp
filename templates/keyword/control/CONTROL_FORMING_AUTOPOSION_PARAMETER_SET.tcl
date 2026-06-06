@@ -1,0 +1,5 @@
+# LS-DYNA R13 *CONTROL_FORMING_AUTOPOSION_PARAMETER_SET
+# Category: control
+# Auto-generated generic template
+
+*createentity cards name="CONTROL_FORMING_AUTOPOSION_PARAMETER_SET" cardimage=CONTROL_FORMING_AUTOPOSION_PARAMETER_SET

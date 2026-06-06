@@ -1,0 +1,5 @@
+# LS-DYNA R13 *CONTROL_MPP_DECOMPOSITION_DISTRIBUTE_SPH
+# Category: control
+# Auto-generated generic template
+
+*createentity cards name="CONTROL_MPP_DECOMPOSITION_DISTRIBUTE_SPH" cardimage=CONTROL_MPP_DECOMPOSITION_DISTRIBUTE_SPH

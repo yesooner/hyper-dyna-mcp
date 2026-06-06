@@ -1,0 +1,5 @@
+# LS-DYNA R13 *INTERFACE_THICKNESS_CHANGE_COM
+# Category: interface
+# Auto-generated generic template
+
+*createentity groups name="INTERFACE_THICKNESS_CHANGE_COM_{{SID}}" cardimage=INTERFACE_THICKNESS_CHANGE_COM

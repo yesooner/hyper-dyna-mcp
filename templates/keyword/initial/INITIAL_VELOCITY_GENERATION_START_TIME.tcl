@@ -1,0 +1,5 @@
+# LS-DYNA R13 *INITIAL_VELOCITY_GENERATION_START_TIME
+# Category: initial
+# Auto-generated generic template
+
+*createentity groups name="INITIAL_VELOCITY_GENERATION_START_TIME_{{SETID}}" cardimage=INITIAL_VELOCITY_GENERATION_START_TIME

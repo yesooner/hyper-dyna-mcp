@@ -1,0 +1,5 @@
+# LS-DYNA R13 *DATABASE_FREQUENCY_BINARY_D3ACS
+# Category: database
+# Auto-generated generic template
+
+*createentity cards name="DATABASE_FREQUENCY_BINARY_D3ACS" cardimage=DATABASE_FREQUENCY_BINARY_D3ACS

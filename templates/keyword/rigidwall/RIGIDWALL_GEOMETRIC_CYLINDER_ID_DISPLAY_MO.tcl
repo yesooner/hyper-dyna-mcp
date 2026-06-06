@@ -1,0 +1,5 @@
+# LS-DYNA R13 *RIGIDWALL_GEOMETRIC_CYLINDER_ID_DISPLAY_MO
+# Category: rigidwall
+# Auto-generated generic template
+
+*createentity groups name="RIGIDWALL_GEOMETRIC_CYLINDER_ID_DISPLAY_MO_{{RWID}}" cardimage=RIGIDWALL_GEOMETRIC_CYLINDER_ID_DISPLAY_MO

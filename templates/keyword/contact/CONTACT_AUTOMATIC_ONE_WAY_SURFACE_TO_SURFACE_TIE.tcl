@@ -1,0 +1,5 @@
+# LS-DYNA R13 *CONTACT_AUTOMATIC_ONE_WAY_SURFACE_TO_SURFACE_TIE
+# Category: contact
+# Auto-generated generic template
+
+*createentity groups name="CONTACT_AUTOMATIC_ONE_WAY_SURFACE_TO_SURFACE_TIE_{{SID}}" cardimage=CONTACT_AUTOMATIC_ONE_WAY_SURFACE_TO_SURFACE_TIE

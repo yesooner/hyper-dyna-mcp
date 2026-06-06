@@ -1,0 +1,5 @@
+# LS-DYNA R13 *CONTROL_MPP_DECOMPOSITION_REDECOMPOSI
+# Category: control
+# Auto-generated generic template
+
+*createentity cards name="CONTROL_MPP_DECOMPOSITION_REDECOMPOSI" cardimage=CONTROL_MPP_DECOMPOSITION_REDECOMPOSI

@@ -1,0 +1,5 @@
+# LS-DYNA R13 *CONTACT_2D_AUTOMATIC_SURFACE_IN_CONTINUUM
+# Category: contact
+# Auto-generated generic template
+
+*createentity groups name="CONTACT_2D_AUTOMATIC_SURFACE_IN_CONTINUUM_{{SID}}" cardimage=CONTACT_2D_AUTOMATIC_SURFACE_IN_CONTINUUM
