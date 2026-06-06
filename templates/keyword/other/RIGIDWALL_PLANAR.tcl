@@ -1,0 +1,3 @@
+# LS-DYNA R13 *RIGIDWALL_PLANAR
+# Category: other
+# Parameters: RWID, NID1, NID2, NID3, DGTOL, DLOAD

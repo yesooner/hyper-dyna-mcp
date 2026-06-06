@@ -1,0 +1,3 @@
+# LS-DYNA R13 *PART_DATA
+# Category: part
+# Parameters: PID, SECID, MID, EOSID, HGID, GRAV, ADPOPT, TMID
