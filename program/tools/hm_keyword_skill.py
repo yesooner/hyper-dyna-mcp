@@ -53,6 +53,10 @@ def hm_set_keyword(
         script = _engine.render(keyword, params)
     except FileNotFoundError as e:
         return {"success": False, "error": str(e)}
+    except ValueError as e:
+        return {"success": False, "error": str(e)}
+    except Exception as e:
+        return {"success": False, "error": f"Template render error: {e}"}
 
     # Execute line by line to avoid HyperMesh crashes
     import time
