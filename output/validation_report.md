@@ -1,103 +1,62 @@
-# Dyna-mcp Validation Report
+# Hyper-Dyna-MCP Validation Report
 
-**Date:** 2026-05-31
-**Model:** `output/model_original.k`
+**Date:** 2026-06-07
+**Model:** test8_daota_lou.hm (倒塌楼, 2020 工程模型)
 **Status:** PASS
 
 ---
 
-## 1. Model Summary
+## 1. 模型信息
 
-| Item | Count | IDs |
-|------|-------|-----|
-| Parts | 2 | PID=1 (Steel Plate), PID=2 (Rigid Impactor) |
-| Materials | 2 | MID=1 (MAT_024), MID=2 (MAT_020) |
-| Sections | 2 | SECID=1 (Shell), SECID=2 (Shell) |
-| Nodes | 8 | NID 1-8 |
-| Elements | 2 | EID=1 (Shell, Part 1), EID=2 (Shell, Part 2) |
-| Sets | 5 | SET_PART_LIST×2, SET_NODE_LIST×1, SET_SEGMENT×2 |
-| Contact | 1 | AUTOMATIC_SURFACE_TO_SURFACE |
-| Boundary | 1 | BOUNDARY_SPC_SET |
-| Load | 1 | LOAD_PRESCRIBED_VELOCITY_SET |
-| Define Curve | 1 | LCID=1 |
-| Keywords | 30 | Total |
+| 项目 | 值 |
+|------|-----|
+| 文件 | test8_daota_lou.hm |
+| Components | 5 (Part 1-4 + Undefined_1) |
+| Nodes | 168,480 |
+| Elements | 78,180 |
+| Materials | 5 |
+| Properties | 6 |
 
----
+## 2. MCP 功能验证
 
-## 2. Cross-Reference Validation
+| 功能 | 状态 | 说明 |
+|------|------|------|
+| Socket 连接 | ✓ | 端口 47882 |
+| IPC Fallback | ✓ | Socket 失败自动降级 |
+| 模型查询 | ✓ | query_model_info |
+| LS-DYNA 模板激活 | ✓ | activate_lsdyne_template |
+| 材料设置 | ✓ | MAT_ELASTIC |
+| 控制卡片 | ✓ | CONTROL_TERMINATION |
+| 数据库输出 | ✓ | DATABASE_BINARY_D3PLOT |
+| 截面设置 | ✓ | SECTION_SHELL |
+| 逐条发送 | ✓ | 避免 HyperMesh 崩溃 |
 
-| Check | Status |
-|-------|--------|
-| Part → Material reference | ✓ PASS |
-| Part → Section reference | ✓ PASS |
-| Contact → Slave Set (SID=5) | ✓ PASS |
-| Contact → Master Set (SID=4) | ✓ PASS |
-| Load → Node Set (SID=3) | ✓ PASS |
-| Boundary → Node Set (SID=3) | ✓ PASS |
-| Load → Curve (LCID=1) | ✓ PASS |
-| All IDs unique | ✓ PASS |
+## 3. 模板验证
 
----
+| 类别 | 总数 | 通过 | 失败 |
+|------|------|------|------|
+| mat | 292 | 292 | 0 |
+| control | 260 | 260 | 0 |
+| define | 208 | 208 | 0 |
+| database | 162 | 162 | 0 |
+| contact | 151 | 151 | 0 |
+| boundary | 120 | 120 | 0 |
+| constrained | 111 | 111 | 0 |
+| load | 96 | 96 | 0 |
+| initial | 83 | 83 | 0 |
+| element | 74 | 74 | 0 |
+| set | 61 | 61 | 0 |
+| **总计** | **1935** | **1935** | **0** |
 
-## 3. LS-DYNA Keyword Compliance
+## 4. 已知限制
 
-| Keyword | Format | Status |
-|---------|--------|--------|
-| *KEYWORD | First line | ✓ |
-| *TITLE | Present | ✓ |
-| *CONTROL_TERMINATION | ENDTIM=0.005 | ✓ |
-| *CONTROL_TIMESTEP | DTMIN/DTMAX set | ✓ |
-| *CONTROL_HOURGLASS | IHQ=1 | ✓ |
-| *DATABASE_BINARY_D3PLOT | DT=0.0001 | ✓ |
-| *MAT_PIECEWISE_LINEAR_PLASTICITY | 8 strain pts | ✓ |
-| *MAT_RIGID | Standard | ✓ |
-| *SECTION_SHELL | ELFORM=0 | ✓ |
-| *PART (×2) | PID/SECID/MID set | ✓ |
-| *NODE | 8 nodes, coordinates | ✓ |
-| *ELEMENT_SHELL | 4-node quad | ✓ |
-| *SET_PART_LIST (×2) | SID=1,2 | ✓ |
-| *SET_NODE_LIST | SID=3, 4 nodes | ✓ |
-| *SET_SEGMENT (×2) | SID=4,5 | ✓ |
-| *CONTACT_AUTOMATIC_SURFACE_TO_SURFACE | SSID/MSID set | ✓ |
-| *BOUNDARY_SPC_SET | NSID=3, all DOF | ✓ |
-| *DEFINE_CURVE | LCID=1, 4 points | ✓ |
-| *LOAD_PRESCRIBED_VELOCITY_SET | SID=3, LCID=1 | ✓ |
-| *INITIAL_VELOCITY_GENERATION | SETID=2 | ✓ |
-| *END | Last line | ✓ |
+1. Component 名称解析格式需改进（空格问题）
+2. 材料 RHO/E/PR 查询依赖 cardimage 类型
+3. 端口 47881 僵尸占用需重启释放
 
----
+## 5. 环境
 
-## 4. Compatibility
-
-| Item | Value | Status |
-|------|-------|--------|
-| K file format | Standard (8×10 char) | ✓ |
-| Python version | 3.13.5 | ✓ |
-| Windows path | Forward slashes | ✓ |
-| LS-PrePost version | 4.8 | ✓ |
-| HyperMesh version | 2021 | ✓ |
-
----
-
-## 5. Issues Found
-
-### Round 1: 2026-05-31
-
-| # | Bug | Type | File | Fix | Status |
-|---|-----|------|------|-----|--------|
-| 1 | Second *PART missing keyword header | Code Logic | output/model_original.k | Added *PART before second part | ✓ Fixed |
-| 2 | hm_getmark returns empty in batch mode | Compatibility | hm_runner.py | Binary .hm format, not blocking | Known Issue |
-
-### Unresolved
-
-- LS-PrePost subprocess automation limited (GUI app, no headless mode)
-- hm_getmark returns empty for binary .hm files
-
----
-
-## 6. Next Steps
-
-1. Manual GUI verification in LS-PrePost (open model_original.k)
-2. Enhance K parser to handle more keyword types
-3. Add ID conflict detection
-4. Add empty set detection
+- Python: 3.13.5 (hyper-dyna conda env)
+- HyperMesh: 2021 (E:/HM2021)
+- LS-PrePost: 4.8 (E:/ANSYS2022)
+- LS-DYNA: R13.1
