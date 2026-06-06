@@ -131,6 +131,25 @@ def read_all_materials(timeout: int = 30) -> list[dict[str, Any]]:
     return materials
 
 
+def _parse_comp_name(raw_name: str) -> dict[str, Any]:
+    """Parse HyperMesh auto-generated component name.
+
+    Format: 'Part N for Mat M and Elem Type T'
+    Returns dict with part_id, mat_id, elem_type, or raw name.
+    """
+    import re
+    pattern = r"Part\s+(\d+)\s+for\s+Mat\s+(\d+)\s+and\s+Elem\s+Type\s+(\d+)"
+    m = re.search(pattern, raw_name)
+    if m:
+        return {
+            "part_id": int(m.group(1)),
+            "mat_id": int(m.group(2)),
+            "elem_type": int(m.group(3)),
+            "raw_name": raw_name.strip(),
+        }
+    return {"raw_name": raw_name.strip()}
+
+
 def read_all_components(timeout: int = 30) -> list[dict[str, Any]]:
     """Read all components from HyperMesh."""
     script = '''
@@ -159,14 +178,20 @@ def read_all_components(timeout: int = 30) -> list[dict[str, Any]]:
                 continue
 
             info: dict[str, Any] = {"cid": cid}
-            data = parts[1].strip().strip("{}")
-            tokens = data.split()
-            i = 0
-            while i < len(tokens) - 1:
-                key = tokens[i]
-                val = tokens[i + 1]
+            data = parts[1].strip()
+            # Parse key-value pairs, handling {braced values}
+            import re
+            kv_pattern = r"(\w+)\s+(\{[^}]+\}|\S+)"
+            for m in re.finditer(kv_pattern, data):
+                key = m.group(1)
+                val = m.group(2).strip("{}")
                 info[key] = val
-                i += 2
+
+            # Parse component name (clean Tcl braces)
+            raw_name = info.get("name", "").strip("{}")
+            name_info = _parse_comp_name(raw_name)
+            info.update(name_info)
+
             components.append(info)
 
     return components
