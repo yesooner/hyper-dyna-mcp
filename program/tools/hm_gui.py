@@ -188,6 +188,54 @@ def send_tcl_to_gui(
         return {"success": False, "error": f"Socket error: {exc}"}
 
 
+# --- Model info query ---
+
+
+def query_model_info(host: str = DEFAULT_GUI_HOST, port: int = DEFAULT_GUI_PORT) -> dict:
+    """Query current model info from HyperMesh GUI.
+
+    Returns model name, component count/names, node/element counts.
+    """
+    script = '''
+    *createmark comps 1 "all"
+    puts "COMPS=[llength [hm_getmark comps 1]]"
+    *createmark nodes 1 "all"
+    puts "NODES=[llength [hm_getmark nodes 1]]"
+    *createmark elements 1 "all"
+    puts "ELEMS=[llength [hm_getmark elements 1]]"
+    *createmark mats 1 "all"
+    puts "MATS=[llength [hm_getmark mats 1]]"
+    *createmark props 1 "all"
+    puts "PROPS=[llength [hm_getmark props 1]]"
+    *createmark groups 1 "all"
+    puts "GROUPS=[llength [hm_getmark groups 1]]"
+    puts "TITLE=[wm title .]"
+    '''
+
+    result = send_tcl_to_gui(script, host=host, port=port, timeout=15)
+
+    if not result.get("success"):
+        return {"connected": False, "error": result.get("error")}
+
+    info = {"connected": True}
+    resp = result.get("response", "")
+    for line in resp.split("\n"):
+        line = line.strip()
+        if "=" in line:
+            key, _, val = line.partition("=")
+            key = key.strip()
+            val = val.strip()
+            if key in ("COMPS", "NODES", "ELEMS", "MATS", "PROPS", "GROUPS"):
+                try:
+                    info[key.lower() + "_count"] = int(val)
+                except ValueError:
+                    info[key.lower() + "_count"] = val
+            elif key == "TITLE":
+                info["window_title"] = val
+
+    return info
+
+
 # --- High-level API ---
 
 
