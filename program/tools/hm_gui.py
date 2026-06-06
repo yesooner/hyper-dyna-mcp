@@ -101,16 +101,28 @@ proc ::mcp_hm_accept {{chan addr client_port}} {{
     catch {{rename puts ""}}
     catch {{rename ::_mcp_base_puts puts}}
 
-    if {{$code == 0 || $code == 2}} {{
-        puts $chan "OK"
-        if {{$::mcp_capture ne ""}} {{ puts $chan $::mcp_capture }}
-        if {{$result ne ""}} {{ puts $chan $result }}
-    }} else {{
+    # HyperMesh commands often return non-zero (e.g. *setvalue returns 1)
+    # Only treat as error if result contains error keywords
+    set is_error 0
+    if {{$code == 1}} {{
+        set lower_result [string tolower $result]
+        if {{[string match "*error*" $lower_result] || \
+             [string match "*invalid*" $lower_result] || \
+             [string match "*failed*" $lower_result] || \
+             [string match "*not found*" $lower_result]}} {{
+            set is_error 1
+        }}
+    }}
+    if {{$is_error}} {{
         puts $chan "ERROR"
         puts $chan $result
         if {{[info exists options(-errorinfo)]}} {{
             puts $chan $options(-errorinfo)
         }}
+    }} else {{
+        puts $chan "OK"
+        if {{$::mcp_capture ne ""}} {{ puts $chan $::mcp_capture }}
+        if {{$result ne ""}} {{ puts $chan $result }}
     }}
     flush $chan
     close $chan
@@ -311,6 +323,7 @@ def execute_tcl_gui(
             "fallback_used": False,
             "retry_count": 0,
             "response": "",
+            "error": "Empty script",
             "error_type": "execution_error",
             "message": "Empty script",
         }
@@ -327,6 +340,7 @@ def execute_tcl_gui(
                 "fallback_used": False,
                 "retry_count": 0,
                 "response": "",
+                "error": violation.get("error", violation.get("message", "Rule violation")),
                 "error_type": "execution_error",
                 "message": violation.get("error", violation.get("message", "Rule violation")),
             }
@@ -374,16 +388,42 @@ def _execute_via_socket(
                 response=result.get("response", ""),
             )
 
-        # Socket failed this attempt
+        # Check if this is a connection error (no response) or execution error (has response)
+        has_response = bool(result.get("response", "").strip())
+        if has_response:
+            # Command executed but returned error — don't retry, return immediately
+            state.record_success()  # Connection was fine
+            return _unified_result(
+                success=False,
+                transport="socket",
+                fallback_used=False,
+                retry_count=attempt,
+                response=result.get("response", ""),
+                error_type="execution_error",
+                message="HyperMesh Tcl command returned error",
+            )
+
+        # Connection error — retry
         state.record_failure()
         logger.warning(
             f"Socket attempt {attempt + 1}/{max_retries} failed: "
-            f"{result.get('error', 'unknown')}"
+            f"{result.get('error', 'connection error')}"
         )
 
         # If state switched to IPC after recording failure, break to IPC path
         if not state.should_use_socket():
             break
+
+    if host != DEFAULT_GUI_HOST or int(port) != DEFAULT_GUI_PORT:
+        return _unified_result(
+            success=False,
+            transport="socket",
+            fallback_used=False,
+            retry_count=max_retries,
+            response="",
+            error_type="connection_error",
+            message=f"Connection failed on explicit socket target {host}:{port}",
+        )
 
     # All socket attempts exhausted or state switched to IPC -> fallback
     logger.info("Falling back to IPC transport")
@@ -446,6 +486,7 @@ def _unified_result(
         "fallback_used": fallback_used,
         "retry_count": retry_count,
         "response": response,
+        "error": message,
         "error_type": error_type,
         "message": message,
     }

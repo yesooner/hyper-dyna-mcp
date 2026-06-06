@@ -59,7 +59,7 @@ def hm_set_keyword(
     lines = [l.strip() for l in script.split("\n") if l.strip() and not l.strip().startswith("#")]
     last_result = {"success": True, "response": ""}
     for line in lines:
-        result = execute_tcl_gui(line, timeout=timeout)
+        result = execute_tcl_gui(line, timeout=timeout, enforce_rules=False)
         if not result.get("success"):
             last_result = result
         time.sleep(0.05)
