@@ -17,6 +17,7 @@ from __future__ import annotations
 import os
 import socket
 import time
+import uuid
 from pathlib import Path
 
 try:
@@ -27,6 +28,7 @@ except ImportError:
 
 from program.tools.hm_policy import check_meshing_rules
 from program.tools.hm_tcl_generator import quote_tcl_path
+from program.transport_manager import get_state, start_heartbeat, TransportState
 
 DEFAULT_GUI_HOST = "127.0.0.1"
 DEFAULT_GUI_PORT = int(os.environ.get("HDM_GUI_PORT", "47882"))
@@ -279,7 +281,12 @@ def execute_tcl_gui(
     timeout: int = 120,
     enforce_rules: bool = True,
 ) -> dict:
-    """Execute a Tcl script in HyperMesh GUI via socket listener.
+    """Execute a Tcl script in HyperMesh GUI with automatic fallback.
+
+    Transport selection (managed by transport_manager):
+      1. If socket mode: try send_tcl_to_gui, retry up to 3 times on failure.
+      2. After 3 consecutive failures: switch to IPC (submit_command + wait_result).
+      3. Heartbeat thread recovers to socket when listener comes back.
 
     Args:
         script: Tcl script to execute.
@@ -291,17 +298,38 @@ def execute_tcl_gui(
         enforce_rules: If True, check meshing safety rules.
 
     Returns:
-        dict with success, response, etc.
+        Unified dict: success, command_id, transport, fallback_used,
+        retry_count, response, error_type, message.
+        Backward-compatible: always has ``success`` and ``response``.
     """
     # Validate script
     if not script.strip():
-        return {"success": False, "error": "Empty script"}
+        return {
+            "success": False,
+            "command_id": None,
+            "transport": None,
+            "fallback_used": False,
+            "retry_count": 0,
+            "response": "",
+            "error_type": "execution_error",
+            "message": "Empty script",
+        }
 
     # Enforce meshing rules
     if enforce_rules:
         violation = check_meshing_rules(script)
         if violation:
-            return violation
+            # Wrap legacy violation dict in unified format
+            return {
+                "success": False,
+                "command_id": None,
+                "transport": None,
+                "fallback_used": False,
+                "retry_count": 0,
+                "response": "",
+                "error_type": "execution_error",
+                "message": violation.get("error", violation.get("message", "Rule violation")),
+            }
 
     # Build GUI script with optional readfile/writefile
     gui_parts: list[str] = []
@@ -313,5 +341,111 @@ def execute_tcl_gui(
 
     gui_script = "\n".join(gui_parts)
 
-    # Send to GUI
-    return send_tcl_to_gui(gui_script, host, port, timeout)
+    # Ensure heartbeat is running
+    start_heartbeat()
+
+    state = get_state()
+
+    if state.should_use_socket():
+        return _execute_via_socket(gui_script, state, host, port, timeout)
+    else:
+        return _execute_via_ipc(gui_script, state, timeout)
+
+
+def _execute_via_socket(
+    gui_script: str,
+    state: TransportState,
+    host: str,
+    port: int,
+    timeout: int,
+) -> dict:
+    """Try socket transport with up to 3 retries; fallback to IPC on failure."""
+    max_retries = 3
+    for attempt in range(max_retries):
+        result = send_tcl_to_gui(gui_script, host, port, timeout)
+
+        if result.get("success"):
+            state.record_success()
+            return _unified_result(
+                success=True,
+                transport="socket",
+                fallback_used=False,
+                retry_count=attempt,
+                response=result.get("response", ""),
+            )
+
+        # Socket failed this attempt
+        state.record_failure()
+        logger.warning(
+            f"Socket attempt {attempt + 1}/{max_retries} failed: "
+            f"{result.get('error', 'unknown')}"
+        )
+
+        # If state switched to IPC after recording failure, break to IPC path
+        if not state.should_use_socket():
+            break
+
+    # All socket attempts exhausted or state switched to IPC -> fallback
+    logger.info("Falling back to IPC transport")
+    return _execute_via_ipc(gui_script, state, timeout, fallback_used=True)
+
+
+def _execute_via_ipc(
+    gui_script: str,
+    state: TransportState,
+    timeout: int,
+    fallback_used: bool = False,
+) -> dict:
+    """Execute via IPC file-queue (plugin_loop submit_command + wait_result)."""
+    from program.plugin_loop import submit_command, wait_result
+
+    cmd_id = submit_command("execute_tcl", script=gui_script, timeout=timeout)
+    result = wait_result(cmd_id, timeout=float(timeout) + 10)
+
+    if result is None:
+        return _unified_result(
+            success=False,
+            command_id=cmd_id,
+            transport="ipc",
+            fallback_used=fallback_used,
+            retry_count=0,
+            response="",
+            error_type="timeout",
+            message=f"IPC wait_result timed out after {timeout + 10}s",
+        )
+
+    payload = result.get("payload", {})
+    ok = result.get("ok", False)
+    return _unified_result(
+        success=ok,
+        command_id=cmd_id,
+        transport="ipc",
+        fallback_used=fallback_used,
+        retry_count=0,
+        response=payload.get("response", ""),
+        error_type=None if ok else "execution_error",
+        message=payload.get("error"),
+    )
+
+
+def _unified_result(
+    success: bool,
+    command_id: str | None = None,
+    transport: str | None = None,
+    fallback_used: bool = False,
+    retry_count: int = 0,
+    response: str = "",
+    error_type: str | None = None,
+    message: str | None = None,
+) -> dict:
+    """Build a unified result dict (backward-compatible with legacy callers)."""
+    return {
+        "success": success,
+        "command_id": command_id or f"cmd_{uuid.uuid4().hex[:8]}",
+        "transport": transport,
+        "fallback_used": fallback_used,
+        "retry_count": retry_count,
+        "response": response,
+        "error_type": error_type,
+        "message": message,
+    }
