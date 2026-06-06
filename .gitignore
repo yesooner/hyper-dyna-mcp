@@ -13,6 +13,11 @@ runs/*
 logs/*
 !logs/.gitkeep
 *.log
+ipc/commands/*.json
+ipc/results/*.json
+ipc/archive/*.json
+temp_*.tcl
+*.bat.setup
 lib/hypermesh-mcp/
 reports/08_*.txt
 reports/09_*.txt

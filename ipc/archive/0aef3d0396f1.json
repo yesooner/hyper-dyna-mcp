@@ -1,1 +1,0 @@
-{"id": "0aef3d0396f1", "type": "execute_tcl", "script": "*createentity cards name=\"CONTROL_TERMINATION\" cardimage=Termin", "timeout": 30}
