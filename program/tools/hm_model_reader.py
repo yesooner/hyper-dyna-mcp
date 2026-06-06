@@ -17,26 +17,33 @@ from program.tools.hm_gui import execute_tcl_gui
 
 
 def read_material(mid: int, timeout: int = 10) -> dict[str, Any]:
-    """Read material properties from HyperMesh."""
+    """Read material properties from HyperMesh.
+
+    Uses HyperMesh internal datanames:
+    - density (not RHO)
+    - cardimage (MATL1, MATL96, etc.)
+    """
     script = f'''
     set info {{}}
     catch {{dict set info cardimage [hm_getvalue mats id={mid} dataname=cardimage]}}
-    catch {{dict set info RHO [hm_getvalue mats id={mid} dataname=RHO]}}
+    catch {{dict set info density [hm_getvalue mats id={mid} dataname=density]}}
+    catch {{dict set info Rho [hm_getvalue mats id={mid} dataname=Rho]}}
     catch {{dict set info E [hm_getvalue mats id={mid} dataname=E]}}
-    catch {{dict set info PR [hm_getvalue mats id={mid} dataname=PR]}}
+    catch {{dict set info Nu [hm_getvalue mats id={mid} dataname=Nu]}}
     puts "MAT_INFO=[array get info]"
     '''
     result = execute_tcl_gui(script, timeout=timeout)
     if not result.get("success"):
         return {"success": False, "mid": mid, "error": result.get("error")}
 
-    info = {"success": True, "mid": mid}
+    info: dict[str, Any] = {"success": True, "mid": mid}
     for line in result.get("response", "").split("\n"):
         if "MAT_INFO=" in line:
             data = line.split("MAT_INFO=", 1)[1].strip()
-            parts = data.split()
-            for i in range(0, len(parts) - 1, 2):
-                info[parts[i]] = parts[i + 1]
+            # Parse Tcl dict: key value key value ...
+            import re
+            for m in re.finditer(r"(\w+)\s+(\{[^}]+\}|\S+)", data):
+                info[m.group(1)] = m.group(2).strip("{}")
             break
     return info
 
@@ -90,16 +97,20 @@ def read_component(cid: int, timeout: int = 10) -> dict[str, Any]:
 
 
 def read_all_materials(timeout: int = 30) -> list[dict[str, Any]]:
-    """Read all materials from HyperMesh."""
+    """Read all materials from HyperMesh.
+
+    Uses HyperMesh internal datanames: density, Rho, E, Nu, cardimage.
+    """
     script = '''
     *createmark mats 1 "all"
     set ids [hm_getmark mats 1]
     foreach mid $ids {
         set info [list mid $mid]
         catch {lappend info cardimage [hm_getvalue mats id=$mid dataname=cardimage]}
-        catch {lappend info RHO [hm_getvalue mats id=$mid dataname=RHO]}
+        catch {lappend info density [hm_getvalue mats id=$mid dataname=density]}
+        catch {lappend info Rho [hm_getvalue mats id=$mid dataname=Rho]}
         catch {lappend info E [hm_getvalue mats id=$mid dataname=E]}
-        catch {lappend info PR [hm_getvalue mats id=$mid dataname=PR]}
+        catch {lappend info Nu [hm_getvalue mats id=$mid dataname=Nu]}
         puts "MAT_$mid=$info"
     }
     '''
