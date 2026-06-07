@@ -1,49 +1,4 @@
-# ==================== 项目核心目录 ====================
-# 只保留以下目录和文件，忽略其他所有内容
-
-# 核心程序目录
-program/
-!program/server.py
-!program/transport_manager.py
-!program/plugin_loop.py
-!program/tools/
-!program/prompts/
-
-# 关键字模板目录
-templates/
-!templates/keyword/
-
-# 路径配置目录
-path/
-!path/local_paths.yaml
-!path/hypermesh_paths.yaml
-
-# 测试目录
-tests/
-
-# 文档目录
-docs/
-
-# 输出目录
-output/
-!output/model_original.k
-!output/model_roundtrip.k
-!output/screenshots/.gitkeep
-
-# 核心配置文件
-!hmcustom.tcl
-!pyproject.toml
-!README.md
-!README.en.md
-!RELEASE_NOTES.md
-!CLAUDE.md
-!.gitignore
-!LICENSE
-!.env.example
-
-# ==================== 忽略的目录和文件 ====================
-
-# Python 相关
+# ==================== Python 相关 ====================
 __pycache__/
 *.pyc
 *.pyo
@@ -65,7 +20,7 @@ wheels/
 *.manifest
 *.spec
 
-# 虚拟环境
+# ==================== 虚拟环境 ====================
 .venv/
 venv/
 ENV/
@@ -74,7 +29,7 @@ env/
 .env.local
 .env.*.local
 
-# 测试相关
+# ==================== 测试相关 ====================
 .pytest_cache/
 .tox/
 .nox/
@@ -84,11 +39,11 @@ htmlcov/
 *.cover
 .hypothesis/
 
-# 类型检查
+# ==================== 类型检查 ====================
 .mypy_cache/
 .pytype/
 
-# IDE
+# ==================== IDE ====================
 .vscode/
 .idea/
 *.swp
@@ -97,7 +52,7 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# Claude Code 会话数据
+# ==================== Claude Code ====================
 .claude/sessions/
 .claude/cache/
 .claude/projects/
@@ -114,7 +69,7 @@ Thumbs.db
 .claude/*.log
 .claude/**/*.log
 
-# 运行时生成的数据
+# ==================== 运行时生成的数据 ====================
 runs/*
 !runs/.gitkeep
 logs/*
@@ -128,12 +83,12 @@ ipc/archive/*.json
 ipc/status.json
 ipc/stop.flag
 
-# Obsidian 相关（用户特定）
+# ==================== Obsidian 相关（用户特定）====================
 path/obsidian_paths.yaml
 program/tools/obsidian_logger.py
 tests/test_obsidian_logger.py
 
-# 参考材料（可选，运行时不需要）
+# ==================== 参考材料（可选）====================
 lsdyna-maunal/
 ref/
 *.db
@@ -147,11 +102,11 @@ ref/
 *.pkl
 *.tmp
 
-# HyperMesh 模型文件（二进制，大文件）
+# ==================== HyperMesh 模型文件 ====================
 *.hm
 models/
 
-# 求解器输出文件
+# ==================== 求解器输出文件 ====================
 *.d3plot
 *.d3thdt
 *.messag
@@ -161,11 +116,11 @@ models/
 *.rcforc
 *.secforc
 
-# LS-PrePost 生成的 cfile（运行时）
+# ==================== LS-PrePost 生成的 cfile ====================
 *.cfile
 !lib/cfile_templates/*.cfile
 
-# 临时输出文件（未被函数调用引用）
+# ==================== 临时输出文件 ====================
 output/command1.tcl
 output/command2.tcl
 output/batchmesher_config.cfg
@@ -183,21 +138,20 @@ temp_*.tcl
 temp_safe_execute.py
 *.bat.setup
 
-# 报告（运行时生成）
+# ==================== 报告（运行时生成）====================
 reports/*.json
 reports/*.html
 
-# 示例模型文件（可选，大文件）
+# ==================== 示例模型文件（可选，大文件）====================
 lib/hypermesh_samples/*.hm
 
-# 批处理安装系统
+# ==================== 批处理安装系统 ====================
 batch/
 
-# 其他目录
+# ==================== 其他目录 ====================
 scripts/
 view/
 lib/
-ipc/
 *.backup
 *.bak
 *.old
