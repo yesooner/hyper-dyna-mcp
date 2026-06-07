@@ -146,28 +146,8 @@ async def list_tools() -> list[Tool]:
                 "required": ["filepath"],
             },
         ),
-        Tool(
-            name="write_k_file",
-            description="Generate an LS-DYNA .k keyword file from parameters",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "filepath": {"type": "string", "description": "Output .k file path"},
-                    "title": {"type": "string", "default": "Generated Model"},
-                    "termination_time": {"type": "number", "default": 0.001},
-                    "material": {
-                        "type": "object",
-                        "properties": {
-                            "mid": {"type": "integer"},
-                            "rho": {"type": "number"},
-                            "e": {"type": "number"},
-                            "pr": {"type": "number"},
-                        },
-                    },
-                },
-                "required": ["filepath"],
-            },
-        ),
+        # write_k_file removed — all modeling must go through HyperMesh Tcl console
+        # Use hm_set_keyword / execute_tcl_gui instead
         Tool(
             name="generate_lsdyna_command",
             description="Generate LS-DYNA solver command (dry_run by default — does not execute)",
@@ -398,22 +378,6 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         for e in errors:
             lines.append(f"  ERROR: {e}")
         return [TextContent(type="text", text="\n".join(lines))]
-
-    elif name == "write_k_file":
-        mat_data = arguments.get("material", {})
-        model = KModel(
-            title=arguments.get("title", "Generated Model"),
-            termination_time=arguments.get("termination_time", 0.001),
-        )
-        if mat_data:
-            model.materials.append(Material(
-                mid=mat_data.get("mid", 1),
-                rho=mat_data.get("rho", 7.85e-9),
-                e=mat_data.get("e", 210000.0),
-                pr=mat_data.get("pr", 0.3),
-            ))
-        content = write_k_file(model, arguments["filepath"])
-        return [TextContent(type="text", text=f"Wrote K file: {arguments['filepath']}\n{len(content)} bytes")]
 
     elif name == "generate_lsdyna_command":
         dry_run = arguments.get("dry_run", True)

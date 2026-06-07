@@ -1,22 +1,51 @@
 # hyper-dyna-mcp for HyperMesh
-# Auto-detects project path from this file's location
+if {[info exists ::env(HDM_HOME)]} {
+    set ::HDM_ROOT [string map [list \\ /] $::env(HDM_HOME)]
+} else {
+    set ::HDM_ROOT "F:/hyper-dyna-mcp"
+}
 
-# Auto-detect project root from this file's location
-set ::HDM_ROOT [file dirname [info script]]
 if {![info exists ::mcp_hm_port]} {
     set ::mcp_hm_port 47882
+}
+
+# Guard: only load once
+if {[info exists ::_hdm_loaded]} { return }
+set ::_hdm_loaded 1
+
+# === Error logging ===
+set ::_hdm_error_log "$::HDM_ROOT/logs/hm_errors/[clock format [clock seconds] -format {%Y%m%d_%H%M%S}].log"
+
+proc hdm_log_error {msg} {
+    set fp [open $::_hdm_error_log a]
+    puts $fp "\[[clock format [clock seconds] -format {%Y-%m-%d %H:%M:%S}]\] $msg"
+    close $fp
+}
+
+# Trap bgerror — catches segfaults and unhandled Tcl errors
+proc bgerror {msg} {
+    hdm_log_error "BGERROR: $msg"
+    hdm_log_error "STACK: [info level]"
+    puts stderr "HDM ERROR: $msg (logged to $::_hdm_error_log)"
+}
+
+# Trap unknown commands
+if {[catch {rename ::unknown ::_orig_unknown}]} {
+    # unknown already exists, wrap it
+}
+proc unknown {args} {
+    hdm_log_error "UNKNOWN CMD: $args"
+    catch {return [uplevel 1 ::_orig_unknown $args]}
 }
 
 # === Socket mode ===
 
 proc mcp_start {} {
-    # Close existing listener if any
     if {[info exists ::mcp_hm_server]} {
         catch {close $::mcp_hm_server}
         unset -nocomplain ::mcp_hm_server
         after 200
     }
-    # Check if port is occupied by stale process
     set port $::mcp_hm_port
     if {![catch {set sock [socket 127.0.0.1 $port]; close $sock} err]} {
         puts "Port $port occupied, attempting cleanup..."
@@ -24,15 +53,14 @@ proc mcp_start {} {
         unset -nocomplain ::mcp_hm_server
         after 300
     }
-    puts "HDM source: $::HDM_ROOT/runs/mcp.tcl"
-    source "$::HDM_ROOT/runs/mcp.tcl"
+    if {[catch {source "$::HDM_ROOT/runs/mcp.tcl"} err]} {
+        hdm_log_error "mcp_start: $err"
+        puts "ERROR: $err"
+    }
 }
 
 proc mcp_status {} {
-    set port 47882
-    if {[info exists ::mcp_hm_port]} {
-        set port $::mcp_hm_port
-    }
+    set port $::mcp_hm_port
     if {[catch {set sock [socket 127.0.0.1 $port]; close $sock} err]} {
         puts "Socket: NOT running"
     } else {
@@ -49,34 +77,38 @@ proc mcp_status {} {
     }
 }
 
-# === File IPC mode ===
-
 proc mcp_loop {} {
-    puts "Starting file IPC loop (blocking)..."
-    cd $::HDM_ROOT
-    exec python -m program.plugin_loop &
-    puts "IPC loop started."
+    if {[catch {
+        puts "Starting file IPC loop (blocking)..."
+        cd $::HDM_ROOT
+        exec python -m program.plugin_loop &
+        puts "IPC loop started."
+    } err]} {
+        hdm_log_error "mcp_loop: $err"
+        puts "ERROR: $err"
+    }
 }
 
 proc mcp_stop {} {
-    set flag "$::HDM_ROOT/ipc/stop.flag"
-    set fp [open $flag w]
-    puts $fp "stop"
-    close $fp
-    puts "Stop flag written. Loop will exit."
+    if {[catch {
+        set flag "$::HDM_ROOT/ipc/stop.flag"
+        set fp [open $flag w]
+        puts $fp "stop"
+        close $fp
+        puts "Stop flag written. Loop will exit."
+    } err]} {
+        hdm_log_error "mcp_stop: $err"
+        puts "ERROR: $err"
+    }
 }
 
-# === GUI Tab (auto-create) ===
+# === GUI Tab ===
 
 proc mcp_create_tab {} {
-    if {[winfo exists .mcp_tab]} {
-        puts "MCP tab already exists"
-        return
-    }
+    if {[winfo exists .mcp_tab]} { return }
     frame .mcp_tab
     hm_framework addtab MCP .mcp_tab
 
-    # 让 .mcp_tab 内部随窗口缩放
     grid columnconfigure .mcp_tab 0 -weight 1
     grid rowconfigure .mcp_tab 2 -weight 1
 
@@ -86,13 +118,11 @@ proc mcp_create_tab {} {
     label .mcp_tab.status -text "Status: Ready" -fg gray
     grid .mcp_tab.status -row 1 -column 0 -pady 5 -sticky n
 
-    # 按钮区域 — grid 布局，列等宽随窗口缩放
     frame .mcp_tab.btns
     grid .mcp_tab.btns -row 2 -column 0 -pady 10 -sticky nsew
     grid columnconfigure .mcp_tab.btns {0 1} -weight 1 -uniform btn
 
     button .mcp_tab.btns.start -text "Start MCP" -command {
-        source "$::HDM_ROOT/hmcustom.tcl"
         catch {mcp_start}
         .mcp_tab.status configure -text "Status: Running" -fg green
     }
@@ -114,40 +144,8 @@ proc mcp_create_tab {} {
         .mcp_tab.status configure -text "Status: Stopped" -fg red
     }
     grid .mcp_tab.btns.stop -row 1 -column 1 -padx 5 -pady 3 -sticky ew
-
-    puts "MCP tab created in HyperMesh menu"
 }
 
-# === Auto-refresh on new model ===
-# HyperMesh calls *userprofile callback when a new file is opened
-if {[info commands *userprofile] eq ""} {
-    # No existing userprofile — install directly
-    catch {rename ::*userprofile ::_orig_userprofile}
-    proc *userprofile {args} {
-        # Re-detect project root in case the file was moved
-        set ::HDM_ROOT [file dirname [info script]]
-        puts "HDM_ROOT refreshed: $::HDM_ROOT"
-        if {[catch {_orig_userprofile {*}$args} err]} {
-            # no original to call, ignore
-        }
-    }
-} else {
-    # Wrap existing userprofile
-    catch {rename ::*userprofile ::_orig_userprofile}
-    proc *userprofile {args} {
-        set ::HDM_ROOT [file dirname [info script]]
-        puts "HDM_ROOT refreshed: $::HDM_ROOT"
-        catch {_orig_userprofile {*}$args}
-    }
-}
-
-# Auto-create tab
+# === Init ===
 catch {mcp_create_tab}
-
-puts "Hyper-Dyna-MCP loaded from: $::HDM_ROOT"
-puts "Commands:"
-puts "  mcp_start    - Start socket listener"
-puts "  mcp_loop     - Start file IPC loop (blocking)"
-puts "  mcp_status   - Check status"
-puts "  mcp_stop     - Stop MCP"
-puts "  mcp_create_tab - Create MCP GUI tab"
+puts "Hyper-Dyna-MCP loaded from: $::HDM_ROOT/hmcustom.tcl"
