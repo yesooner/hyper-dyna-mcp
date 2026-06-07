@@ -58,13 +58,21 @@ def hm_set_keyword(
     except Exception as e:
         return {"success": False, "error": f"Template render error: {e}"}
 
-    # Execute line by line to avoid HyperMesh crashes
+    # Execute line by line with segfault protection
     import time
     lines = [l.strip() for l in script.split("\n") if l.strip() and not l.strip().startswith("#")]
     last_result = {"success": True, "response": ""}
+    count = 0
     for line in lines:
         result = execute_tcl_gui(line, timeout=timeout, enforce_rules=False)
+        count += 1
         if not result.get("success"):
+            # Check for connection loss (segfault)
+            err = str(result.get("error", ""))
+            if "connection" in err.lower() or "refused" in err.lower():
+                return {"success": False, "keyword": keyword, "params": params,
+                        "error": f"HyperMesh connection lost after {count} commands (possible segfault)",
+                        "response": ""}
             last_result = result
         time.sleep(0.05)
 

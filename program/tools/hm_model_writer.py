@@ -66,27 +66,53 @@ def _build_setvalue_lines(
     return lines
 
 
-def _execute_script(lines: list[str], timeout: int = 15) -> dict:
-    """Execute Tcl lines one by one via GUI socket to avoid crashes.
+def _execute_script(lines: list[str], timeout: int = 15, batch_size: int = 50, batch_delay: float = 0.5) -> dict:
+    """Execute Tcl lines one by one with batching to avoid HyperMesh crashes.
 
-    Sending multiple *setvalue commands at once can cause HyperMesh
-    segmentation faults. Each command is sent individually.
+    HyperMesh can segfault when too many commands are sent rapidly.
+    This function:
+    - Sends each command individually
+    - Pauses between commands (50ms)
+    - Pauses longer between batches (batch_delay)
+    - Detects connection loss and reports it
+
+    Args:
+        lines: Tcl command lines
+        timeout: Per-command timeout
+        batch_size: Commands per batch before longer pause
+        batch_delay: Pause between batches in seconds
     """
     import time
     if not lines:
         return {"success": False, "error": "Empty script"}
 
     last_result = {"success": True}
+    count = 0
     for line in lines:
         line = line.strip()
         if not line or line.startswith("#"):
             continue
+
         logger.debug(f"hm_model_writer: {line}")
         result = execute_tcl_gui(line, timeout=timeout)
+        count += 1
+
         if not result.get("success"):
+            # Check if this is a connection error (segfault recovery)
+            if "connection" in str(result.get("error", "")).lower() or \
+               "refused" in str(result.get("error", "")).lower():
+                logger.error(f"Connection lost after {count} commands — HyperMesh may have crashed")
+                return {"success": False, "error": "HyperMesh connection lost (possible segfault)",
+                        "commands_executed": count}
             logger.warning(f"Command failed: {line[:60]} → {result.get('response', '')[:100]}")
             last_result = result
-        time.sleep(0.05)  # 50ms delay between commands
+
+        # Throttle: small delay between commands, longer delay between batches
+        if count % batch_size == 0:
+            logger.info(f"Batch boundary at {count} commands, pausing {batch_delay}s...")
+            time.sleep(batch_delay)
+        else:
+            time.sleep(0.05)  # 50ms between individual commands
 
     return last_result
 
