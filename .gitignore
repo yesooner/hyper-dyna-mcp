@@ -121,29 +121,17 @@ models/
 !lib/cfile_templates/*.cfile
 
 # ==================== 临时输出文件 ====================
-output/command1.tcl
-output/command2.tcl
-output/batchmesher_config.cfg
-output/batchmesher_config_2019.cfg
-output/batchmesher_config_files/
-output/batchmesher_config_2019_files/
-output/saves/
-output/screenshots/
-output/hmmenu.set
-output/validation_report.md
-output/test[0-9]*.hm
-output/test_hysteresis*.hm
+output/
 temp_*.py
 temp_*.tcl
 temp_safe_execute.py
 *.bat.setup
 
 # ==================== 报告（运行时生成）====================
-reports/*.json
-reports/*.html
+reports/
 
 # ==================== 示例模型文件（可选，大文件）====================
-lib/hypermesh_samples/*.hm
+lib/
 
 # ==================== 批处理安装系统 ====================
 batch/
@@ -151,7 +139,8 @@ batch/
 # ==================== 其他目录 ====================
 scripts/
 view/
-lib/
+tests/
+docs/
 *.backup
 *.bak
 *.old
