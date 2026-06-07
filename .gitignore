@@ -89,10 +89,12 @@ logs/*
 !logs/.gitkeep
 *.log
 
-# IPC temporary files
+# IPC temporary files (runtime generated)
 ipc/commands/*.json
 ipc/results/*.json
 ipc/archive/*.json
+ipc/status.json
+ipc/stop.flag
 
 # Reference materials (optional, not required for runtime)
 lsdyna-maunal/
