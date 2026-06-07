@@ -38,3 +38,18 @@ ref/
 *~
 .DS_Store
 Thumbs.db
+
+# Temporary output files (not referenced by function calls)
+output/command1.tcl
+output/command2.tcl
+output/batchmesher_config.cfg
+output/batchmesher_config_2019.cfg
+output/batchmesher_config_files/
+output/batchmesher_config_2019_files/
+output/saves/
+output/screenshots/
+output/hmmenu.set
+output/validation_report.md
+output/test[0-9]*.hm
+output/test_hysteresis*.hm
+temp_safe_execute.py
