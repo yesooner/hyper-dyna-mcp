@@ -96,6 +96,12 @@ proc mcp_create_tab {} {
     }
     pack .mcp_tab.btns.check -side left -padx 5
 
+    button .mcp_tab.btns.loop -text "Start Loop" -width 15 -command {
+        mcp_loop
+        .mcp_tab.status configure -text "Status: Loop Running" -fg blue
+    }
+    pack .mcp_tab.btns.loop -side left -padx 5
+
     button .mcp_tab.btns.stop -text "Stop IPC" -width 15 -command {
         mcp_stop
         .mcp_tab.status configure -text "Status: Stopped" -fg red
