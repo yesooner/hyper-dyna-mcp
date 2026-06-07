@@ -39,6 +39,7 @@ output/
 !CLAUDE.md
 !.gitignore
 !LICENSE
+!.env.example
 
 # ==================== 忽略的目录和文件 ====================
 
@@ -201,6 +202,7 @@ ipc/
 *.bak
 *.old
 *.orig
+claude_code_mcp.json
 
 # ==================== OS 特定 ====================
 .DS_Store
