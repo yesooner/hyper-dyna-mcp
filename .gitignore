@@ -18,6 +18,10 @@ ipc/results/*.json
 ipc/archive/*.json
 temp_*.tcl
 *.bat.setup
+
+# Reference materials (optional, not required for runtime)
+lsdyna-maunal/
+ref/
 *.db
 *.set
 *.cfile
