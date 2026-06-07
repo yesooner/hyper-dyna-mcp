@@ -75,38 +75,44 @@ proc mcp_create_tab {} {
     frame .mcp_tab
     hm_framework addtab MCP .mcp_tab
 
+    # 让 .mcp_tab 内部随窗口缩放
+    grid columnconfigure .mcp_tab 0 -weight 1
+    grid rowconfigure .mcp_tab 2 -weight 1
+
     label .mcp_tab.title -text "Hyper-Dyna-MCP" -font {Arial 12 bold}
-    pack .mcp_tab.title -pady 10
+    grid .mcp_tab.title -row 0 -column 0 -pady 10 -sticky n
 
     label .mcp_tab.status -text "Status: Ready" -fg gray
-    pack .mcp_tab.status -pady 5
+    grid .mcp_tab.status -row 1 -column 0 -pady 5 -sticky n
 
+    # 按钮区域 — grid 布局，列等宽随窗口缩放
     frame .mcp_tab.btns
-    pack .mcp_tab.btns -pady 10
+    grid .mcp_tab.btns -row 2 -column 0 -pady 10 -sticky nsew
+    grid columnconfigure .mcp_tab.btns {0 1} -weight 1 -uniform btn
 
-    button .mcp_tab.btns.start -text "Start MCP" -width 15 -command {
+    button .mcp_tab.btns.start -text "Start MCP" -command {
         source "$::HDM_ROOT/hmcustom.tcl"
         catch {mcp_start}
         .mcp_tab.status configure -text "Status: Running" -fg green
     }
-    pack .mcp_tab.btns.start -side left -padx 5
+    grid .mcp_tab.btns.start -row 0 -column 0 -padx 5 -pady 3 -sticky ew
 
-    button .mcp_tab.btns.check -text "Check Status" -width 15 -command {
+    button .mcp_tab.btns.check -text "Check Status" -command {
         mcp_status
     }
-    pack .mcp_tab.btns.check -side left -padx 5
+    grid .mcp_tab.btns.check -row 0 -column 1 -padx 5 -pady 3 -sticky ew
 
-    button .mcp_tab.btns.loop -text "Start Loop" -width 15 -command {
+    button .mcp_tab.btns.loop -text "Start Loop" -command {
         mcp_loop
         .mcp_tab.status configure -text "Status: Loop Running" -fg blue
     }
-    pack .mcp_tab.btns.loop -side left -padx 5
+    grid .mcp_tab.btns.loop -row 1 -column 0 -padx 5 -pady 3 -sticky ew
 
-    button .mcp_tab.btns.stop -text "Stop IPC" -width 15 -command {
+    button .mcp_tab.btns.stop -text "Stop MCP" -command {
         mcp_stop
         .mcp_tab.status configure -text "Status: Stopped" -fg red
     }
-    pack .mcp_tab.btns.stop -side left -padx 5
+    grid .mcp_tab.btns.stop -row 1 -column 1 -padx 5 -pady 3 -sticky ew
 
     puts "MCP tab created in HyperMesh menu"
 }

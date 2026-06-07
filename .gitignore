@@ -95,10 +95,10 @@ ipc/archive/*.json
 ipc/status.json
 ipc/stop.flag
 
-# Obsidian related (user-specific, not required for runtime)
-path/obsidian_paths.yaml
-program/tools/obsidian_logger.py
-tests/test_obsidian_logger.py
+# Obsidian related (user-specific, optional)
+# path/obsidian_paths.yaml
+# program/tools/obsidian_logger.py
+# tests/test_obsidian_logger.py
 
 # Reference materials (optional, not required for runtime)
 lsdyna-maunal/

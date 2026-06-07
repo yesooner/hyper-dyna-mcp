@@ -1,0 +1,7 @@
+# Obsidian vault paths for log backflow
+
+obsidian:
+  root: "D:/Zotero/ZoteroNote/Agent/dyna mcp"
+  workflow_log: "D:/Zotero/ZoteroNote/Agent/dyna mcp/workflow_log.md"
+  execution_log: "D:/Zotero/ZoteroNote/Agent/dyna mcp/execution_log.md"
+  validation_log: "D:/Zotero/ZoteroNote/Agent/dyna mcp/validation_log.md"

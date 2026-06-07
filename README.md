@@ -17,7 +17,7 @@
 
 - 📚 **1935 个 LS-DYNA 关键字模板** — MAT、SECTION、CONTACT、BOUNDARY、LOAD、CONTROL、DATABASE、SET 等
 - 🔗 **HyperMesh GUI 集成** — Socket 通信（端口 47882）+ IPC 文件队列双通道
-- 📝 **K 文件解析/生成** — 解析、验证、生成 LS-DYNA .k 关键字文件
+- 📝 **K 文件导出** — 从 HyperMesh 模型导出 LS-DYNA .k 关键字文件
 - 🔧 **模型操作** — 读写材料、属性、组件、截面等
 - 🛡️ **安全策略** — Tcl 脚本策略强制执行、MCP_SCRIPT 标记、逐命令执行
 - 🔄 **工作流编排** — LS-DYNA、HyperMesh 和混合流水线
@@ -138,6 +138,34 @@ python -m program.server
    ```
 4. **或者**：HyperMesh → MCP 标签页 → 点击 "Start MCP" 按钮
 
+### HyperMesh 命令说明
+
+`hmcustom.tcl` 提供以下命令：
+
+| 命令 | 功能描述 |
+|------|----------|
+| `mcp_start` | 启动 Socket 监听器（端口 47882），接收 MCP 服务器的 Tcl 命令 |
+| `mcp_loop` | 启动文件 IPC 循环（阻塞模式），轮询 `ipc/commands/` 目录 |
+| `mcp_status` | 检查 Socket 和 IPC 状态 |
+| `mcp_stop` | 停止 IPC 循环（写入 `ipc/stop.flag`） |
+| `mcp_create_tab` | 创建 MCP GUI 标签页（自动执行） |
+
+### 连接模式
+
+项目支持两种通信模式：
+
+**模式 1：Socket 直连（推荐）**
+- 端口：47882
+- 延迟：< 10ms
+- 命令：`mcp_start`
+- 适用：HyperMesh GUI 已打开，需要实时交互
+
+**模式 2：IPC 文件队列（备用）**
+- 目录：`ipc/commands/`, `ipc/results/`
+- 延迟：100-500ms
+- 命令：`mcp_loop`
+- 适用：Socket 连接失败时自动切换，或批处理模式
+
 ### 方式三：Claude Code 集成
 
 在 Claude Code 中直接使用 MCP 工具：
@@ -165,7 +193,7 @@ Claude: 我将使用 Hyper-Dyna-MCP 工具为您创建模型...
 | `check_hypermesh_connection` | 检查 hmbatch.exe 连接 | 本地检查 |
 | `parse_k_file` | 解析 .k 文件 | 本地解析 |
 | `write_k_file` | 生成 .k 文件 | 本地生成 |
-| `generate_lsdyna_command` | 生成求解器命令 | 本地生成 |
+| `generate_lsdyna_command` | 生成求解器命令（dry_run） | 本地生成 |
 | `parse_solver_log` | 解析求解器日志 | 本地解析 |
 | `execute_lsprepost` | 执行 LS-PrePost cfile | 直接调用 |
 | `generate_cfile` | 生成 cfile 脚本 | 本地生成 |
@@ -242,26 +270,6 @@ graph TB
     E --> L
     E --> M
 ```
-
-## 🔌 连接模式
-
-### 模式 1：Socket 直连（推荐）
-
-- **端口**: 47882
-- **延迟**: < 10ms
-- **适用**: HyperMesh GUI 已打开
-
-### 模式 2：IPC 文件队列（备用）
-
-- **目录**: `ipc/commands/`, `ipc/results/`
-- **延迟**: 100-500ms
-- **适用**: Socket 连接失败时自动切换
-
-### 模式 3：批处理模式
-
-- **执行**: hmbatch.exe
-- **延迟**: 1-5s
-- **适用**: 无 GUI 环境
 
 ## 📈 性能指标
 

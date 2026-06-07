@@ -16,9 +16,9 @@
 - IPC 文件队列双通道
 - 自动故障转移和恢复
 
-### 📝 K 文件处理
-- 解析 LS-DYNA .k 关键字文件
-- 验证和生成 K 文件
+### 📝 K 文件导出
+- 从 HyperMesh 模型导出 LS-DYNA .k 关键字文件
+- 解析和验证 K 文件
 - 支持 100MB+ 大文件
 
 ### 🔧 模型操作
@@ -52,7 +52,7 @@
 | `check_hypermesh_connection` | 检查 hmbatch.exe 连接 |
 | `parse_k_file` | 解析 .k 文件 |
 | `write_k_file` | 生成 .k 文件 |
-| `generate_lsdyna_command` | 生成求解器命令 |
+| `generate_lsdyna_command` | 生成求解器命令（dry_run） |
 | `parse_solver_log` | 解析求解器日志 |
 | `execute_lsprepost` | 执行 LS-PrePost cfile |
 | `generate_cfile` | 生成 cfile 脚本 |
@@ -102,6 +102,26 @@ python -m program.server
    source hmcustom.tcl
    mcp_start
    ```
+
+### HyperMesh 命令说明
+
+| 命令 | 功能描述 |
+|------|----------|
+| `mcp_start` | 启动 Socket 监听器（端口 47882） |
+| `mcp_loop` | 启动文件 IPC 循环（阻塞模式） |
+| `mcp_status` | 检查 Socket 和 IPC 状态 |
+| `mcp_stop` | 停止 IPC 循环 |
+| `mcp_create_tab` | 创建 MCP GUI 标签页 |
+
+### 连接模式
+
+**Socket 直连（推荐）**
+- 端口：47882，延迟：< 10ms
+- 命令：`mcp_start`
+
+**IPC 文件队列（备用）**
+- 目录：`ipc/commands/`, `ipc/results/`
+- 命令：`mcp_loop`
 
 ### 方式三：Claude Code 集成
 直接在 Claude Code 中使用 MCP 工具。

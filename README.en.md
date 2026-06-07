@@ -17,7 +17,7 @@
 
 - 📚 **1935 LS-DYNA keyword templates** — MAT, SECTION, CONTACT, BOUNDARY, LOAD, CONTROL, DATABASE, SET, etc.
 - 🔗 **HyperMesh GUI integration** — Socket communication (port 47882) + IPC file queue dual-channel
-- 📝 **K file parser/writer** — Parse, validate, generate LS-DYNA .k keyword files
+- 📝 **K file export** — Export LS-DYNA .k keyword files from HyperMesh models
 - 🔧 **Model operations** — Read/write materials, properties, components, sections
 - 🛡️ **Safety policies** — Tcl script policy enforcement, MCP_SCRIPT markers, command-by-command execution
 - 🔄 **Workflow orchestration** — LS-DYNA, HyperMesh, and mixed pipelines
@@ -138,6 +138,34 @@ python -m program.server
    ```
 4. **Or**: HyperMesh → MCP tab → Click "Start MCP" button
 
+### HyperMesh Commands
+
+`hmcustom.tcl` provides the following commands:
+
+| Command | Description |
+|---------|-------------|
+| `mcp_start` | Start socket listener (port 47882) to receive Tcl commands from MCP server |
+| `mcp_loop` | Start file IPC loop (blocking mode), polling `ipc/commands/` directory |
+| `mcp_status` | Check socket and IPC status |
+| `mcp_stop` | Stop IPC loop (writes `ipc/stop.flag`) |
+| `mcp_create_tab` | Create MCP GUI tab (auto-executed) |
+
+### Connection Modes
+
+The project supports two communication modes:
+
+**Mode 1: Socket Direct Connection (Recommended)**
+- Port: 47882
+- Latency: < 10ms
+- Command: `mcp_start`
+- Use case: HyperMesh GUI is open, real-time interaction needed
+
+**Mode 2: IPC File Queue (Fallback)**
+- Directory: `ipc/commands/`, `ipc/results/`
+- Latency: 100-500ms
+- Command: `mcp_loop`
+- Use case: Auto-switch when socket fails, or batch processing mode
+
 ### Method 3: Claude Code Integration
 
 Use MCP tools directly in Claude Code:
@@ -165,7 +193,7 @@ Claude: I'll use Hyper-Dyna-MCP tools to create the model for you...
 | `check_hypermesh_connection` | Check hmbatch.exe connection | Local check |
 | `parse_k_file` | Parse .k file | Local parsing |
 | `write_k_file` | Generate .k file | Local generation |
-| `generate_lsdyna_command` | Generate solver command | Local generation |
+| `generate_lsdyna_command` | Generate solver command (dry_run) | Local generation |
 | `parse_solver_log` | Parse solver log | Local parsing |
 | `execute_lsprepost` | Execute LS-PrePost cfile | Direct call |
 | `generate_cfile` | Generate cfile script | Local generation |
@@ -242,26 +270,6 @@ graph TB
     E --> L
     E --> M
 ```
-
-## 🔌 Connection Modes
-
-### Mode 1: Socket Direct Connection (Recommended)
-
-- **Port**: 47882
-- **Latency**: < 10ms
-- **Use case**: HyperMesh GUI is open
-
-### Mode 2: IPC File Queue (Fallback)
-
-- **Directory**: `ipc/commands/`, `ipc/results/`
-- **Latency**: 100-500ms
-- **Use case**: Auto-switch when socket connection fails
-
-### Mode 3: Batch Processing Mode
-
-- **Execution**: hmbatch.exe
-- **Latency**: 1-5s
-- **Use case**: No GUI environment
 
 ## 📈 Performance Metrics
 
