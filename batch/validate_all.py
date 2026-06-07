@@ -284,8 +284,8 @@ def main():
     else:
         print("\n✅ 所有配置验证通过！")
         print("\n下一步:")
-        print("1. 生成 Claude MCP 配置: python batch/generate_mcp_config.py")
-        print("2. 生成 CODEX MCP 配置: python batch/generate_codex_config.py")
+        print("1. 生成 Claude MCP 配置: python batch/generators/generate_mcp_config.py")
+        print("2. 生成 CODEX MCP 配置: python batch/generators/generate_codex_config.py")
         print("3. 启动 MCP 服务器: python -m program.server")
         return 0
 
