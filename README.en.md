@@ -7,20 +7,20 @@
   <a href="https://github.com/hyper-dyna-mcp/releases"><img alt="Release" src="https://img.shields.io/badge/Release-v0.1.0-orange"></a>
 </p>
 
-**Hyper-Dyna-MCP** is an **MCP (Model Context Protocol)** based CAE workflow automation server, bridging natural language planning with **HyperMesh** pre-processing, **LS-DYNA** keyword file handling, and **LS-PrePost** post-processing.
+**Hyper-Dyna-MCP** is an **MCP (Model Context Protocol)** workflow automation server designed specifically for **LS-DYNA**, enabling Agent to automatically generate LS-DYNA input files through **HyperMesh** pre-processing and **LS-DYNA** keyword templates.
 
-> 🎯 **Core Goal**: Enable engineers to automatically complete complex CAE pre-processing workflows through natural language descriptions.
+> 🎯 **Core Goal**: Enable engineers to describe requirements in natural language, and Agent automatically calls LS-DYNA keyword templates to generate standard .k input files.
 
 ![Hyper-Dyna-MCP Architecture](./docs/images/architecture.png)
 
 ## ✨ Features
 
-- 📚 **1935 LS-DYNA keyword templates** — MAT, SECTION, CONTACT, BOUNDARY, LOAD, CONTROL, DATABASE, SET, etc.
+- 📚 **1935 LS-DYNA keyword templates** — Complete LS-DYNA keyword library including MAT, SECTION, CONTACT, BOUNDARY, LOAD, CONTROL, DATABASE, SET, etc.
+- 📝 **K file generation** — Agent calls keyword templates to automatically generate standard LS-DYNA .k input files
 - 🔗 **HyperMesh GUI integration** — Socket communication (port 47882) + IPC file queue dual-channel
-- 📝 **K file export** — Export LS-DYNA .k keyword files from HyperMesh models
-- 🔧 **Model operations** — Read/write materials, properties, components, sections
+- 🔧 **Model operations** — Read/write LS-DYNA model data including materials, properties, components, sections
 - 🛡️ **Safety policies** — Tcl script policy enforcement, MCP_SCRIPT markers, command-by-command execution
-- 🔄 **Workflow orchestration** — LS-DYNA, HyperMesh, and mixed pipelines
+- 🔄 **Workflow orchestration** — LS-DYNA workflow automation, supporting natural language to K file conversion
 
 ## 🧩 Interface Types
 
@@ -32,14 +32,49 @@ This project implements the standard **MCP (Model Context Protocol)** protocol, 
 - **Prompts** — Workflow planning, execution, validation
 - **Resources** — Path configuration, environment information
 
+### Agent Calling LS-DYNA Modules
+
+Agent calls the following LS-DYNA related modules through MCP protocol:
+
+**Keyword Template Calling**
+```
+Agent: "Create a concrete material"
+→ hm_set_keyword(keyword="MAT_CONCRETE", params={MID: 1, RHO: 2.4e-9, E: 30000, PR: 0.2})
+→ Automatically generates MAT_CONCRETE keyword card
+```
+
+**K File Generation Flow**
+```
+Agent: "Generate LS-DYNA input file"
+→ hm_set_keyword() × N (set multiple keywords)
+→ hm_convert_model() (convert model format)
+→ write_k_file() (generate .k file)
+→ Output standard LS-DYNA input file
+```
+
+**Model Checking & Diagnosis**
+```
+Agent: "Check current model status"
+→ hm_check_model() (query components, materials, nodes, etc.)
+→ hm_read_materials() (read all materials)
+→ hm_read_components() (read all components)
+→ Return model status report
+```
+
 ### Communication Interfaces
 
 ```mermaid
 graph LR
-    A[Agent/Claude Code] -->|MCP Protocol| B[MCP Server]
-    B -->|Socket:47882| C[HyperMesh GUI]
-    B -->|IPC File Queue| D[HyperMesh Batch]
-    B -->|Direct API| E[LS-DYNA/LS-PrePost]
+    A["🤖 Agent/Claude Code"] -->|"MCP Protocol"| B["⚙️ MCP Server"]
+    B -->|"Socket:47882"| C["🖥️ HyperMesh GUI"]
+    B -->|"IPC File Queue"| D["⚙️ HyperMesh Batch"]
+    B -->|"Generate .k"| E["📄 LS-DYNA Input File"]
+    
+    style A fill:#bbdefb,stroke:#1565c0
+    style B fill:#e1bee7,stroke:#6a1b9a
+    style C fill:#c8e6c9,stroke:#2e7d32
+    style D fill:#c8e6c9,stroke:#2e7d32
+    style E fill:#ffe0b2,stroke:#ef6c00
 ```
 
 ## 📦 Installation

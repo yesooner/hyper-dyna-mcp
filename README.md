@@ -7,20 +7,20 @@
   <a href="https://github.com/hyper-dyna-mcp/releases"><img alt="Release" src="https://img.shields.io/badge/Release-v0.1.0-orange"></a>
 </p>
 
-**Hyper-Dyna-MCP** 是一个基于 **MCP (Model Context Protocol)** 的 CAE 工作流自动化服务器，连接自然语言规划与 **HyperMesh** 前处理、**LS-DYNA** 关键字文件处理、**LS-PrePost** 后处理。
+**Hyper-Dyna-MCP** 是一个专为 **LS-DYNA** 设计的 **MCP (Model Context Protocol)** 工作流自动化服务器，通过 **HyperMesh** 前处理和 **LS-DYNA** 关键字模板，让 Agent 能够自动生成 LS-DYNA 输入文件。
 
-> 🎯 **核心目标**：让工程师通过自然语言描述，自动完成复杂的 CAE 前处理工作流。
+> 🎯 **核心目标**：让工程师通过自然语言描述，Agent 自动调用 LS-DYNA 关键字模板，生成标准的 .k 输入文件。
 
 ![Hyper-Dyna-MCP 架构](./docs/images/architecture.png)
 
 ## ✨ 功能特点
 
-- 📚 **1935 个 LS-DYNA 关键字模板** — MAT、SECTION、CONTACT、BOUNDARY、LOAD、CONTROL、DATABASE、SET 等
+- 📚 **1935 个 LS-DYNA 关键字模板** — 完整的 LS-DYNA 关键字库，包括 MAT、SECTION、CONTACT、BOUNDARY、LOAD、CONTROL、DATABASE、SET 等
+- 📝 **K 文件生成** — Agent 调用关键字模板，自动生成标准 LS-DYNA .k 输入文件
 - 🔗 **HyperMesh GUI 集成** — Socket 通信（端口 47882）+ IPC 文件队列双通道
-- 📝 **K 文件导出** — 从 HyperMesh 模型导出 LS-DYNA .k 关键字文件
-- 🔧 **模型操作** — 读写材料、属性、组件、截面等
+- 🔧 **模型操作** — 读写材料、属性、组件、截面等 LS-DYNA 模型数据
 - 🛡️ **安全策略** — Tcl 脚本策略强制执行、MCP_SCRIPT 标记、逐命令执行
-- 🔄 **工作流编排** — LS-DYNA、HyperMesh 和混合流水线
+- 🔄 **工作流编排** — LS-DYNA 工作流自动化，支持自然语言到 K 文件的转换
 
 ## 🧩 接口类型
 
@@ -32,14 +32,49 @@
 - **提示词 (Prompts)** — 工作流规划、执行、验证
 - **资源 (Resources)** — 路径配置、环境信息
 
+### Agent 调用 LS-DYNA 模块
+
+Agent 通过 MCP 协议调用以下 LS-DYNA 相关模块：
+
+**关键字模板调用**
+```
+Agent: "创建一个混凝土材料"
+→ hm_set_keyword(keyword="MAT_CONCRETE", params={MID: 1, RHO: 2.4e-9, E: 30000, PR: 0.2})
+→ 自动生成 MAT_CONCRETE 关键字卡片
+```
+
+**K 文件生成流程**
+```
+Agent: "生成 LS-DYNA 输入文件"
+→ hm_set_keyword() × N（设置多个关键字）
+→ hm_convert_model()（转换模型格式）
+→ write_k_file()（生成 .k 文件）
+→ 输出标准 LS-DYNA 输入文件
+```
+
+**模型检查与诊断**
+```
+Agent: "检查当前模型状态"
+→ hm_check_model()（查询组件、材料、节点等）
+→ hm_read_materials()（读取所有材料）
+→ hm_read_components()（读取所有组件）
+→ 返回模型状态报告
+```
+
 ### 通信接口
 
 ```mermaid
 graph LR
-    A[Agent/Claude Code] -->|MCP Protocol| B[MCP Server]
-    B -->|Socket:47882| C[HyperMesh GUI]
-    B -->|IPC File Queue| D[HyperMesh Batch]
-    B -->|Direct API| E[LS-DYNA/LS-PrePost]
+    A["🤖 Agent/Claude Code"] -->|"MCP Protocol"| B["⚙️ MCP Server"]
+    B -->|"Socket:47882"| C["🖥️ HyperMesh GUI"]
+    B -->|"IPC File Queue"| D["⚙️ HyperMesh Batch"]
+    B -->|"生成 .k 文件"| E["📄 LS-DYNA 输入文件"]
+    
+    style A fill:#bbdefb,stroke:#1565c0
+    style B fill:#e1bee7,stroke:#6a1b9a
+    style C fill:#c8e6c9,stroke:#2e7d32
+    style D fill:#c8e6c9,stroke:#2e7d32
+    style E fill:#ffe0b2,stroke:#ef6c00
 ```
 
 ## 📦 安装方法

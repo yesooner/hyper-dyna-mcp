@@ -2,24 +2,24 @@
 
 ## 🎉 首次发布
 
-**Hyper-Dyna-MCP** 是一个基于 MCP (Model Context Protocol) 的 CAE 工作流自动化服务器，连接自然语言规划与 HyperMesh 前处理、LS-DYNA 关键字文件处理、LS-PrePost 后处理。
+**Hyper-Dyna-MCP** 是一个专为 **LS-DYNA** 设计的 MCP (Model Context Protocol) 工作流自动化服务器，通过 HyperMesh 前处理和 LS-DYNA 关键字模板，让 Agent 能够自动生成 LS-DYNA 输入文件。
 
 ## ✨ 主要功能
 
 ### 📚 1935 个 LS-DYNA 关键字模板
 - 完整的 LS-DYNA 关键字库
 - 支持 MAT、SECTION、CONTACT、BOUNDARY、LOAD、CONTROL、DATABASE、SET 等
-- 基于 Tcl 的模板引擎
+- Agent 可直接调用模板生成关键字卡片
+
+### 📝 K 文件生成
+- Agent 调用关键字模板，自动生成标准 LS-DYNA .k 输入文件
+- 支持 100MB+ 大文件
+- 符合 LS-DYNA R13 标准格式
 
 ### 🔗 HyperMesh GUI 集成
 - Socket 直连通信（端口 47882）
 - IPC 文件队列双通道
 - 自动故障转移和恢复
-
-### 📝 K 文件导出
-- 从 HyperMesh 模型导出 LS-DYNA .k 关键字文件
-- 解析和验证 K 文件
-- 支持 100MB+ 大文件
 
 ### 🔧 模型操作
 - 读写材料、属性、组件、截面
