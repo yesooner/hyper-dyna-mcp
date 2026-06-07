@@ -40,8 +40,8 @@ python batch/validators/check_paths.py
 python batch/validators/check_env.py
 
 # 生成 MCP 配置
-python batch/generate_mcp_config.py      # Claude Desktop/Code
-python batch/generate_codex_config.py    # CODEX (OpenAI Codex CLI)
+python batch/generators/generate_mcp_config.py      # Claude Desktop/Code
+python batch/generators/generate_codex_config.py    # CODEX (OpenAI Codex CLI)
 
 # 运行测试
 python -m pytest
@@ -55,7 +55,7 @@ python -m program.server
 ### Claude Desktop / Claude Code
 
 ```bash
-python batch/generate_mcp_config.py
+python batch/generators/generate_mcp_config.py
 ```
 
 配置文件自动保存到：
@@ -65,7 +65,7 @@ python batch/generate_mcp_config.py
 ### CODEX (OpenAI Codex CLI)
 
 ```bash
-python batch/generate_codex_config.py
+python batch/generators/generate_codex_config.py
 ```
 
 配置文件追加到：`~/.codex/config.toml`
@@ -95,18 +95,18 @@ codex mcp get hyper-dyna-mcp
 
 ### Q: 如何配置 Claude Desktop？
 
-1. 运行 `python batch/generate_mcp_config.py`
+1. 运行 `python batch/generators/generate_mcp_config.py`
 2. 配置文件会自动保存到正确位置
 3. 重启 Claude Desktop
 
 ### Q: 如何配置 Claude Code？
 
-1. 运行 `python batch/generate_mcp_config.py`
+1. 运行 `python batch/generators/generate_mcp_config.py`
 2. 将生成的 `claude_code_mcp.json` 内容添加到 `~/.claude/settings.json`
 
 ### Q: 如何配置 CODEX？
 
-1. 运行 `python batch/generate_codex_config.py`
+1. 运行 `python batch/generators/generate_codex_config.py`
 2. 配置会自动追加到 `~/.codex/config.toml`
 3. 重启 CODEX 或运行 `codex mcp list` 验证
 
