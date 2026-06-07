@@ -127,16 +127,48 @@ python -c "from program.server import main; print('✅ MCP Server ready')"
 python -m program.server
 ```
 
-### 方式二：通过 HyperMesh GUI
+### 方式二：通过 HyperMesh GUI（推荐）
 
-1. **双击启动** `start_mcp.bat`
-2. **打开 HyperMesh GUI**
-3. **在 HyperMesh Tcl 控制台中执行**：
-   ```tcl
-   source hmcustom.tcl
-   mcp_start
-   ```
-4. **或者**：HyperMesh → MCP 标签页 → 点击 "Start MCP" 按钮
+#### Step 1：打开 Tcl 控制台
+
+在 HyperMesh 中，通过菜单打开 Tcl 控制台：
+
+**View → Tcl Console**
+
+![Step 1: 打开 Tcl 控制台](./view/step1.png)
+
+#### Step 2：加载 MCP 脚本
+
+在 Tcl 控制台中输入以下命令加载 MCP 脚本：
+
+```tcl
+source hmcustom.tcl
+```
+
+![Step 2: 加载 MCP 脚本](./view/step2.png)
+
+#### Step 3：使用 MCP GUI 界面
+
+加载脚本后，会自动创建 MCP 标签页，包含以下功能按钮：
+
+- **Start MCP** - 启动 Socket 监听器
+- **Check Status** - 检查连接状态
+- **Start Loop** - 启动 IPC 文件循环
+- **Stop MCP** - 停止 MCP 服务
+
+![Step 3: MCP GUI 界面](./view/step3.png)
+
+#### Step 4：使用 Claude Code 进行模型检查
+
+启动 MCP 后，可以使用 Claude Code 进行模型检查和问题诊断：
+
+```bash
+# 在 Claude Code 中
+用户: 检查当前 HyperMesh 模型状态
+Claude: 我将使用 hm_check_model 工具检查模型...
+```
+
+![Step 4: Claude Code 模型检查](./view/step4.png)
 
 ### HyperMesh 命令说明
 
@@ -231,31 +263,34 @@ hyper-dyna-mcp/
 
 ```mermaid
 graph TB
-    subgraph "用户层"
-        A[Claude Code / Agent]
-        B[HyperMesh GUI]
+    subgraph User["👤 用户层"]
+        style User fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+        A["🤖 Claude Code / Agent"]
+        B["🖥️ HyperMesh GUI"]
     end
     
-    subgraph "MCP 服务器层"
-        C[Server Entry Point]
-        D[Transport Manager]
-        E[Tool Registry]
-        F[Template Engine]
+    subgraph MCP["⚙️ MCP 服务器层"]
+        style MCP fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+        C["📡 Server Entry Point"]
+        D["🔄 Transport Manager"]
+        E["🔧 Tool Registry"]
+        F["📝 Template Engine"]
     end
     
-    subgraph "通信层"
-        G[Socket:47882]
-        H[IPC File Queue]
+    subgraph Comm["🔌 通信层"]
+        style Comm fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+        G["🔌 Socket:47882"]
+        H["📁 IPC File Queue"]
     end
     
-    subgraph "执行层"
-        J[HyperMesh GUI]
-        K[HyperMesh Batch]
-        L[LS-DYNA Solver]
-        M[LS-PrePost]
+    subgraph Exec["⚡ 执行层"]
+        style Exec fill:#fff3e0,stroke:#e65100,stroke-width:2px
+        J["🖥️ HyperMesh GUI"]
+        K["⚙️ HyperMesh Batch"]
+        L["📄 K 文件导出"]
     end
     
-    A -->|MCP Protocol| C
+    A -->|"MCP Protocol"| C
     C --> D
     D --> G
     D --> H
@@ -263,10 +298,21 @@ graph TB
     E --> F
     F --> G
     F --> H
-    G --> J
-    H --> K
-    E --> L
-    E --> M
+    G -->|"实时通信"| J
+    H -->|"批处理"| K
+    E -->|"生成 .k 文件"| L
+    
+    style A fill:#bbdefb,stroke:#1565c0
+    style B fill:#bbdefb,stroke:#1565c0
+    style C fill:#e1bee7,stroke:#6a1b9a
+    style D fill:#e1bee7,stroke:#6a1b9a
+    style E fill:#e1bee7,stroke:#6a1b9a
+    style F fill:#e1bee7,stroke:#6a1b9a
+    style G fill:#c8e6c9,stroke:#2e7d32
+    style H fill:#c8e6c9,stroke:#2e7d32
+    style J fill:#ffe0b2,stroke:#ef6c00
+    style K fill:#ffe0b2,stroke:#ef6c00
+    style L fill:#ffe0b2,stroke:#ef6c00
 ```
 
 ## 📈 性能指标

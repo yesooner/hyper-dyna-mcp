@@ -127,16 +127,48 @@ python -c "from program.server import main; print('✅ MCP Server ready')"
 python -m program.server
 ```
 
-### Method 2: Via HyperMesh GUI
+### Method 2: Via HyperMesh GUI (Recommended)
 
-1. **Double-click** `start_mcp.bat`
-2. **Open HyperMesh GUI**
-3. **Execute in HyperMesh Tcl console**:
-   ```tcl
-   source hmcustom.tcl
-   mcp_start
-   ```
-4. **Or**: HyperMesh → MCP tab → Click "Start MCP" button
+#### Step 1: Open Tcl Console
+
+In HyperMesh, open the Tcl console through the menu:
+
+**View → Tcl Console**
+
+![Step 1: Open Tcl Console](./view/step1.png)
+
+#### Step 2: Load MCP Script
+
+Enter the following command in the Tcl console to load the MCP script:
+
+```tcl
+source hmcustom.tcl
+```
+
+![Step 2: Load MCP Script](./view/step2.png)
+
+#### Step 3: Use MCP GUI Interface
+
+After loading the script, an MCP tab will be automatically created with the following buttons:
+
+- **Start MCP** - Start socket listener
+- **Check Status** - Check connection status
+- **Start Loop** - Start IPC file loop
+- **Stop MCP** - Stop MCP service
+
+![Step 3: MCP GUI Interface](./view/step3.png)
+
+#### Step 4: Use Claude Code for Model Checking
+
+After starting MCP, you can use Claude Code for model checking and problem diagnosis:
+
+```bash
+# In Claude Code
+User: Check current HyperMesh model status
+Claude: I'll use hm_check_model tool to check the model...
+```
+
+![Step 4: Claude Code Model Checking](./view/step4.png)
 
 ### HyperMesh Commands
 
@@ -231,31 +263,34 @@ hyper-dyna-mcp/
 
 ```mermaid
 graph TB
-    subgraph "User Layer"
-        A[Claude Code / Agent]
-        B[HyperMesh GUI]
+    subgraph User["👤 User Layer"]
+        style User fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+        A["🤖 Claude Code / Agent"]
+        B["🖥️ HyperMesh GUI"]
     end
     
-    subgraph "MCP Server Layer"
-        C[Server Entry Point]
-        D[Transport Manager]
-        E[Tool Registry]
-        F[Template Engine]
+    subgraph MCP["⚙️ MCP Server Layer"]
+        style MCP fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+        C["📡 Server Entry Point"]
+        D["🔄 Transport Manager"]
+        E["🔧 Tool Registry"]
+        F["📝 Template Engine"]
     end
     
-    subgraph "Communication Layer"
-        G[Socket:47882]
-        H[IPC File Queue]
+    subgraph Comm["🔌 Communication Layer"]
+        style Comm fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+        G["🔌 Socket:47882"]
+        H["📁 IPC File Queue"]
     end
     
-    subgraph "Execution Layer"
-        J[HyperMesh GUI]
-        K[HyperMesh Batch]
-        L[LS-DYNA Solver]
-        M[LS-PrePost]
+    subgraph Exec["⚡ Execution Layer"]
+        style Exec fill:#fff3e0,stroke:#e65100,stroke-width:2px
+        J["🖥️ HyperMesh GUI"]
+        K["⚙️ HyperMesh Batch"]
+        L["📄 K File Export"]
     end
     
-    A -->|MCP Protocol| C
+    A -->|"MCP Protocol"| C
     C --> D
     D --> G
     D --> H
@@ -263,10 +298,21 @@ graph TB
     E --> F
     F --> G
     F --> H
-    G --> J
-    H --> K
-    E --> L
-    E --> M
+    G -->|"Real-time"| J
+    H -->|"Batch"| K
+    E -->|"Generate .k"| L
+    
+    style A fill:#bbdefb,stroke:#1565c0
+    style B fill:#bbdefb,stroke:#1565c0
+    style C fill:#e1bee7,stroke:#6a1b9a
+    style D fill:#e1bee7,stroke:#6a1b9a
+    style E fill:#e1bee7,stroke:#6a1b9a
+    style F fill:#e1bee7,stroke:#6a1b9a
+    style G fill:#c8e6c9,stroke:#2e7d32
+    style H fill:#c8e6c9,stroke:#2e7d32
+    style J fill:#ffe0b2,stroke:#ef6c00
+    style K fill:#ffe0b2,stroke:#ef6c00
+    style L fill:#ffe0b2,stroke:#ef6c00
 ```
 
 ## 📈 Performance Metrics

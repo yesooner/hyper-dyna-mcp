@@ -94,14 +94,27 @@ pytest
 python -m program.server
 ```
 
-### 方式二：HyperMesh GUI 集成
-1. 双击 `start_mcp.bat`
-2. 打开 HyperMesh GUI
-3. 在 Tcl 控制台执行：
-   ```tcl
-   source hmcustom.tcl
-   mcp_start
-   ```
+### 方式二：HyperMesh GUI 集成（推荐）
+
+#### Step 1：打开 Tcl 控制台
+在 HyperMesh 中，通过菜单打开 Tcl 控制台：
+**View → Tcl Console**
+
+#### Step 2：加载 MCP 脚本
+在 Tcl 控制台中输入：
+```tcl
+source hmcustom.tcl
+```
+
+#### Step 3：使用 MCP GUI 界面
+加载脚本后，会自动创建 MCP 标签页，包含：
+- **Start MCP** - 启动 Socket 监听器
+- **Check Status** - 检查连接状态
+- **Start Loop** - 启动 IPC 文件循环
+- **Stop MCP** - 停止 MCP 服务
+
+#### Step 4：使用 Claude Code 进行模型检查
+启动 MCP 后，可以使用 Claude Code 进行模型检查和问题诊断。
 
 ### HyperMesh 命令说明
 
