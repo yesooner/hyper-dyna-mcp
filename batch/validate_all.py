@@ -183,9 +183,11 @@ def check_batch_files() -> List[Tuple[bool, str]]:
     batch_files = [
         ("batch/setup_wizard.py", "配置向导"),
         ("batch/generate_mcp_config.py", "MCP 配置生成器"),
+        ("batch/generate_codex_config.py", "CODEX 配置生成器"),
         ("batch/sync_config.py", "配置同步工具"),
         ("batch/validators/check_paths.py", "路径验证工具"),
         ("batch/validators/check_env.py", "环境验证工具"),
+        ("batch/validators/check_codex.py", "CODEX 验证工具"),
     ]
 
     for filepath, name in batch_files:
@@ -281,8 +283,9 @@ def main():
     else:
         print("\n✅ 所有配置验证通过！")
         print("\n下一步:")
-        print("1. 生成 MCP 配置: python batch/generate_mcp_config.py")
-        print("2. 启动 MCP 服务器: python -m program.server")
+        print("1. 生成 Claude MCP 配置: python batch/generate_mcp_config.py")
+        print("2. 生成 CODEX MCP 配置: python batch/generate_codex_config.py")
+        print("3. 启动 MCP 服务器: python -m program.server")
         return 0
 
 
