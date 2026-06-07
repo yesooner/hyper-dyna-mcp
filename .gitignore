@@ -191,6 +191,11 @@ lcov.info
 claude_code_mcp.json
 *.backup
 
+# Batch templates (LS-DYNA and Obsidian related, optional)
+batch/templates/lsdyna_paths.yaml
+batch/templates/lsprepost_paths.yaml
+batch/templates/obsidian_paths.yaml
+
 # ==================== Misc ====================
 *.bak
 *.backup
