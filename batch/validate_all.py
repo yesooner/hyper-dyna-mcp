@@ -181,10 +181,11 @@ def check_batch_files() -> List[Tuple[bool, str]]:
     """检查 batch 文件"""
     results = []
     batch_files = [
-        ("batch/setup_wizard.py", "配置向导"),
-        ("batch/generate_mcp_config.py", "MCP 配置生成器"),
-        ("batch/generate_codex_config.py", "CODEX 配置生成器"),
-        ("batch/sync_config.py", "配置同步工具"),
+        ("batch/core/auto_detect.py", "自动环境检测"),
+        ("batch/core/setup_wizard.py", "配置向导"),
+        ("batch/core/sync_config.py", "配置同步工具"),
+        ("batch/generators/generate_mcp_config.py", "MCP 配置生成器"),
+        ("batch/generators/generate_codex_config.py", "CODEX 配置生成器"),
         ("batch/validators/check_paths.py", "路径验证工具"),
         ("batch/validators/check_env.py", "环境验证工具"),
         ("batch/validators/check_codex.py", "CODEX 验证工具"),

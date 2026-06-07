@@ -27,7 +27,7 @@ if errorlevel 1 (
 REM 运行自动环境检测
 echo 运行自动环境检测...
 echo.
-python batch/auto_detect.py
+python batch/core/auto_detect.py
 
 REM 询问是否运行配置向导
 echo.
@@ -35,7 +35,7 @@ set /p run_wizard="是否运行完整配置向导？(y/n) [n]: "
 if /i "%run_wizard%"=="y" (
     echo.
     echo 启动配置向导...
-    python batch/setup_wizard.py
+    python batch/core/setup_wizard.py
 )
 
 REM 运行验证

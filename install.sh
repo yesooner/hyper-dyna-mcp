@@ -24,7 +24,7 @@ fi
 # 运行自动环境检测
 echo "运行自动环境检测..."
 echo ""
-python3 batch/auto_detect.py
+python3 batch/core/auto_detect.py
 
 # 询问是否运行配置向导
 echo ""
@@ -32,7 +32,7 @@ read -p "是否运行完整配置向导？(y/n) [n]: " run_wizard
 if [ "$run_wizard" = "y" ] || [ "$run_wizard" = "Y" ]; then
     echo ""
     echo "启动配置向导..."
-    python3 batch/setup_wizard.py
+    python3 batch/core/setup_wizard.py
 fi
 
 # 运行验证
