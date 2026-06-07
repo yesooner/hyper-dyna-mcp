@@ -2,7 +2,7 @@
 
 ## 🎉 首次发布
 
-**Hyper-Dyna-MCP** 是一个基于 MCP (Model Context Protocol) 的 CAE 工作流自动化服务器，连接自然语言规划与 HyperMesh 前处理、LS-DYNA 关键字文件处理、LS-PrePost 后处理以及 Obsidian 日志记录。
+**Hyper-Dyna-MCP** 是一个基于 MCP (Model Context Protocol) 的 CAE 工作流自动化服务器，连接自然语言规划与 HyperMesh 前处理、LS-DYNA 关键字文件处理、LS-PrePost 后处理。
 
 ## ✨ 主要功能
 
@@ -36,12 +36,7 @@
 - 自然语言到工作流转换
 - 执行状态跟踪
 
-### 📊 Obsidian 日志集成
-- 自动执行日志记录
-- 结构化日志格式
-- 知识库集成
-
-## 🔧 MCP 工具 (19 个)
+## 🔧 MCP 工具 (18 个)
 
 | 工具 | 描述 |
 |------|------|
@@ -65,7 +60,6 @@
 | `check_environment` | 检查 Python/conda/包 |
 | `load_path_config` | 加载 YAML 配置 |
 | `validate_path` | 检查路径是否存在 |
-| `write_obsidian_log` | 写入 Obsidian 日志 |
 
 ## 📦 安装方法
 
@@ -105,7 +99,7 @@ python -m program.server
 2. 打开 HyperMesh GUI
 3. 在 Tcl 控制台执行：
    ```tcl
-   source F:/hyper-dyna-mcp/hmcustom.tcl
+   source hmcustom.tcl
    mcp_start
    ```
 
@@ -115,7 +109,7 @@ python -m program.server
 ## 📊 性能指标
 
 - **关键字模板**: 1935 个
-- **工具数量**: 19 个
+- **工具数量**: 18 个
 - **测试覆盖**: 132 个测试用例
 - **连接延迟**: Socket < 10ms, IPC < 500ms
 - **模型处理**: 支持 100MB+ .k 文件
@@ -145,7 +139,6 @@ python -m program.server
 - LS-DYNA — 有限元求解器
 - HyperMesh — 前处理软件
 - MCP Protocol — 模型上下文协议
-- Obsidian — 知识管理工具
 
 ---
 

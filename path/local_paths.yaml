@@ -1,11 +1,11 @@
 # Local project paths
 project:
-  root: "F:/hyper-dyna-mcp"
+  root: "."
   conda_env: "hyper-dyna"
   python_exe: "E:/anaconda3/anzhuang/envs/hyper-dyna/python.exe"
   python_version: "3.13"
 
 run:
   default_dry_run: true
-  runs_dir: "F:/hyper-dyna-mcp/runs"
-  reports_dir: "F:/hyper-dyna-mcp/reports"
+  runs_dir: "./runs"
+  reports_dir: "./reports"

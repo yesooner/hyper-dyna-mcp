@@ -7,7 +7,7 @@
   <a href="https://github.com/hyper-dyna-mcp/releases"><img alt="Release" src="https://img.shields.io/badge/Release-v0.1.0-orange"></a>
 </p>
 
-**Hyper-Dyna-MCP** is an **MCP (Model Context Protocol)** based CAE workflow automation server, bridging natural language planning with **HyperMesh** pre-processing, **LS-DYNA** keyword file handling, **LS-PrePost** post-processing, and **Obsidian** logging.
+**Hyper-Dyna-MCP** is an **MCP (Model Context Protocol)** based CAE workflow automation server, bridging natural language planning with **HyperMesh** pre-processing, **LS-DYNA** keyword file handling, and **LS-PrePost** post-processing.
 
 > 🎯 **Core Goal**: Enable engineers to automatically complete complex CAE pre-processing workflows through natural language descriptions.
 
@@ -21,7 +21,6 @@
 - 🔧 **Model operations** — Read/write materials, properties, components, sections
 - 🛡️ **Safety policies** — Tcl script policy enforcement, MCP_SCRIPT markers, command-by-command execution
 - 🔄 **Workflow orchestration** — LS-DYNA, HyperMesh, and mixed pipelines
-- 📊 **Obsidian logging** — Automatic execution logging to Obsidian vault
 
 ## 🧩 Interface Types
 
@@ -29,7 +28,7 @@
 
 This project implements the standard **MCP (Model Context Protocol)** protocol, supporting:
 
-- **Tools** — 19 professional CAE tools
+- **Tools** — 18 professional CAE tools
 - **Prompts** — Workflow planning, execution, validation
 - **Resources** — Path configuration, environment information
 
@@ -41,7 +40,6 @@ graph LR
     B -->|Socket:47882| C[HyperMesh GUI]
     B -->|IPC File Queue| D[HyperMesh Batch]
     B -->|Direct API| E[LS-DYNA/LS-PrePost]
-    B -->|REST API| F[Obsidian Vault]
 ```
 
 ## 📦 Installation
@@ -54,7 +52,26 @@ graph LR
 - **LS-PrePost**: 4.8+
 - **Conda**: For environment management
 
-### Installation Steps
+### Quick Installation (Recommended)
+
+Use the batch installation script to automatically configure all paths:
+
+```bash
+# Windows
+install.bat
+
+# Linux/macOS
+chmod +x install.sh
+./install.sh
+```
+
+Or use the interactive configuration wizard:
+
+```bash
+python batch/setup_wizard.py
+```
+
+### Manual Installation
 
 #### 1️⃣ Clone Repository
 
@@ -86,7 +103,7 @@ Edit `path/local_paths.yaml`:
 
 ```yaml
 project:
-  root: "F:/hyper-dyna-mcp"
+  root: "."
   conda_env: "hyper-dyna"
   python_exe: "E:/anaconda3/anzhuang/envs/hyper-dyna/python.exe"
 ```
@@ -116,7 +133,7 @@ python -m program.server
 2. **Open HyperMesh GUI**
 3. **Execute in HyperMesh Tcl console**:
    ```tcl
-   source F:/hyper-dyna-mcp/hmcustom.tcl
+   source hmcustom.tcl
    mcp_start
    ```
 4. **Or**: HyperMesh → MCP tab → Click "Start MCP" button
@@ -132,7 +149,7 @@ Claude: I'll use Hyper-Dyna-MCP tools to create the model for you...
 
 ## 🔧 MCP Tools List
 
-### Core Tools (19)
+### Core Tools (18)
 
 | Tool Name | Description | Interface Type |
 |-----------|-------------|----------------|
@@ -156,14 +173,13 @@ Claude: I'll use Hyper-Dyna-MCP tools to create the model for you...
 | `check_environment` | Check Python/conda/packages | Local check |
 | `load_path_config` | Load YAML config | Local loading |
 | `validate_path` | Check path exists | Local check |
-| `write_obsidian_log` | Write to Obsidian vault | REST API |
 
 ## 🏗️ Project Structure
 
 ```
 hyper-dyna-mcp/
 ├── 📁 program/                    # MCP server core
-│   ├── 🐍 server.py              # MCP entry point (19 tools)
+│   ├── 🐍 server.py              # MCP entry point (18 tools)
 │   ├── 🔄 transport_manager.py   # Socket/IPC dual-channel management
 │   ├── 📨 plugin_loop.py         # IPC command dispatcher
 │   └── 🛠️ tools/                 # 24 tool modules
@@ -204,7 +220,6 @@ graph TB
     subgraph "Communication Layer"
         G[Socket:47882]
         H[IPC File Queue]
-        I[REST API]
     end
     
     subgraph "Execution Layer"
@@ -226,8 +241,6 @@ graph TB
     H --> K
     E --> L
     E --> M
-    C --> I
-    I --> N[Obsidian Vault]
 ```
 
 ## 🔌 Connection Modes
@@ -253,7 +266,7 @@ graph TB
 ## 📈 Performance Metrics
 
 - **Keyword templates**: 1935
-- **Tool count**: 19
+- **Tool count**: 18
 - **Test coverage**: 132 test cases
 - **Connection latency**: Socket < 10ms, IPC < 500ms
 - **Model processing**: Supports 100MB+ .k files
@@ -293,13 +306,13 @@ Contributions are welcome! Please follow these steps:
 ### v0.1.0 (Current Version)
 
 - ✅ MCP server core architecture
-- ✅ 19 CAE tool implementations
+- ✅ 18 CAE tool implementations
 - ✅ 1935 LS-DYNA keyword templates
 - ✅ HyperMesh GUI integration
 - ✅ Socket/IPC dual-channel communication
 - ✅ K file parsing/generation
-- ✅ Obsidian logging integration
 - ✅ 132 test cases
+- ✅ Batch configuration system (supporting personal to public versions)
 
 ## 📄 License
 
@@ -310,7 +323,6 @@ This project is licensed under the [MIT License](./LICENSE).
 - [LS-DYNA](https://www.lstc.com/) — Finite element solver
 - [HyperMesh](https://www.altair.com/hypermesh/) — Pre-processing software
 - [MCP Protocol](https://modelcontextprotocol.io/) — Model Context Protocol
-- [Obsidian](https://obsidian.md/) — Knowledge management tool
 
 ## 📞 Contact
 

@@ -10,7 +10,6 @@ from program.tools.env_check import check_environment
 from program.tools.k_parser import parse_k_file
 from program.tools.k_writer import KModel, Material, Part, Section, write_k_file, generate_k_content
 from program.tools.lsdyna_runner import generate_solver_command, run_lsdyna
-from program.tools.obsidian_logger import write_execution_log
 from program.tools.path_tools import load_yaml, validate_path
 
 # Phase 2 modules — import guarded for missing dependencies
@@ -181,22 +180,6 @@ async def list_tools() -> list[Tool]:
                     "dry_run": {"type": "boolean", "default": True, "description": "If true, only generate command"},
                 },
                 "required": ["input_file"],
-            },
-        ),
-        Tool(
-            name="write_obsidian_log",
-            description="Write execution log entry to Obsidian vault",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "task": {"type": "string", "description": "Task description"},
-                    "modified_files": {"type": "array", "items": {"type": "string"}},
-                    "commands": {"type": "array", "items": {"type": "string"}},
-                    "test_results": {"type": "string"},
-                    "next_steps": {"type": "string"},
-                    "log_type": {"type": "string", "enum": ["execution", "workflow", "validation"], "default": "execution"},
-                },
-                "required": ["task"],
             },
         ),
         Tool(
@@ -442,17 +425,6 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         )
         import json
         return [TextContent(type="text", text=json.dumps(result, indent=2))]
-
-    elif name == "write_obsidian_log":
-        entry = write_execution_log(
-            task=arguments["task"],
-            modified_files=arguments.get("modified_files"),
-            commands=arguments.get("commands"),
-            test_results=arguments.get("test_results"),
-            next_steps=arguments.get("next_steps"),
-            log_type=arguments.get("log_type", "execution"),
-        )
-        return [TextContent(type="text", text=f"Log written.\n{entry[:200]}...")]
 
     elif name == "generate_solver_command":
         result = generate_solver_command(
