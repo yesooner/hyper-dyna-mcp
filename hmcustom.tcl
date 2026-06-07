@@ -10,10 +10,19 @@ if {![info exists ::mcp_hm_port]} {
 # === Socket mode ===
 
 proc mcp_start {} {
+    # Close existing listener if any
     if {[info exists ::mcp_hm_server]} {
         catch {close $::mcp_hm_server}
         unset -nocomplain ::mcp_hm_server
         after 200
+    }
+    # Check if port is occupied by stale process
+    set port $::mcp_hm_port
+    if {![catch {set sock [socket 127.0.0.1 $port]; close $sock} err]} {
+        puts "Port $port occupied, attempting cleanup..."
+        catch {close $::mcp_hm_server}
+        unset -nocomplain ::mcp_hm_server
+        after 300
     }
     source "$::HDM_ROOT/runs/mcp.tcl"
 }
