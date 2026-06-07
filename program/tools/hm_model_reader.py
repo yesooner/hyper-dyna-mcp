@@ -22,23 +22,30 @@ def read_material(mid: int, timeout: int = 10) -> dict[str, Any]:
     Uses HyperMesh internal datanames:
     - density (not RHO)
     - cardimage (MATL1, MATL96, etc.)
+    - E, Nu (standard)
+    - SIGY, ETAN (plasticity materials)
+
+    For MATL96 (MAT_024), some fields may return 0 because
+    HyperMesh uses different internal names. raw_fields contains
+    all queried values for debugging.
     """
-    # Query each field individually to avoid Tcl dict parsing issues
-    fields = ["cardimage", "density", "Rho", "E", "Nu"]
+    fields = ["cardimage", "density", "Rho", "E", "Nu", "SIGY", "ETAN"]
     info: dict[str, Any] = {"success": True, "mid": mid}
+    raw_fields: dict[str, str] = {}
 
     for fname in fields:
         script = f'puts [hm_getvalue mats id={mid} dataname={fname}]'
         result = execute_tcl_gui(script, timeout=timeout)
         if result.get("success"):
-            # Extract value from response (OK\nvalue\n\nvalue\n\n)
             resp = result.get("response", "")
             for line in resp.split("\n"):
                 line = line.strip()
                 if line and line != "OK" and line != "ERROR":
                     info[fname] = line
+                    raw_fields[fname] = line
                     break
 
+    info["raw_fields"] = raw_fields
     return info
 
 
@@ -93,7 +100,7 @@ def read_component(cid: int, timeout: int = 10) -> dict[str, Any]:
 def read_all_materials(timeout: int = 30) -> list[dict[str, Any]]:
     """Read all materials from HyperMesh.
 
-    Uses HyperMesh internal datanames: density, Rho, E, Nu, cardimage.
+    Uses HyperMesh internal datanames: density, Rho, E, Nu, SIGY, ETAN, cardimage.
     """
     script = '''
     *createmark mats 1 "all"
@@ -105,6 +112,8 @@ def read_all_materials(timeout: int = 30) -> list[dict[str, Any]]:
         catch {lappend info Rho [hm_getvalue mats id=$mid dataname=Rho]}
         catch {lappend info E [hm_getvalue mats id=$mid dataname=E]}
         catch {lappend info Nu [hm_getvalue mats id=$mid dataname=Nu]}
+        catch {lappend info SIGY [hm_getvalue mats id=$mid dataname=SIGY]}
+        catch {lappend info ETAN [hm_getvalue mats id=$mid dataname=ETAN]}
         puts "MAT_$mid=$info"
     }
     '''
