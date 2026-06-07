@@ -24,6 +24,7 @@ proc mcp_start {} {
         unset -nocomplain ::mcp_hm_server
         after 300
     }
+    puts "HDM source: $::HDM_ROOT/runs/mcp.tcl"
     source "$::HDM_ROOT/runs/mcp.tcl"
 }
 
@@ -117,12 +118,36 @@ proc mcp_create_tab {} {
     puts "MCP tab created in HyperMesh menu"
 }
 
+# === Auto-refresh on new model ===
+# HyperMesh calls *userprofile callback when a new file is opened
+if {[info commands *userprofile] eq ""} {
+    # No existing userprofile — install directly
+    catch {rename ::*userprofile ::_orig_userprofile}
+    proc *userprofile {args} {
+        # Re-detect project root in case the file was moved
+        set ::HDM_ROOT [file dirname [info script]]
+        puts "HDM_ROOT refreshed: $::HDM_ROOT"
+        if {[catch {_orig_userprofile {*}$args} err]} {
+            # no original to call, ignore
+        }
+    }
+} else {
+    # Wrap existing userprofile
+    catch {rename ::*userprofile ::_orig_userprofile}
+    proc *userprofile {args} {
+        set ::HDM_ROOT [file dirname [info script]]
+        puts "HDM_ROOT refreshed: $::HDM_ROOT"
+        catch {_orig_userprofile {*}$args}
+    }
+}
+
 # Auto-create tab
 catch {mcp_create_tab}
 
-puts "Hyper-Dyna-MCP loaded. Commands:"
+puts "Hyper-Dyna-MCP loaded from: $::HDM_ROOT"
+puts "Commands:"
 puts "  mcp_start    - Start socket listener"
 puts "  mcp_loop     - Start file IPC loop (blocking)"
 puts "  mcp_status   - Check status"
-puts "  mcp_stop     - Stop IPC loop"
+puts "  mcp_stop     - Stop MCP"
 puts "  mcp_create_tab - Create MCP GUI tab"
