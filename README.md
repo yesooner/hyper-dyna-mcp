@@ -7,20 +7,20 @@
   <a href="https://github.com/hyper-dyna-mcp/releases"><img alt="Release" src="https://img.shields.io/badge/Release-v0.1.0-orange"></a>
 </p>
 
-**Hyper-Dyna-MCP** 是一个专为 **LS-DYNA** 设计的 **MCP (Model Context Protocol)** 工作流自动化服务器，通过 **HyperMesh** 前处理和 **LS-DYNA** 关键字模板，让 Agent 能够自动生成 LS-DYNA 输入文件。
+**Hyper-Dyna-MCP** 是一个专为 **LS-DYNA** 设计的 **MCP (Model Context Protocol)** 工作流自动化服务器，通过 **HyperMesh** 前处理和 **LS-DYNA** 关键字模板，让 Agent 能够解析和操作 LS-DYNA 输入文件。
 
-> 🎯 **核心目标**：让工程师通过自然语言描述，Agent 自动调用 LS-DYNA 关键字模板，生成标准的 .k 输入文件。
+> 🎯 **核心目标**：让工程师通过自然语言描述，Agent 自动解析 LS-DYNA .k 文件，查询和修改模型数据。
 
 ![Hyper-Dyna-MCP 架构](./docs/images/architecture.png)
 
 ## ✨ 功能特点
 
 - 📚 **1935 个 LS-DYNA 关键字模板** — 完整的 LS-DYNA 关键字库，包括 MAT、SECTION、CONTACT、BOUNDARY、LOAD、CONTROL、DATABASE、SET 等
-- 📝 **K 文件生成** — Agent 调用关键字模板，自动生成标准 LS-DYNA .k 输入文件
+- 📝 **K 文件解析** — 解析 LS-DYNA .k 文件，提取模型数据（材料、组件、截面等）
 - 🔗 **HyperMesh GUI 集成** — Socket 通信（端口 47882）+ IPC 文件队列双通道
 - 🔧 **模型操作** — 读写材料、属性、组件、截面等 LS-DYNA 模型数据
 - 🛡️ **安全策略** — Tcl 脚本策略强制执行、MCP_SCRIPT 标记、逐命令执行
-- 🔄 **工作流编排** — LS-DYNA 工作流自动化，支持自然语言到 K 文件的转换
+- 🔄 **工作流编排** — LS-DYNA 工作流自动化，支持自然语言查询和修改模型
 
 ## 🧩 接口类型
 
@@ -36,20 +36,20 @@
 
 Agent 通过 MCP 协议调用以下 LS-DYNA 相关模块：
 
-**关键字模板调用**
+**K 文件解析**
 ```
-Agent: "创建一个混凝土材料"
-→ hm_set_keyword(keyword="MAT_CONCRETE", params={MID: 1, RHO: 2.4e-9, E: 30000, PR: 0.2})
-→ 自动生成 MAT_CONCRETE 关键字卡片
+Agent: "解析这个 LS-DYNA .k 文件"
+→ parse_k_file(filepath="model.k")
+→ 提取材料、组件、截面等数据
+→ 返回结构化的模型信息
 ```
 
-**K 文件生成流程**
+**模型查询**
 ```
-Agent: "生成 LS-DYNA 输入文件"
-→ hm_set_keyword() × N（设置多个关键字）
-→ hm_convert_model()（转换模型格式）
-→ write_k_file()（生成 .k 文件）
-→ 输出标准 LS-DYNA 输入文件
+Agent: "查询当前模型的材料信息"
+→ hm_read_materials()
+→ 读取所有材料属性（MID、RHO、E、PR）
+→ 返回材料列表
 ```
 
 **模型检查与诊断**
@@ -247,7 +247,7 @@ Claude: 我将使用 Hyper-Dyna-MCP 工具为您创建模型...
 
 ## 🔧 MCP 工具列表
 
-### 核心工具 (18 个)
+### 核心工具 (17 个)
 
 | 工具名称 | 功能描述 | 接口类型 |
 |----------|----------|----------|
@@ -262,7 +262,6 @@ Claude: 我将使用 Hyper-Dyna-MCP 工具为您创建模型...
 | `generate_tcl_script` | 生成 Tcl 脚本 | 本地生成 |
 | `check_hypermesh_connection` | 检查 hmbatch.exe 连接 | 本地检查 |
 | `parse_k_file` | 解析 .k 文件 | 本地解析 |
-| `write_k_file` | 生成 .k 文件 | 本地生成 |
 | `generate_lsdyna_command` | 生成求解器命令（dry_run） | 本地生成 |
 | `parse_solver_log` | 解析求解器日志 | 本地解析 |
 | `execute_lsprepost` | 执行 LS-PrePost cfile | 直接调用 |
@@ -277,7 +276,7 @@ Claude: 我将使用 Hyper-Dyna-MCP 工具为您创建模型...
 ```
 hyper-dyna-mcp/
 ├── 📁 program/                    # MCP 服务器核心
-│   ├── 🐍 server.py              # MCP 入口点（18 个工具）
+│   ├── 🐍 server.py              # MCP 入口点（17 个工具）
 │   ├── 🔄 transport_manager.py   # Socket/IPC 双通道管理
 │   ├── 📨 plugin_loop.py         # IPC 命令分发器
 │   └── 🛠️ tools/                 # 24 个工具模块

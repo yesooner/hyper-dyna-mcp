@@ -2,17 +2,17 @@
 
 ## 🎉 首次发布
 
-**Hyper-Dyna-MCP** 是一个专为 **LS-DYNA** 设计的 MCP (Model Context Protocol) 工作流自动化服务器，通过 HyperMesh 前处理和 LS-DYNA 关键字模板，让 Agent 能够自动生成 LS-DYNA 输入文件。
+**Hyper-Dyna-MCP** 是一个专为 **LS-DYNA** 设计的 MCP (Model Context Protocol) 工作流自动化服务器，通过 HyperMesh 前处理和 LS-DYNA 关键字模板，让 Agent 能够解析和操作 LS-DYNA 输入文件。
 
 ## ✨ 主要功能
 
 ### 📚 1935 个 LS-DYNA 关键字模板
 - 完整的 LS-DYNA 关键字库
 - 支持 MAT、SECTION、CONTACT、BOUNDARY、LOAD、CONTROL、DATABASE、SET 等
-- Agent 可直接调用模板生成关键字卡片
+- Agent 可直接调用模板查询关键字信息
 
-### 📝 K 文件生成
-- Agent 调用关键字模板，自动生成标准 LS-DYNA .k 输入文件
+### 📝 K 文件解析
+- 解析 LS-DYNA .k 文件，提取模型数据（材料、组件、截面等）
 - 支持 100MB+ 大文件
 - 符合 LS-DYNA R13 标准格式
 
@@ -36,7 +36,7 @@
 - 自然语言到工作流转换
 - 执行状态跟踪
 
-## 🔧 MCP 工具 (18 个)
+## 🔧 MCP 工具 (17 个)
 
 | 工具 | 描述 |
 |------|------|
@@ -51,7 +51,6 @@
 | `generate_tcl_script` | 生成 Tcl 脚本 |
 | `check_hypermesh_connection` | 检查 hmbatch.exe 连接 |
 | `parse_k_file` | 解析 .k 文件 |
-| `write_k_file` | 生成 .k 文件 |
 | `generate_lsdyna_command` | 生成求解器命令（dry_run） |
 | `parse_solver_log` | 解析求解器日志 |
 | `execute_lsprepost` | 执行 LS-PrePost cfile |

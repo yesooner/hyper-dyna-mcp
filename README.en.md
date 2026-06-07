@@ -7,20 +7,20 @@
   <a href="https://github.com/hyper-dyna-mcp/releases"><img alt="Release" src="https://img.shields.io/badge/Release-v0.1.0-orange"></a>
 </p>
 
-**Hyper-Dyna-MCP** is an **MCP (Model Context Protocol)** workflow automation server designed specifically for **LS-DYNA**, enabling Agent to automatically generate LS-DYNA input files through **HyperMesh** pre-processing and **LS-DYNA** keyword templates.
+**Hyper-Dyna-MCP** is an **MCP (Model Context Protocol)** workflow automation server designed specifically for **LS-DYNA**, enabling Agent to parse and operate LS-DYNA input files through **HyperMesh** pre-processing and **LS-DYNA** keyword templates.
 
-> 🎯 **Core Goal**: Enable engineers to describe requirements in natural language, and Agent automatically calls LS-DYNA keyword templates to generate standard .k input files.
+> 🎯 **Core Goal**: Enable engineers to describe requirements in natural language, and Agent automatically parses LS-DYNA .k files to query and modify model data.
 
 ![Hyper-Dyna-MCP Architecture](./docs/images/architecture.png)
 
 ## ✨ Features
 
 - 📚 **1935 LS-DYNA keyword templates** — Complete LS-DYNA keyword library including MAT, SECTION, CONTACT, BOUNDARY, LOAD, CONTROL, DATABASE, SET, etc.
-- 📝 **K file generation** — Agent calls keyword templates to automatically generate standard LS-DYNA .k input files
+- 📝 **K file parsing** — Parse LS-DYNA .k files to extract model data (materials, components, sections, etc.)
 - 🔗 **HyperMesh GUI integration** — Socket communication (port 47882) + IPC file queue dual-channel
 - 🔧 **Model operations** — Read/write LS-DYNA model data including materials, properties, components, sections
 - 🛡️ **Safety policies** — Tcl script policy enforcement, MCP_SCRIPT markers, command-by-command execution
-- 🔄 **Workflow orchestration** — LS-DYNA workflow automation, supporting natural language to K file conversion
+- 🔄 **Workflow orchestration** — LS-DYNA workflow automation, supporting natural language queries and modifications
 
 ## 🧩 Interface Types
 
@@ -28,7 +28,7 @@
 
 This project implements the standard **MCP (Model Context Protocol)** protocol, supporting:
 
-- **Tools** — 18 professional CAE tools
+- **Tools** — 17 professional CAE tools
 - **Prompts** — Workflow planning, execution, validation
 - **Resources** — Path configuration, environment information
 
@@ -36,20 +36,20 @@ This project implements the standard **MCP (Model Context Protocol)** protocol, 
 
 Agent calls the following LS-DYNA related modules through MCP protocol:
 
-**Keyword Template Calling**
+**K File Parsing**
 ```
-Agent: "Create a concrete material"
-→ hm_set_keyword(keyword="MAT_CONCRETE", params={MID: 1, RHO: 2.4e-9, E: 30000, PR: 0.2})
-→ Automatically generates MAT_CONCRETE keyword card
+Agent: "Parse this LS-DYNA .k file"
+→ parse_k_file(filepath="model.k")
+→ Extract materials, components, sections, etc.
+→ Return structured model information
 ```
 
-**K File Generation Flow**
+**Model Query**
 ```
-Agent: "Generate LS-DYNA input file"
-→ hm_set_keyword() × N (set multiple keywords)
-→ hm_convert_model() (convert model format)
-→ write_k_file() (generate .k file)
-→ Output standard LS-DYNA input file
+Agent: "Query current model materials"
+→ hm_read_materials()
+→ Read all material properties (MID, RHO, E, PR)
+→ Return material list
 ```
 
 **Model Checking & Diagnosis**
@@ -242,7 +242,7 @@ Claude: I'll use Hyper-Dyna-MCP tools to create the model for you...
 
 ## 🔧 MCP Tools List
 
-### Core Tools (18)
+### Core Tools (17)
 
 | Tool Name | Description | Interface Type |
 |-----------|-------------|----------------|
@@ -257,7 +257,6 @@ Claude: I'll use Hyper-Dyna-MCP tools to create the model for you...
 | `generate_tcl_script` | Generate Tcl script | Local generation |
 | `check_hypermesh_connection` | Check hmbatch.exe connection | Local check |
 | `parse_k_file` | Parse .k file | Local parsing |
-| `write_k_file` | Generate .k file | Local generation |
 | `generate_lsdyna_command` | Generate solver command (dry_run) | Local generation |
 | `parse_solver_log` | Parse solver log | Local parsing |
 | `execute_lsprepost` | Execute LS-PrePost cfile | Direct call |
@@ -272,7 +271,7 @@ Claude: I'll use Hyper-Dyna-MCP tools to create the model for you...
 ```
 hyper-dyna-mcp/
 ├── 📁 program/                    # MCP server core
-│   ├── 🐍 server.py              # MCP entry point (18 tools)
+│   ├── 🐍 server.py              # MCP entry point (17 tools)
 │   ├── 🔄 transport_manager.py   # Socket/IPC dual-channel management
 │   ├── 📨 plugin_loop.py         # IPC command dispatcher
 │   └── 🛠️ tools/                 # 24 tool modules
