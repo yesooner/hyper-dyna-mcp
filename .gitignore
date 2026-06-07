@@ -1,4 +1,48 @@
-# ==================== Python ====================
+# ==================== 项目核心目录 ====================
+# 只保留以下目录和文件，忽略其他所有内容
+
+# 核心程序目录
+program/
+!program/server.py
+!program/transport_manager.py
+!program/plugin_loop.py
+!program/tools/
+!program/prompts/
+
+# 关键字模板目录
+templates/
+!templates/keyword/
+
+# 路径配置目录
+path/
+!path/local_paths.yaml
+!path/hypermesh_paths.yaml
+
+# 测试目录
+tests/
+
+# 文档目录
+docs/
+
+# 输出目录
+output/
+!output/model_original.k
+!output/model_roundtrip.k
+!output/screenshots/.gitkeep
+
+# 核心配置文件
+!hmcustom.tcl
+!pyproject.toml
+!README.md
+!README.en.md
+!RELEASE_NOTES.md
+!CLAUDE.md
+!.gitignore
+!LICENSE
+
+# ==================== 忽略的目录和文件 ====================
+
+# Python 相关
 __pycache__/
 *.pyc
 *.pyo
@@ -20,7 +64,7 @@ wheels/
 *.manifest
 *.spec
 
-# ==================== Virtual Environments ====================
+# 虚拟环境
 .venv/
 venv/
 ENV/
@@ -29,7 +73,7 @@ env/
 .env.local
 .env.*.local
 
-# ==================== Testing ====================
+# 测试相关
 .pytest_cache/
 .tox/
 .nox/
@@ -39,11 +83,11 @@ htmlcov/
 *.cover
 .hypothesis/
 
-# ==================== Type Checking ====================
+# 类型检查
 .mypy_cache/
 .pytype/
 
-# ==================== IDE ====================
+# IDE
 .vscode/
 .idea/
 *.swp
@@ -52,8 +96,7 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# ==================== Claude Code ====================
-# Claude session data
+# Claude Code 会话数据
 .claude/sessions/
 .claude/cache/
 .claude/projects/
@@ -63,44 +106,33 @@ Thumbs.db
 .claude/conversations/
 .claude/fetches/
 .claude/temp/
-
-# Claude worktrees (temporary)
 .claude/worktrees/
-
-# Claude hooks (temporary state)
 .claude/hooks/.handoff-turn-count
 .claude/hooks/task-progress.md
-
-# Claude settings (user-specific)
 .claude/settings.json
-
-# Claude logs
 .claude/*.log
 .claude/**/*.log
 
-# ==================== Project Specific ====================
-# Run data (runtime generated)
+# 运行时生成的数据
 runs/*
 !runs/.gitkeep
-
-# Logs (runtime generated)
 logs/*
 !logs/.gitkeep
 *.log
 
-# IPC temporary files (runtime generated)
+# IPC 临时文件
 ipc/commands/*.json
 ipc/results/*.json
 ipc/archive/*.json
 ipc/status.json
 ipc/stop.flag
 
-# Obsidian related (user-specific, not required for runtime)
+# Obsidian 相关（用户特定）
 path/obsidian_paths.yaml
 program/tools/obsidian_logger.py
 tests/test_obsidian_logger.py
 
-# Reference materials (optional, not required for runtime)
+# 参考材料（可选，运行时不需要）
 lsdyna-maunal/
 ref/
 *.db
@@ -114,11 +146,11 @@ ref/
 *.pkl
 *.tmp
 
-# HyperMesh model files (binary, large)
+# HyperMesh 模型文件（二进制，大文件）
 *.hm
 models/
 
-# Solver output files
+# 求解器输出文件
 *.d3plot
 *.d3thdt
 *.messag
@@ -128,11 +160,11 @@ models/
 *.rcforc
 *.secforc
 
-# LS-PrePost generated cfiles (runtime)
+# LS-PrePost 生成的 cfile（运行时）
 *.cfile
 !lib/cfile_templates/*.cfile
 
-# Temporary output files (not referenced by function calls)
+# 临时输出文件（未被函数调用引用）
 output/command1.tcl
 output/command2.tcl
 output/batchmesher_config.cfg
@@ -150,14 +182,27 @@ temp_*.tcl
 temp_safe_execute.py
 *.bat.setup
 
-# Reports (runtime generated)
+# 报告（运行时生成）
 reports/*.json
 reports/*.html
 
-# Sample model files (optional, large)
+# 示例模型文件（可选，大文件）
 lib/hypermesh_samples/*.hm
 
-# ==================== OS Specific ====================
+# 批处理安装系统
+batch/
+
+# 其他目录
+scripts/
+view/
+lib/
+ipc/
+*.backup
+*.bak
+*.old
+*.orig
+
+# ==================== OS 特定 ====================
 .DS_Store
 .DS_Store?
 ._*
@@ -168,7 +213,7 @@ Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
-# ==================== Documentation Build ====================
+# ==================== 文档构建 ====================
 docs/_build/
 docs/build/
 site/
@@ -177,7 +222,7 @@ site/
 .ipynb_checkpoints/
 *.ipynb
 
-# ==================== Coverage Reports ====================
+# ==================== 覆盖率报告 ====================
 .coverage
 .coverage.*
 htmlcov/
@@ -185,20 +230,3 @@ htmlcov/
 coverage/
 lcov/
 lcov.info
-
-# ==================== Batch Installation ====================
-# Generated MCP config files
-claude_code_mcp.json
-*.backup
-
-# Batch templates (LS-DYNA and Obsidian related, optional)
-batch/templates/lsdyna_paths.yaml
-batch/templates/lsprepost_paths.yaml
-batch/templates/obsidian_paths.yaml
-
-# ==================== Misc ====================
-*.bak
-*.backup
-*.old
-*.orig
-*~
