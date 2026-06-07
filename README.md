@@ -89,7 +89,7 @@ graph LR
 
 ### 快速安装（推荐）
 
-使用批处理安装脚本，自动配置所有路径：
+使用批处理安装脚本，**自动检测环境并生成配置**：
 
 ```bash
 # Windows
@@ -100,7 +100,12 @@ chmod +x install.sh
 ./install.sh
 ```
 
-或者使用交互式配置向导：
+**自动检测功能：**
+- ✅ Python/Conda 环境（自动查找 `hyper-dyna` 环境）
+- ✅ HyperMesh 安装路径（扫描常见安装目录）
+- ⚠️ LS-DYNA、LS-PrePost、Obsidian（需手动配置）
+
+**手动配置向导：**
 
 ```bash
 python batch/setup_wizard.py

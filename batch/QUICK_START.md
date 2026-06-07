@@ -7,12 +7,15 @@
 git clone https://github.com/your-username/hyper-dyna-mcp.git
 cd hyper-dyna-mcp
 
-# 2. 运行安装脚本
+# 2. 运行安装脚本（自动检测环境）
 ./install.sh  # Linux/macOS
 # 或
 install.bat   # Windows
 
-# 3. 按照提示配置路径
+# 3. 检查自动生成的配置文件 (path/*.yaml)
+#    - Python/Conda 环境会自动检测
+#    - HyperMesh 路径会自动检测
+#    - 其他软件路径需要手动配置
 
 # 4. 启动 MCP 服务器
 python -m program.server
