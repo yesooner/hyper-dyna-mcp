@@ -144,27 +144,25 @@ python -m program.server
 
 | 命令 | 功能描述 |
 |------|----------|
-| `mcp_start` | 启动 Socket 监听器（端口 47882），接收 MCP 服务器的 Tcl 命令 |
-| `mcp_loop` | 启动文件 IPC 循环（阻塞模式），轮询 `ipc/commands/` 目录 |
+| `mcp_start` | 启动 MCP 监听器（调用 `runs/mcp.tcl`） |
+| `mcp_loop` | 启动 IPC 文件循环（调用 `python -m program.plugin_loop`） |
 | `mcp_status` | 检查 Socket 和 IPC 状态 |
 | `mcp_stop` | 停止 IPC 循环（写入 `ipc/stop.flag`） |
 | `mcp_create_tab` | 创建 MCP GUI 标签页（自动执行） |
 
-### 连接模式
+### 启动方式
 
-项目支持两种通信模式：
+项目提供两种独立的启动方式：
 
-**模式 1：Socket 直连（推荐）**
-- 端口：47882
-- 延迟：< 10ms
+**方式 A：Socket 监听器**
 - 命令：`mcp_start`
-- 适用：HyperMesh GUI 已打开，需要实时交互
+- 功能：启动 HyperMesh 内置的 Socket 服务器，监听端口 47882
+- 适用：需要与 MCP 服务器实时通信
 
-**模式 2：IPC 文件队列（备用）**
-- 目录：`ipc/commands/`, `ipc/results/`
-- 延迟：100-500ms
+**方式 B：IPC 文件循环**
 - 命令：`mcp_loop`
-- 适用：Socket 连接失败时自动切换，或批处理模式
+- 功能：启动 Python 脚本，轮询 `ipc/commands/` 目录处理命令
+- 适用：批处理模式或 Socket 不可用时
 
 ### 方式三：Claude Code 集成
 

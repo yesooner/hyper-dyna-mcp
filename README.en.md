@@ -144,27 +144,25 @@ python -m program.server
 
 | Command | Description |
 |---------|-------------|
-| `mcp_start` | Start socket listener (port 47882) to receive Tcl commands from MCP server |
-| `mcp_loop` | Start file IPC loop (blocking mode), polling `ipc/commands/` directory |
+| `mcp_start` | Start MCP listener (calls `runs/mcp.tcl`) |
+| `mcp_loop` | Start IPC file loop (calls `python -m program.plugin_loop`) |
 | `mcp_status` | Check socket and IPC status |
 | `mcp_stop` | Stop IPC loop (writes `ipc/stop.flag`) |
 | `mcp_create_tab` | Create MCP GUI tab (auto-executed) |
 
-### Connection Modes
+### Startup Methods
 
-The project supports two communication modes:
+The project provides two independent startup methods:
 
-**Mode 1: Socket Direct Connection (Recommended)**
-- Port: 47882
-- Latency: < 10ms
+**Method A: Socket Listener**
 - Command: `mcp_start`
-- Use case: HyperMesh GUI is open, real-time interaction needed
+- Function: Start HyperMesh built-in socket server, listening on port 47882
+- Use case: Real-time communication with MCP server
 
-**Mode 2: IPC File Queue (Fallback)**
-- Directory: `ipc/commands/`, `ipc/results/`
-- Latency: 100-500ms
+**Method B: IPC File Loop**
 - Command: `mcp_loop`
-- Use case: Auto-switch when socket fails, or batch processing mode
+- Function: Start Python script, polling `ipc/commands/` directory to process commands
+- Use case: Batch processing mode or when socket is unavailable
 
 ### Method 3: Claude Code Integration
 
