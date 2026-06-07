@@ -31,12 +31,17 @@ Batch 配置系统已成功建立，实现了 Hyper-DYNA-MCP 从个人版到大�
 - ✅ `batch/templates/.env.example` - 环境变量模板
 - ✅ `batch/templates/claude_desktop_config.json` - Claude Desktop 配置模板
 - ✅ `batch/templates/claude_code_mcp.json` - Claude Code 配置模板
+- ✅ `batch/templates/codex_config.toml` - CODEX 配置模板
 
 ### 4. 配置工具
-- ✅ `batch/generate_mcp_config.py` - MCP 配置生成器
+- ✅ `batch/generate_mcp_config.py` - Claude MCP 配置生成器
   - 自动生成 Claude Desktop 和 Claude Code 配置
   - 使用绝对路径确保配置正确
   - 支持备份旧配置
+- ✅ `batch/generate_codex_config.py` - CODEX MCP 配置生成器
+  - 生成 OpenAI Codex CLI 的 MCP 配置
+  - 支持追加到现有配置或创建新配置
+  - 使用 TOML 格式
 - ✅ `batch/sync_config.py` - 配置同步工具
   - 将实际配置同步到标准格式
   - 自动补充缺失的配置项
@@ -48,6 +53,10 @@ Batch 配置系统已成功建立，实现了 Hyper-DYNA-MCP 从个人版到大�
 - ✅ `batch/validators/check_env.py` - 环境验证工具
   - 检查 Python 版本
   - 检查必需的 Python 包
+- ✅ `batch/validators/check_codex.py` - CODEX 配置验证工具
+  - 检查 CODEX 安装状态
+  - 验证 MCP 配置文件
+  - 测试 MCP 命令
   - 检查项目结构
   - 检查配置文件
 - ✅ `batch/validate_all.py` - 完整配置验证脚本
@@ -81,7 +90,8 @@ hyper-dyna-mcp/
     ├── install.bat                # 批处理安装脚本
     ├── install.sh                 # 批处理安装脚本
     ├── setup_wizard.py            # 交互式配置向导
-    ├── generate_mcp_config.py     # MCP 配置生成器
+    ├── generate_mcp_config.py     # Claude MCP 配置生成器
+    ├── generate_codex_config.py   # CODEX MCP 配置生成器
     ├── sync_config.py             # 配置同步工具
     ├── validate_all.py            # 完整配置验证
     ├── test_batch.py              # 测试脚本
@@ -94,11 +104,13 @@ hyper-dyna-mcp/
     │   ├── obsidian_paths.yaml    # Obsidian 配置模板
     │   ├── .env.example           # 环境变量模板
     │   ├── claude_desktop_config.json
-    │   └── claude_code_mcp.json
+    │   ├── claude_code_mcp.json
+    │   └── codex_config.toml      # CODEX 配置模板
     └── validators/
         ├── __init__.py
         ├── check_paths.py         # 路径验证工具
-        └── check_env.py           # 环境验证工具
+        ├── check_env.py           # 环境验证工具
+        └── check_codex.py         # CODEX 配置验证工具
 ```
 
 ## 🎯 主要特性
@@ -119,20 +131,23 @@ hyper-dyna-mcp/
 - ✅ Python 环境验证
 - ✅ 依赖包验证
 - ✅ 项目结构验证
+- ✅ CODEX 配置验证
 
 ### 4. MCP 集成
 - ✅ Claude Desktop 配置生成
 - ✅ Claude Code 配置生成
+- ✅ CODEX (OpenAI Codex CLI) 配置生成
 - ✅ 自动保存到正确位置
 - ✅ 使用绝对路径确保正确性
 - ✅ 支持备份旧配置
+- ✅ 支持追加到现有配置
 
 ## 📊 测试结果
 
 ### 完整配置验证
 
 ```
-验证结果: 20/20 通过
+验证结果: 22/22 通过
 
 配置文件检查:
   ✓ 本地路径配置: path/local_paths.yaml
@@ -164,9 +179,11 @@ Obsidian 配置:
 Batch 工具文件:
   ✓ 配置向导: batch/setup_wizard.py
   ✓ MCP 配置生成器: batch/generate_mcp_config.py
+  ✓ CODEX 配置生成器: batch/generate_codex_config.py
   ✓ 配置同步工具: batch/sync_config.py
   ✓ 路径验证工具: batch/validators/check_paths.py
   ✓ 环境验证工具: batch/validators/check_env.py
+  ✓ CODEX 验证工具: batch/validators/check_codex.py
 ```
 
 ## 🚀 使用方法
@@ -195,7 +212,8 @@ python batch/sync_config.py
 python batch/validate_all.py
 
 # 4. 生成 MCP 配置
-python batch/generate_mcp_config.py
+python batch/generate_mcp_config.py      # Claude Desktop/Code
+python batch/generate_codex_config.py    # CODEX (OpenAI Codex CLI)
 
 # 5. 启动 MCP 服务器
 python -m program.server
@@ -212,11 +230,17 @@ python batch/validators/check_paths.py
 
 # 环境验证
 python batch/validators/check_env.py
+
+# CODEX 验证
+python batch/validators/check_codex.py
+codex mcp list
 ```
 
 ## 📝 Git 提交历史
 
 ```
+234f7a5 update: 完整验证脚本添加 CODEX 支持
+54ee5ee add: CODEX 配置支持，生成器和验证工具
 f583a48 fix: 修复 MCP 配置生成器，使用绝对路径
 70c184a add: 完整配置验证脚本
 e32090d add: 配置同步工具，修复 HyperMesh 路径配置
@@ -233,9 +257,17 @@ Hyper-Dyna-MCP batch 配置系统已完成，实现了从个人版到大众版�
 3. **自动化** - 自动检测软件安装路径和环境
 4. **可验证** - 完整的配置验证工具
 5. **完善文档** - 详细的配置指南和快速开始
-6. **MCP 集成** - 自动生成 Claude Desktop 和 Claude Code 配置
+6. **MCP 集成** - 自动生成 Claude Desktop、Claude Code 和 CODEX 配置
 
 用户现在可以轻松地在自己的环境中配置和使用 Hyper-Dyna-MCP，无需手动编辑复杂的配置文件。
+
+### 支持的 MCP 客户端
+
+| 客户端 | 配置格式 | 配置文件位置 | 生成工具 |
+|--------|----------|--------------|----------|
+| Claude Desktop | JSON | `%APPDATA%\Claude\claude_desktop_config.json` | `generate_mcp_config.py` |
+| Claude Code | JSON | `~/.claude.json` | `generate_mcp_config.py` |
+| CODEX (OpenAI) | TOML | `~/.codex/config.toml` | `generate_codex_config.py` |
 
 ## 🔗 相关链接
 
