@@ -1,0 +1,21 @@
+# Hyper-Dyna-MCP CODEX 配置模板
+# 将此内容添加到 ~/.codex/config.toml 文件中
+# 或者运行: python batch/generate_codex_config.py
+
+[mcp_servers.hyper-dyna-mcp]
+type = "stdio"
+# 请根据实际路径修改
+command = 'E:\anaconda3\anzhuang\envs\hyper-dyna\python.exe'
+args = ["-m", "program.server"]
+# 请根据实际路径修改
+cwd = 'F:\hyper-dyna-mcp'
+startup_timeout_sec = 30.0
+tool_timeout_sec = 120.0
+enabled = true
+required = false
+
+[mcp_servers.hyper-dyna-mcp.env]
+# 请根据实际路径修改
+PYTHONPATH = 'F:\hyper-dyna-mcp'
+PYTHONIOENCODING = "utf-8"
+PYTHONUTF8 = "1"

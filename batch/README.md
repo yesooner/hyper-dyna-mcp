@@ -10,6 +10,8 @@ batch/
 ├── install.bat                  # Windows 安装脚本
 ├── install.sh                   # Linux/macOS 安装脚本
 ├── setup_wizard.py              # 交互式配置向导
+├── generate_mcp_config.py       # Claude MCP 配置生成器
+├── generate_codex_config.py     # CODEX MCP 配置生成器
 ├── templates/
 │   ├── local_paths.yaml         # 本地路径配置模板
 │   ├── hypermesh_paths.yaml     # HyperMesh 路径配置模板
@@ -18,10 +20,12 @@ batch/
 │   ├── obsidian_paths.yaml      # Obsidian 路径配置模板
 │   ├── .env.example             # 环境变量模板
 │   ├── claude_desktop_config.json  # Claude Desktop MCP 配置模板
-│   └── claude_code_mcp.json     # Claude Code MCP 配置模板
+│   ├── claude_code_mcp.json     # Claude Code MCP 配置模板
+│   └── codex_config.toml        # CODEX MCP 配置模板
 └── validators/
     ├── check_paths.py           # 路径验证工具
-    └── check_env.py             # 环境验证工具
+    ├── check_env.py             # 环境验证工具
+    └── check_codex.py           # CODEX 配置验证工具
 ```
 
 ## 快速开始
@@ -95,6 +99,80 @@ python batch/validators/check_paths.py
 python batch/validators/check_env.py
 ```
 
+## MCP 配置
+
+### Claude Desktop 配置
+
+运行配置生成器：
+
+```bash
+python batch/generate_mcp_config.py
+```
+
+配置文件将自动保存到：
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+### Claude Code 配置
+
+运行配置生成器：
+
+```bash
+python batch/generate_mcp_config.py
+```
+
+配置文件将保存到项目根目录：`claude_code_mcp.json`
+
+### CODEX (OpenAI Codex CLI) 配置
+
+运行 CODEX 配置生成器：
+
+```bash
+python batch/generate_codex_config.py
+```
+
+配置文件将追加到：`~/.codex/config.toml`
+
+**CODEX 配置特点：**
+- 使用 TOML 格式（不同于 Claude 的 JSON 格式）
+- 支持分层配置（系统、用户、项目级别）
+- 支持更丰富的配置选项（超时、工具过滤等）
+
+**手动配置示例：**
+
+```toml
+[mcp_servers.hyper-dyna-mcp]
+type = "stdio"
+command = 'E:\anaconda3\anzhuang\envs\hyper-dyna\python.exe'
+args = ["-m", "program.server"]
+cwd = 'F:\hyper-dyna-mcp'
+startup_timeout_sec = 30.0
+tool_timeout_sec = 120.0
+enabled = true
+required = false
+
+[mcp_servers.hyper-dyna-mcp.env]
+PYTHONPATH = 'F:\hyper-dyna-mcp'
+PYTHONIOENCODING = "utf-8"
+PYTHONUTF8 = "1"
+```
+
+**验证 CODEX 配置：**
+
+```bash
+# 检查 CODEX 安装
+codex --version
+
+# 列出 MCP 服务器
+codex mcp list
+
+# 查看特定服务器配置
+codex mcp get hyper-dyna-mcp
+
+# 运行验证脚本
+python batch/validators/check_codex.py
+```
+
 ## 常见问题
 
 ### Q: 如何找到我的 HyperMesh 安装路径？
@@ -129,6 +207,17 @@ python -m program.server
 # 在另一个终端中运行测试
 python -m pytest tests/
 ```
+
+### Q: Claude Desktop、Claude Code 和 CODEX 有什么区别？
+
+| 特性 | Claude Desktop | Claude Code | CODEX |
+|------|----------------|-------------|-------|
+| **配置格式** | JSON | JSON | TOML |
+| **配置文件** | `%APPDATA%\Claude\claude_desktop_config.json` | `~/.claude.json` | `~/.codex/config.toml` |
+| **传输方式** | stdio | stdio | stdio, streamable_http |
+| **分层配置** | 否 | 否 | 是 |
+| **工具过滤** | 否 | 否 | 是 |
+| **超时配置** | 否 | 否 | 是 |
 
 ## 支持
 

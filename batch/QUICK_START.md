@@ -37,13 +37,41 @@ python batch/validators/check_paths.py
 python batch/validators/check_env.py
 
 # 生成 MCP 配置
-python batch/generate_mcp_config.py
+python batch/generate_mcp_config.py      # Claude Desktop/Code
+python batch/generate_codex_config.py    # CODEX (OpenAI Codex CLI)
 
 # 运行测试
 python -m pytest
 
 # 启动 MCP 服务器
 python -m program.server
+```
+
+## MCP 配置
+
+### Claude Desktop / Claude Code
+
+```bash
+python batch/generate_mcp_config.py
+```
+
+配置文件自动保存到：
+- Claude Desktop: `%APPDATA%\Claude\claude_desktop_config.json`
+- Claude Code: `claude_code_mcp.json`
+
+### CODEX (OpenAI Codex CLI)
+
+```bash
+python batch/generate_codex_config.py
+```
+
+配置文件追加到：`~/.codex/config.toml`
+
+**验证 CODEX 配置：**
+
+```bash
+codex mcp list
+codex mcp get hyper-dyna-mcp
 ```
 
 ## 常见问题
@@ -72,6 +100,23 @@ python -m program.server
 
 1. 运行 `python batch/generate_mcp_config.py`
 2. 将生成的 `claude_code_mcp.json` 内容添加到 `~/.claude/settings.json`
+
+### Q: 如何配置 CODEX？
+
+1. 运行 `python batch/generate_codex_config.py`
+2. 配置会自动追加到 `~/.codex/config.toml`
+3. 重启 CODEX 或运行 `codex mcp list` 验证
+
+### Q: Claude Desktop、Claude Code 和 CODEX 有什么区别？
+
+| 特性 | Claude Desktop | Claude Code | CODEX |
+|------|----------------|-------------|-------|
+| **配置格式** | JSON | JSON | TOML |
+| **配置文件** | `%APPDATA%\Claude\claude_desktop_config.json` | `~/.claude.json` | `~/.codex/config.toml` |
+| **传输方式** | stdio | stdio | stdio, streamable_http |
+| **分层配置** | 否 | 否 | 是 |
+| **工具过滤** | 否 | 否 | 是 |
+| **超时配置** | 否 | 否 | 是 |
 
 ### Q: 如何更新配置？
 
