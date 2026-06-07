@@ -1,0 +1,23 @@
+# HyperMesh paths configuration
+# 请根据你的实际安装路径修改
+
+hypermesh:
+  # HyperMesh 安装目录
+  # Windows 默认: "C:/Program Files/Altair/2024/hw/bin/win64"
+  # 请根据你的实际版本修改年份（如 2023, 2024）
+  install_dir: "C:/Program Files/Altair/2024/hw/bin/win64"
+
+  # hmbatch.exe 路径（通常在 install_dir 下）
+  hmbatch_exe: "C:/Program Files/Altair/2024/hw/bin/win64/hmbatch.exe"
+
+  # HyperMesh GUI 可执行文件（用于启动 GUI）
+  hmopengl_exe: "C:/Program Files/Altair/2024/hw/bin/win64/hmopengl.exe"
+
+  # HyperMesh 版本
+  version: "2024"
+
+  # 默认 Tcl 控制台端口（用于 GUI 通信）
+  gui_port: 47882
+
+  # 默认超时时间（秒）
+  default_timeout: 300

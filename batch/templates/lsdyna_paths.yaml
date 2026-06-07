@@ -1,0 +1,26 @@
+# LS-DYNA paths configuration
+# 请根据你的实际安装路径修改
+
+lsdyna:
+  # LS-DYNA 求解器可执行文件路径
+  # Windows 示例: "C:/Program Files/LSTC/ls-dyna_smp_d_R13.1_216-g83709a1_winx64_ifort190.exe"
+  # Linux 示例: "/usr/local/bin/ls-dyna_smp_d_R13.1_216-g83709a1_linux64_ifort190"
+  solver_exe: "C:/Program Files/LSTC/ls-dyna_sMP_d_R13.1_216-g83709a1_winx64_ifort190.exe"
+
+  # LS-DYNA 版本
+  version: "R13.1"
+
+  # 许可证文件路径（如果需要）
+  # license_file: "C:/Program Files/LSTC/license.dat"
+
+  # 许可证服务器（如果使用网络许可证）
+  # license_server: "27000@license-server"
+
+  # 默认 CPU 核心数
+  default_ncpus: 4
+
+  # 默认内存分配
+  default_memory: "200m"
+
+  # 默认超时时间（秒）
+  default_timeout: 3600

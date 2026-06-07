@@ -7,7 +7,7 @@
   <a href="https://github.com/hyper-dyna-mcp/releases"><img alt="Release" src="https://img.shields.io/badge/Release-v0.1.0-orange"></a>
 </p>
 
-**Hyper-Dyna-MCP** 是一个基于 **MCP (Model Context Protocol)** 的 CAE 工作流自动化服务器，连接自然语言规划与 **HyperMesh** 前处理、**LS-DYNA** 关键字文件处理、**LS-PrePost** 后处理以及 **Obsidian** 日志记录。
+**Hyper-Dyna-MCP** 是一个基于 **MCP (Model Context Protocol)** 的 CAE 工作流自动化服务器，连接自然语言规划与 **HyperMesh** 前处理、**LS-DYNA** 关键字文件处理、**LS-PrePost** 后处理。
 
 > 🎯 **核心目标**：让工程师通过自然语言描述，自动完成复杂的 CAE 前处理工作流。
 
@@ -21,7 +21,6 @@
 - 🔧 **模型操作** — 读写材料、属性、组件、截面等
 - 🛡️ **安全策略** — Tcl 脚本策略强制执行、MCP_SCRIPT 标记、逐命令执行
 - 🔄 **工作流编排** — LS-DYNA、HyperMesh 和混合流水线
-- 📊 **Obsidian 日志** — 自动记录执行日志到 Obsidian 知识库
 
 ## 🧩 接口类型
 
@@ -29,7 +28,7 @@
 
 本项目实现标准 **MCP (Model Context Protocol)** 协议，支持：
 
-- **工具调用 (Tools)** — 19 个专业 CAE 工具
+- **工具调用 (Tools)** — 18 个专业 CAE 工具
 - **提示词 (Prompts)** — 工作流规划、执行、验证
 - **资源 (Resources)** — 路径配置、环境信息
 
@@ -41,7 +40,6 @@ graph LR
     B -->|Socket:47882| C[HyperMesh GUI]
     B -->|IPC File Queue| D[HyperMesh Batch]
     B -->|Direct API| E[LS-DYNA/LS-PrePost]
-    B -->|REST API| F[Obsidian Vault]
 ```
 
 ## 📦 安装方法
@@ -54,7 +52,26 @@ graph LR
 - **LS-PrePost**: 4.8+
 - **Conda**: 用于环境管理
 
-### 安装步骤
+### 快速安装（推荐）
+
+使用批处理安装脚本，自动配置所有路径：
+
+```bash
+# Windows
+install.bat
+
+# Linux/macOS
+chmod +x install.sh
+./install.sh
+```
+
+或者使用交互式配置向导：
+
+```bash
+python batch/setup_wizard.py
+```
+
+### 手动安装
 
 #### 1️⃣ 克隆仓库
 
@@ -86,7 +103,7 @@ pip install -e ".[dev]"
 
 ```yaml
 project:
-  root: "F:/hyper-dyna-mcp"
+  root: "."
   conda_env: "hyper-dyna"
   python_exe: "E:/anaconda3/anzhuang/envs/hyper-dyna/python.exe"
 ```
@@ -116,7 +133,7 @@ python -m program.server
 2. **打开 HyperMesh GUI**
 3. **在 HyperMesh Tcl 控制台中执行**：
    ```tcl
-   source F:/hyper-dyna-mcp/hmcustom.tcl
+   source hmcustom.tcl
    mcp_start
    ```
 4. **或者**：HyperMesh → MCP 标签页 → 点击 "Start MCP" 按钮
@@ -132,7 +149,7 @@ Claude: 我将使用 Hyper-Dyna-MCP 工具为您创建模型...
 
 ## 🔧 MCP 工具列表
 
-### 核心工具 (19 个)
+### 核心工具 (18 个)
 
 | 工具名称 | 功能描述 | 接口类型 |
 |----------|----------|----------|
@@ -156,14 +173,13 @@ Claude: 我将使用 Hyper-Dyna-MCP 工具为您创建模型...
 | `check_environment` | 检查 Python/conda/包 | 本地检查 |
 | `load_path_config` | 加载 YAML 配置 | 本地加载 |
 | `validate_path` | 检查路径是否存在 | 本地检查 |
-| `write_obsidian_log` | 写入 Obsidian 日志 | REST API |
 
 ## 🏗️ 项目结构
 
 ```
 hyper-dyna-mcp/
 ├── 📁 program/                    # MCP 服务器核心
-│   ├── 🐍 server.py              # MCP 入口点（19 个工具）
+│   ├── 🐍 server.py              # MCP 入口点（18 个工具）
 │   ├── 🔄 transport_manager.py   # Socket/IPC 双通道管理
 │   ├── 📨 plugin_loop.py         # IPC 命令分发器
 │   └── 🛠️ tools/                 # 24 个工具模块
@@ -204,7 +220,6 @@ graph TB
     subgraph "通信层"
         G[Socket:47882]
         H[IPC File Queue]
-        I[REST API]
     end
     
     subgraph "执行层"
@@ -226,8 +241,6 @@ graph TB
     H --> K
     E --> L
     E --> M
-    C --> I
-    I --> N[Obsidian Vault]
 ```
 
 ## 🔌 连接模式
@@ -253,7 +266,7 @@ graph TB
 ## 📈 性能指标
 
 - **关键字模板**: 1935 个
-- **工具数量**: 19 个
+- **工具数量**: 18 个
 - **测试覆盖**: 132 个测试用例
 - **连接延迟**: Socket < 10ms, IPC < 500ms
 - **模型处理**: 支持 100MB+ .k 文件
@@ -277,6 +290,7 @@ pytest --cov=program --cov-report=html
 - 🏗️ [架构设计](./docs/architecture.md)
 - 🔧 [工具参考](./docs/tools.md)
 - 📝 [示例工作流](./docs/examples.md)
+- 📦 [Batch 配置指南](./batch/README.md)
 
 ## 🤝 贡献指南
 
@@ -293,13 +307,13 @@ pytest --cov=program --cov-report=html
 ### v0.1.0 (当前版本)
 
 - ✅ MCP 服务器核心架构
-- ✅ 19 个 CAE 工具实现
+- ✅ 18 个 CAE 工具实现
 - ✅ 1935 个 LS-DYNA 关键字模板
 - ✅ HyperMesh GUI 集成
 - ✅ Socket/IPC 双通道通信
 - ✅ K 文件解析/生成
-- ✅ Obsidian 日志集成
 - ✅ 132 个测试用例
+- ✅ Batch 配置系统（支持从个人版到大众版）
 
 ## 📄 许可证
 
@@ -310,7 +324,6 @@ pytest --cov=program --cov-report=html
 - [LS-DYNA](https://www.lstc.com/) — 有限元求解器
 - [HyperMesh](https://www.altair.com/hypermesh/) — 前处理软件
 - [MCP Protocol](https://modelcontextprotocol.io/) — 模型上下文协议
-- [Obsidian](https://obsidian.md/) — 知识管理工具
 
 ## 📞 联系方式
 

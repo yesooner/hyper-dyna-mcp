@@ -1,0 +1,27 @@
+# Local project paths
+# 请根据你的实际环境修改以下路径
+
+project:
+  # 项目根目录（包含 program/ 目录的父目录）
+  root: "F:/hyper-dyna-mcp"
+
+  # Conda 环境名称
+  conda_env: "hyper-dyna"
+
+  # Python 可执行文件路径（在 conda 环境中）
+  # Windows 示例: "E:/anaconda3/anzhuang/envs/hyper-dyna/python.exe"
+  # Linux/macOS 示例: "/home/user/anaconda3/envs/hyper-dyna/bin/python"
+  python_exe: "E:/anaconda3/anzhuang/envs/hyper-dyna/python.exe"
+
+  # Python 版本
+  python_version: "3.13"
+
+run:
+  # 默认 dry_run 模式（true = 不执行实际软件，只生成命令）
+  default_dry_run: true
+
+  # 运行输出目录
+  runs_dir: "F:/hyper-dyna-mcp/runs"
+
+  # 报告输出目录
+  reports_dir: "F:/hyper-dyna-mcp/reports"

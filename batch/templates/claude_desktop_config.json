@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "hyper-dyna-mcp": {
+      "command": "python",
+      "args": ["-m", "program.server"],
+      "cwd": "F:/hyper-dyna-mcp",
+      "env": {
+        "PYTHONPATH": "F:/hyper-dyna-mcp"
+      }
+    }
+  }
+}

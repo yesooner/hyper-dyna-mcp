@@ -12,7 +12,6 @@ develop-eggs/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -96,12 +95,16 @@ ipc/archive/*.json
 ipc/status.json
 ipc/stop.flag
 
+# Obsidian related (user-specific, not required for runtime)
+path/obsidian_paths.yaml
+program/tools/obsidian_logger.py
+tests/test_obsidian_logger.py
+
 # Reference materials (optional, not required for runtime)
 lsdyna-maunal/
 ref/
 *.db
 *.set
-*.cfile
 *.msg
 *.bdf
 *.op2
@@ -110,6 +113,24 @@ ref/
 *.fem
 *.pkl
 *.tmp
+
+# HyperMesh model files (binary, large)
+*.hm
+models/
+
+# Solver output files
+*.d3plot
+*.d3thdt
+*.messag
+*.glstat
+*.nodout
+*.elout
+*.rcforc
+*.secforc
+
+# LS-PrePost generated cfiles (runtime)
+*.cfile
+!lib/cfile_templates/*.cfile
 
 # Temporary output files (not referenced by function calls)
 output/command1.tcl
@@ -126,7 +147,15 @@ output/test[0-9]*.hm
 output/test_hysteresis*.hm
 temp_*.py
 temp_*.tcl
+temp_safe_execute.py
 *.bat.setup
+
+# Reports (runtime generated)
+reports/*.json
+reports/*.html
+
+# Sample model files (optional, large)
+lib/hypermesh_samples/*.hm
 
 # ==================== OS Specific ====================
 .DS_Store
@@ -156,6 +185,11 @@ htmlcov/
 coverage/
 lcov/
 lcov.info
+
+# ==================== Batch Installation ====================
+# Generated MCP config files
+claude_code_mcp.json
+*.backup
 
 # ==================== Misc ====================
 *.bak
