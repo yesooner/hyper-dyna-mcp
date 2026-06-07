@@ -12885,3 +12885,1686 @@ return; # Stop script and return to application
 *viewset 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 10 10
 *readfile "F:\\hyper-dyna-mcp\\output\\test8_daota_lou.hm"
 *setgeomrefinelevel 1
+*menufont 2
+*setsolverusessegmentsets 0
+*ME_CoreBehaviorAdjust "allowable_actions_policy=TC_lite"
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*setelementcolormode 16
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*setelementcolormode 1
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*setelementcolormode 16
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*clearmarkall 3
+*clearmark collections 1
+*clearmark collections 2
+*clearmark controllers 1
+*loaddefaultattributevaluesfromxml 
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*setvalue mats id=5 Rho=7.85e-09
+*setvalue mats id=5 E=210000
+*setvalue mats id=5 Nu=0.3
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*setvalue cards id=29 LSD_ENDTIM=0.01
+*setvalue cards id=29 LSD_ENDCYCLE=0
+*setvalue cards id=29 LSD_TSMIN=0
+*setvalue cards id=29 LSD_TERMRAT=0
+*setvalue cards id=29 LSD_PERMASS=0
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*setvalue cards id=30 LSD_DT=0.001
+*setvalue cards id=30 LSD_LCID=0
+*setvalue cards id=30 LSD_NOBEAM=0
+*setvalue cards id=30 LSD_NPLTC=0
+*setvalue cards id=30 LSD_PSID=0
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*setvalue mats id=5 Rho=7.85e-09
+*setvalue mats id=5 E=210000
+*setvalue mats id=5 Nu=0.3
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*setvalue cards id=29 LSD_ENDTIM=0.01
+*setvalue cards id=29 LSD_ENDCYCLE=0
+*setvalue cards id=29 LSD_TSMIN=0
+*setvalue cards id=29 LSD_TERMRAT=0
+*setvalue cards id=29 LSD_PERMASS=0
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*setvalue cards id=30 LSD_DT=0.001
+*setvalue cards id=30 LSD_LCID=0
+*setvalue cards id=30 LSD_NOBEAM=0
+*setvalue cards id=30 LSD_NPLTC=0
+*setvalue cards id=30 LSD_PSID=0
+*viewset -0.675729006 0.232141275 -0.699643294 0 -0.732824009 -0.31422583 0.603515617 0 -0.0797451093 0.920528411 0.382450208 0 602.124208 3383.34965 -4.77484718e-12 1 -8014.06017 5267.58896 -5440.06015 9944.05055
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*setvalue mats id=5 Rho=7.85e-09
+*setvalue mats id=5 E=210000
+*setvalue mats id=5 Nu=0.3
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*setvalue mats id=5 Rho=7.85e-09
+*setvalue mats id=5 E=210000
+*setvalue mats id=5 Nu=0.3
+*setvalue mats id=1
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*setvalue mats id=5 Rho=7.85e-09
+*setvalue mats id=5 E=210000
+*setvalue mats id=5 Nu=0.3
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*setvalue cards id=29 LSD_ENDTIM=0.005
+*setvalue cards id=29 LSD_ENDCYCLE=0
+*setvalue cards id=29 LSD_TSMIN=0
+*setvalue cards id=29 LSD_TERMRAT=0
+*setvalue cards id=29 LSD_PERMASS=0
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*setvalue cards id=30 LSD_DT=0.001
+*setvalue cards id=30 LSD_LCID=0
+*setvalue cards id=30 LSD_NOBEAM=0
+*setvalue cards id=30 LSD_NPLTC=0
+*setvalue cards id=30 LSD_PSID=0
+*createentity props name="SECTION_SHELL_1" cardimage=SectShl
+*setvalue props id=6 STATUS=2
+*setvalue props id=6
+*setvalue props id=6
+*setvalue props id=6
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*setvalue mats id=5 Rho=7.85e-09
+*setvalue mats id=5 E=210000
+*setvalue mats id=5 Nu=0.3
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*setvalue mats id=5 Rho=7.85e-09
+*setvalue mats id=5 E=210000
+*setvalue mats id=5 Nu=0.3
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*setvalue cards id=29 LSD_ENDTIM=0.005
+*setvalue cards id=29 LSD_ENDCYCLE=0
+*setvalue cards id=29 LSD_TSMIN=0
+*setvalue cards id=29 LSD_TERMRAT=0
+*setvalue cards id=29 LSD_PERMASS=0
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*setvalue cards id=30 LSD_DT=0.001
+*setvalue cards id=30 LSD_LCID=0
+*setvalue cards id=30 LSD_NOBEAM=0
+*setvalue cards id=30 LSD_NPLTC=0
+*setvalue cards id=30 LSD_PSID=0
+*createentity props name="SECTION_SHELL_1" cardimage=SectShl
+*setvalue props id=6 STATUS=2
+*setvalue props id=6
+*setvalue props id=6
+*setvalue props id=6
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*setvalue mats id=5 Rho=7.85e-09
+*setvalue mats id=5 E=210000
+*setvalue mats id=5 Nu=0.3
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*setvalue cards id=29 LSD_ENDTIM=0.005
+*setvalue cards id=29 LSD_ENDCYCLE=0
+*setvalue cards id=29 LSD_TSMIN=0
+*setvalue cards id=29 LSD_TERMRAT=0
+*setvalue cards id=29 LSD_PERMASS=0
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*setvalue cards id=30 LSD_DT=0.001
+*setvalue cards id=30 LSD_LCID=0
+*setvalue cards id=30 LSD_NOBEAM=0
+*setvalue cards id=30 LSD_NPLTC=0
+*setvalue cards id=30 LSD_PSID=0
+*createentity props name="SECTION_SHELL_1" cardimage=SectShl
+*setvalue props id=6 STATUS=2
+*setvalue props id=6
+*setvalue props id=6
+*setvalue props id=6
+*templatefileset "E:/HM2021/2021/hwdesktop/templates/feoutput/ls-dyna971/dyna.key"
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*setvalue mats id=5 Rho=7.85e-09
+*setvalue mats id=5 E=210000
+*setvalue mats id=5 Nu=0.3
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*setvalue cards id=29 LSD_ENDTIM=0.01
+*setvalue cards id=29 LSD_ENDCYCLE=0
+*setvalue cards id=29 LSD_TSMIN=0
+*setvalue cards id=29 LSD_TERMRAT=0
+*setvalue cards id=29 LSD_PERMASS=0
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*setvalue cards id=30 LSD_DT=0.001
+*setvalue cards id=30 LSD_LCID=0
+*setvalue cards id=30 LSD_NOBEAM=0
+*setvalue cards id=30 LSD_NPLTC=0
+*setvalue cards id=30 LSD_PSID=0
+*createentity props name="SECTION_SHELL_1" cardimage=SectShl
+*setvalue props id=6 STATUS=2
+*setvalue props id=6
+*setvalue props id=6
+*setvalue props id=6
+*createentity groups name="CONTACT_1D_900000" cardimage=CONTACT_1D
+*createentity groups name="CONTACT_2D_900000" cardimage=CONTACT_2D
+*createentity groups name="CONTACT_2D_AUTO_900000" cardimage=CONTACT_2D_AUTO
+*createentity groups name="CONTACT_2D_AUTOMAITC_SINGLE_SURFACE_900000" cardimage=CONTACT_2D_AUTOMAITC_SINGLE_SURFACE
+*createentity groups name="CONTACT_2D_AUTOMATIC_900000" cardimage=CONTACT_2D_AUTOMATIC
+*createentity groups name="CONTACT_2D_AUTOMATIC_FORCE_TRANSDUCER_900000" cardimage=CONTACT_2D_AUTOMATIC_FORCE_TRANSDUCER
+*createentity groups name="CONTACT_2D_AUTOMATIC_SINGLE_SURFACE_900000" cardimage=CONTACT_2D_AUTOMATIC_SINGLE_SURFACE
+*createentity groups name="CONTACT_2D_AUTOMATIC_SINGLE_SURFACE_MORTAR_900000" cardimage=CONTACT_2D_AUTOMATIC_SINGLE_SURFACE_MORTAR
+*createentity groups name="CONTACT_2D_AUTOMATIC_SURFACE_IN_CONTINUUM_900000" cardimage=CONTACT_2D_AUTOMATIC_SURFACE_IN_CONTINUUM
+*createentity groups name="CONTACT_2D_AUTOMATIC_SURFACE_TO_SUR_900000" cardimage=CONTACT_2D_AUTOMATIC_SURFACE_TO_SUR
+*createentity groups name="CONTACT_2D_AUTOMATIC_SURFACE_TO_SURFACE_900000" cardimage=CONTACT_2D_AUTOMATIC_SURFACE_TO_SURFACE
+*createentity groups name="CONTACT_2D_AUTOMATIC_TIED_900000" cardimage=CONTACT_2D_AUTOMATIC_TIED
+*createentity groups name="CONTACT_2D_FORCE_TRANSDUCER_900000" cardimage=CONTACT_2D_FORCE_TRANSDUCER
+*createentity groups name="CONTACT_2D_NODE_TO_SOLID_900000" cardimage=CONTACT_2D_NODE_TO_SOLID
+*createentity groups name="CONTACT_2D_NODE_TO_SOLID_OPTION_900000" cardimage=CONTACT_2D_NODE_TO_SOLID_OPTION
+*createentity groups name="CONTACT_2D_OPTION_900000" cardimage=CONTACT_2D_OPTION
+*createentity groups name="CONTACT_2D_SINGLE_SURFACE_900000" cardimage=CONTACT_2D_SINGLE_SURFACE
+*createentity groups name="CONTACT_ADD_WEAR_900000" cardimage=CONTACT_ADD_WEAR
+*createentity groups name="CONTACT_AIRBAG_SINGLE_SURFACE_900000" cardimage=CONTACT_AIRBAG_SINGLE_SURFACE
+*createentity groups name="CONTACT_AU_900000" cardimage=CONTACT_AU
+*createentity groups name="CONTACT_AUTO_900000" cardimage=CONTACT_AUTO
+*createentity groups name="CONTACT_AUTO_MOVE_900000" cardimage=CONTACT_AUTO_MOVE
+*createentity groups name="CONTACT_AUTOMAT_900000" cardimage=CONTACT_AUTOMAT
+*createentity groups name="CONTACT_AUTOMATIC_900000" cardimage=CONTACT_AUTOMATIC
+*createentity groups name="CONTACT_AUTOMATIC_BEAMS_TO_SURFACE_900000" cardimage=CONTACT_AUTOMATIC_BEAMS_TO_SURFACE
+*createentity groups name="CONTACT_AUTOMATIC_BEAMS_TO_SURFACE_ID_900000" cardimage=CONTACT_AUTOMATIC_BEAMS_TO_SURFACE_ID
+*createentity groups name="CONTACT_AUTOMATIC_GEN_900000" cardimage=CONTACT_AUTOMATIC_GEN
+*createentity groups name="CONTACT_AUTOMATIC_GENER_900000" cardimage=CONTACT_AUTOMATIC_GENER
+*createentity groups name="CONTACT_AUTOMATIC_GENERAL_900000" cardimage=CONTACT_AUTOMATIC_GENERAL
+*createentity groups name="CONTACT_AUTOMATIC_GENERAL_ID_900000" cardimage=CONTACT_AUTOMATIC_GENERAL_ID
+*createentity groups name="CONTACT_AUTOMATIC_GENERAL_INTERIOR_MPP_900000" cardimage=CONTACT_AUTOMATIC_GENERAL_INTERIOR_MPP
+*createentity groups name="CONTACT_AUTOMATIC_GENERAL_TIEBREAK_900000" cardimage=CONTACT_AUTOMATIC_GENERAL_TIEBREAK
+*createentity groups name="CONTACT_AUTOMATIC_NODES_TO_SURFACE_900000" cardimage=CONTACT_AUTOMATIC_NODES_TO_SURFACE
+*createentity groups name="CONTACT_AUTOMATIC_ONE_WAY_SUR_900000" cardimage=CONTACT_AUTOMATIC_ONE_WAY_SUR
+*createentity groups name="CONTACT_AUTOMATIC_ONE_WAY_SURFACE_TO_SURFACE_900000" cardimage=CONTACT_AUTOMATIC_ONE_WAY_SURFACE_TO_SURFACE
+*createentity groups name="CONTACT_AUTOMATIC_ONE_WAY_SURFACE_TO_SURFACE_TIE_900000" cardimage=CONTACT_AUTOMATIC_ONE_WAY_SURFACE_TO_SURFACE_TIE
+*createentity groups name="CONTACT_AUTOMATIC_ONE_WAY_SURFACE_TO_SURFACE_TIEBREAK_USER_900000" cardimage=CONTACT_AUTOMATIC_ONE_WAY_SURFACE_TO_SURFACE_TIEBREAK_USER
+*createentity groups name="CONTACT_AUTOMATIC_SINGLE_SUR_900000" cardimage=CONTACT_AUTOMATIC_SINGLE_SUR
+*createentity groups name="CONTACT_AUTOMATIC_SINGLE_SURFACE_900000" cardimage=CONTACT_AUTOMATIC_SINGLE_SURFACE
+*createentity groups name="CONTACT_AUTOMATIC_SINGLE_SURFACE_MORTAR_900000" cardimage=CONTACT_AUTOMATIC_SINGLE_SURFACE_MORTAR
+*createentity groups name="CONTACT_AUTOMATIC_SINGLE_SURFACE_TIEBREAK_900000" cardimage=CONTACT_AUTOMATIC_SINGLE_SURFACE_TIEBREAK
+*createentity groups name="CONTACT_AUTOMATIC_SINGLE_SURFACE_TIED_900000" cardimage=CONTACT_AUTOMATIC_SINGLE_SURFACE_TIED
+*createentity groups name="CONTACT_AUTOMATIC_SURFACE_TO_SUR_900000" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SUR
+*createentity groups name="CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_900000" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE
+*createentity groups name="CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_COM_900000" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_COM
+*createentity groups name="CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_COMPOSITE_900000" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_COMPOSITE
+*createentity groups name="CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_ID_900000" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_ID
+*createentity groups name="CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_LUBRICATION_900000" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_LUBRICATION
+*createentity groups name="CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_MORTAR_900000" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_MORTAR
+*createentity groups name="CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_MORTAR_TIED_900000" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_MORTAR_TIED
+*createentity groups name="CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_MORTAR_TIED_WELD_900000" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_MORTAR_TIED_WELD
+*createentity groups name="CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_TIEBREAK_MORTAR_900000" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_TIEBREAK_MORTAR
+*createentity groups name="CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_TIEBREAK_USER_900000" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_TIEBREAK_USER
+*createentity groups name="CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_TIEBREAK_USER_MORTAR_900000" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_TIEBREAK_USER_MORTAR
+*createentity groups name="CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_TIED_WELD_900000" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_TIED_WELD
+*createentity groups name="CONTACT_AUTOMATIC_TIEBREAK_900000" cardimage=CONTACT_AUTOMATIC_TIEBREAK
+*createentity groups name="CONTACT_CONSTRAINT_NODES_TO_SURFACE_900000" cardimage=CONTACT_CONSTRAINT_NODES_TO_SURFACE
+*createentity groups name="CONTACT_CONSTRAINT_SURFACE_TO_SURFACE_900000" cardimage=CONTACT_CONSTRAINT_SURFACE_TO_SURFACE
+*createentity groups name="CONTACT_COUPLING_900000" cardimage=CONTACT_COUPLING
+*createentity groups name="CONTACT_DISTRIBUTE_900000" cardimage=CONTACT_DISTRIBUTE
+*createentity groups name="CONTACT_DRAWBEAD_900000" cardimage=CONTACT_DRAWBEAD
+*createentity groups name="CONTACT_DRAWBEAD_ID_900000" cardimage=CONTACT_DRAWBEAD_ID
+*createentity groups name="CONTACT_DRAWBEAD_INITIALIZE_900000" cardimage=CONTACT_DRAWBEAD_INITIALIZE
+*createentity groups name="CONTACT_DRAWBEAD_INITIALIZE_ID_900000" cardimage=CONTACT_DRAWBEAD_INITIALIZE_ID
+*createentity groups name="CONTACT_DRAWBEAD_INITILIZE_900000" cardimage=CONTACT_DRAWBEAD_INITILIZE
+*createentity groups name="CONTACT_EN_900000" cardimage=CONTACT_EN
+*createentity groups name="CONTACT_ENTITY_900000" cardimage=CONTACT_ENTITY
+*createentity groups name="CONTACT_EROD_900000" cardimage=CONTACT_EROD
+*createentity groups name="CONTACT_ERODING_NODES_TO_SURFACE_900000" cardimage=CONTACT_ERODING_NODES_TO_SURFACE
+*createentity groups name="CONTACT_ERODING_SINGLE_SURFACE_900000" cardimage=CONTACT_ERODING_SINGLE_SURFACE
+*createentity groups name="CONTACT_ERODING_SINGLE_SURFACE_MPP_900000" cardimage=CONTACT_ERODING_SINGLE_SURFACE_MPP
+*createentity groups name="CONTACT_ERODING_SURFACE_TO_SURFACE_900000" cardimage=CONTACT_ERODING_SURFACE_TO_SURFACE
+*createentity groups name="CONTACT_EXCLUDE_INTERAC_900000" cardimage=CONTACT_EXCLUDE_INTERAC
+*createentity groups name="CONTACT_EXCLUDE_INTERACTIONS_900000" cardimage=CONTACT_EXCLUDE_INTERACTIONS
+*createentity groups name="CONTACT_FORCE_TRANSDUC_900000" cardimage=CONTACT_FORCE_TRANSDUC
+*createentity groups name="CONTACT_FORCE_TRANSDUCER_900000" cardimage=CONTACT_FORCE_TRANSDUCER
+*createentity groups name="CONTACT_FORCE_TRANSDUCER_CONSTRAINT_900000" cardimage=CONTACT_FORCE_TRANSDUCER_CONSTRAINT
+*createentity groups name="CONTACT_FORCE_TRANSDUCER_PENALTY_900000" cardimage=CONTACT_FORCE_TRANSDUCER_PENALTY
+*createentity groups name="CONTACT_FORM_900000" cardimage=CONTACT_FORM
+*createentity groups name="CONTACT_FORMING_900000" cardimage=CONTACT_FORMING
+*createentity groups name="CONTACT_FORMING_NODES_TO_SUR_900000" cardimage=CONTACT_FORMING_NODES_TO_SUR
+*createentity groups name="CONTACT_FORMING_NODES_TO_SURFACE_900000" cardimage=CONTACT_FORMING_NODES_TO_SURFACE
+*createentity groups name="CONTACT_FORMING_NODES_TO_SURFACE_SMOOTH_900000" cardimage=CONTACT_FORMING_NODES_TO_SURFACE_SMOOTH
+*createentity groups name="CONTACT_FORMING_ONE_WAY_SUR_900000" cardimage=CONTACT_FORMING_ONE_WAY_SUR
+*createentity groups name="CONTACT_FORMING_ONE_WAY_SURFACE_TO_900000" cardimage=CONTACT_FORMING_ONE_WAY_SURFACE_TO
+*createentity groups name="CONTACT_FORMING_ONE_WAY_SURFACE_TO_SUR_900000" cardimage=CONTACT_FORMING_ONE_WAY_SURFACE_TO_SUR
+*createentity groups name="CONTACT_FORMING_ONE_WAY_SURFACE_TO_SURACE_ORTHO_FRIC_900000" cardimage=CONTACT_FORMING_ONE_WAY_SURFACE_TO_SURACE_ORTHO_FRIC
+*createentity groups name="CONTACT_FORMING_ONE_WAY_SURFACE_TO_SURFACE_900000" cardimage=CONTACT_FORMING_ONE_WAY_SURFACE_TO_SURFACE
+*createentity groups name="CONTACT_FORMING_ONE_WAY_SURFACE_TO_SURFACE_ID_900000" cardimage=CONTACT_FORMING_ONE_WAY_SURFACE_TO_SURFACE_ID
+*createentity groups name="CONTACT_FORMING_ONE_WAY_SURFACE_TO_SURFACE_ORTHO_FRICTION_900000" cardimage=CONTACT_FORMING_ONE_WAY_SURFACE_TO_SURFACE_ORTHO_FRICTION
+*createentity groups name="CONTACT_FORMING_ONE_WAY_SURFACE_TO_SURFACE_THERMAL_FRICTION_ID_900000" cardimage=CONTACT_FORMING_ONE_WAY_SURFACE_TO_SURFACE_THERMAL_FRICTION_ID
+*createentity groups name="CONTACT_FORMING_SURFACE_TO_SUR_900000" cardimage=CONTACT_FORMING_SURFACE_TO_SUR
+*createentity groups name="CONTACT_FORMING_SURFACE_TO_SURFACE_900000" cardimage=CONTACT_FORMING_SURFACE_TO_SURFACE
+*createentity groups name="CONTACT_FORMING_SURFACE_TO_SURFACE_ID_MPP_900000" cardimage=CONTACT_FORMING_SURFACE_TO_SURFACE_ID_MPP
+*createentity groups name="CONTACT_FORMING_SURFACE_TO_SURFACE_MORTAR_900000" cardimage=CONTACT_FORMING_SURFACE_TO_SURFACE_MORTAR
+*createentity groups name="CONTACT_GEBOD_900000" cardimage=CONTACT_GEBOD
+*createentity groups name="CONTACT_GEBOD_OPTION_900000" cardimage=CONTACT_GEBOD_OPTION
+*createentity groups name="CONTACT_GENERAL_900000" cardimage=CONTACT_GENERAL
+*createentity groups name="CONTACT_GENERAL_INTERIOR_900000" cardimage=CONTACT_GENERAL_INTERIOR
+*createentity groups name="CONTACT_GUIDED_CABLE_900000" cardimage=CONTACT_GUIDED_CABLE
+*createentity groups name="CONTACT_GUIDED_GABLE_900000" cardimage=CONTACT_GUIDED_GABLE
+*createentity groups name="CONTACT_INTERIOR_900000" cardimage=CONTACT_INTERIOR
+*createentity groups name="CONTACT_MPP_DECOMPOSITION_DEFORMED_GEOMETRY_900000" cardimage=CONTACT_MPP_DECOMPOSITION_DEFORMED_GEOMETRY
+*createentity groups name="CONTACT_NODES_TO_SURFACE_900000" cardimage=CONTACT_NODES_TO_SURFACE
+*createentity groups name="CONTACT_NODES_TO_SURFACE_INTERFERENCE_900000" cardimage=CONTACT_NODES_TO_SURFACE_INTERFERENCE
+*createentity groups name="CONTACT_ONE_WAY_SURFACE_TO_SURFACE_900000" cardimage=CONTACT_ONE_WAY_SURFACE_TO_SURFACE
+*createentity groups name="CONTACT_ONE_WAY_SURFACE_TO_SURFACE_INTERFERENCE_900000" cardimage=CONTACT_ONE_WAY_SURFACE_TO_SURFACE_INTERFERENCE
+*createentity groups name="CONTACT_OPTION_900000" cardimage=CONTACT_OPTION
+*createentity groups name="CONTACT_RIGID_BODY_ONE_WAY_TO_RIGID_BODY_900000" cardimage=CONTACT_RIGID_BODY_ONE_WAY_TO_RIGID_BODY
+*createentity groups name="CONTACT_RIGID_BODY_TWO_WAY_TO_RIGID_BODY_900000" cardimage=CONTACT_RIGID_BODY_TWO_WAY_TO_RIGID_BODY
+*createentity groups name="CONTACT_RIGID_NODE_SURFACE_900000" cardimage=CONTACT_RIGID_NODE_SURFACE
+*createentity groups name="CONTACT_RIGID_NODES_TO_RIGID_BODY_900000" cardimage=CONTACT_RIGID_NODES_TO_RIGID_BODY
+*createentity groups name="CONTACT_RIGID_SUR_900000" cardimage=CONTACT_RIGID_SUR
+*createentity groups name="CONTACT_RIGID_SURFACE_900000" cardimage=CONTACT_RIGID_SURFACE
+*createentity groups name="CONTACT_RIGID_TO_RIGID_900000" cardimage=CONTACT_RIGID_TO_RIGID
+*createentity groups name="CONTACT_SINGLE_EDGE_900000" cardimage=CONTACT_SINGLE_EDGE
+*createentity groups name="CONTACT_SINGLE_SURFACE_900000" cardimage=CONTACT_SINGLE_SURFACE
+*createentity groups name="CONTACT_SLID_900000" cardimage=CONTACT_SLID
+*createentity groups name="CONTACT_SLIDING_ONLY_900000" cardimage=CONTACT_SLIDING_ONLY
+*createentity groups name="CONTACT_SPG_900000" cardimage=CONTACT_SPG
+*createentity groups name="CONTACT_SPOTWELD_900000" cardimage=CONTACT_SPOTWELD
+*createentity groups name="CONTACT_SPOTWELD_WITH_TORSION_900000" cardimage=CONTACT_SPOTWELD_WITH_TORSION
+*createentity groups name="CONTACT_SURFACE_TO_SURFACE_900000" cardimage=CONTACT_SURFACE_TO_SURFACE
+*createentity groups name="CONTACT_SURFACE_TO_SURFACE_CONTRACTION_JOINT_900000" cardimage=CONTACT_SURFACE_TO_SURFACE_CONTRACTION_JOINT
+*createentity groups name="CONTACT_SURFACE_TO_SURFACE_INTERFERENCE_900000" cardimage=CONTACT_SURFACE_TO_SURFACE_INTERFERENCE
+*createentity groups name="CONTACT_THERMAL_FORMING_900000" cardimage=CONTACT_THERMAL_FORMING
+*createentity groups name="CONTACT_TIEBREAK_NODES_ONLY_900000" cardimage=CONTACT_TIEBREAK_NODES_ONLY
+*createentity groups name="CONTACT_TIEBREAK_NODES_TO_SUR_900000" cardimage=CONTACT_TIEBREAK_NODES_TO_SUR
+*createentity groups name="CONTACT_TIEBREAK_NODES_TO_SURFACE_900000" cardimage=CONTACT_TIEBREAK_NODES_TO_SURFACE
+*createentity groups name="CONTACT_TIEBREAK_SUR_900000" cardimage=CONTACT_TIEBREAK_SUR
+*createentity groups name="CONTACT_TIEBREAK_SURFACE_900000" cardimage=CONTACT_TIEBREAK_SURFACE
+*createentity groups name="CONTACT_TIEBREAK_SURFACE_TO_SURFACE_900000" cardimage=CONTACT_TIEBREAK_SURFACE_TO_SURFACE
+*createentity groups name="CONTACT_TIEBREAK_SURFACE_TO_SURFACE_ONLY_900000" cardimage=CONTACT_TIEBREAK_SURFACE_TO_SURFACE_ONLY
+*createentity groups name="CONTACT_TIED_900000" cardimage=CONTACT_TIED
+*createentity groups name="CONTACT_TIED_NODES_TO_SURFACE_900000" cardimage=CONTACT_TIED_NODES_TO_SURFACE
+*createentity groups name="CONTACT_TIED_NODES_TO_SURFACE_CONSTRAINED_OFFSET_900000" cardimage=CONTACT_TIED_NODES_TO_SURFACE_CONSTRAINED_OFFSET
+*createentity groups name="CONTACT_TIED_NODES_TO_SURFACE_CONSTRAINED_OFFSET_THERMAL_900000" cardimage=CONTACT_TIED_NODES_TO_SURFACE_CONSTRAINED_OFFSET_THERMAL
+*createentity groups name="CONTACT_TIED_NODES_TO_SURFACE_OFFSET_900000" cardimage=CONTACT_TIED_NODES_TO_SURFACE_OFFSET
+*createentity groups name="CONTACT_TIED_NODES_TO_SURFACE_OFFSET_THERMAL_900000" cardimage=CONTACT_TIED_NODES_TO_SURFACE_OFFSET_THERMAL
+*createentity groups name="CONTACT_TIED_NODES_TO_SURFACE_THERMAL_900000" cardimage=CONTACT_TIED_NODES_TO_SURFACE_THERMAL
+*createentity groups name="CONTACT_TIED_SHELL_EDGE_TO_SOLID_900000" cardimage=CONTACT_TIED_SHELL_EDGE_TO_SOLID
+*createentity groups name="CONTACT_TIED_SHELL_EDGE_TO_SURFACE_900000" cardimage=CONTACT_TIED_SHELL_EDGE_TO_SURFACE
+*createentity groups name="CONTACT_TIED_SHELL_EDGE_TO_SURFACE_BEAM_OFFSET_900000" cardimage=CONTACT_TIED_SHELL_EDGE_TO_SURFACE_BEAM_OFFSET
+*createentity groups name="CONTACT_TIED_SHELL_EDGE_TO_SURFACE_BEAM_OFFSET_THERMAL_900000" cardimage=CONTACT_TIED_SHELL_EDGE_TO_SURFACE_BEAM_OFFSET_THERMAL
+*createentity groups name="CONTACT_TIED_SHELL_EDGE_TO_SURFACE_CON_900000" cardimage=CONTACT_TIED_SHELL_EDGE_TO_SURFACE_CON
+*createentity groups name="CONTACT_TIED_SHELL_EDGE_TO_SURFACE_CONSTRAINED_OFFSET_900000" cardimage=CONTACT_TIED_SHELL_EDGE_TO_SURFACE_CONSTRAINED_OFFSET
+*createentity groups name="CONTACT_TIED_SHELL_EDGE_TO_SURFACE_CONSTRAINED_OFFSET_THERMAL_900000" cardimage=CONTACT_TIED_SHELL_EDGE_TO_SURFACE_CONSTRAINED_OFFSET_THERMAL
+*createentity groups name="CONTACT_TIED_SHELL_EDGE_TO_SURFACE_OFFSET_THERMAL_900000" cardimage=CONTACT_TIED_SHELL_EDGE_TO_SURFACE_OFFSET_THERMAL
+*createentity groups name="CONTACT_TIED_SHELL_EDGE_TO_SURFACE_THERMAL_900000" cardimage=CONTACT_TIED_SHELL_EDGE_TO_SURFACE_THERMAL
+*createentity groups name="CONTACT_TIED_SUR_900000" cardimage=CONTACT_TIED_SUR
+*createentity groups name="CONTACT_TIED_SURFACE_TO_SURFACE_900000" cardimage=CONTACT_TIED_SURFACE_TO_SURFACE
+*createentity groups name="BOUNDARY_ACOUSTIC_COMPLEX_900000" cardimage=BOUNDARY_ACOUSTIC_COMPLEX
+*createentity groups name="BOUNDARY_ACOUSTIC_COU_900000" cardimage=BOUNDARY_ACOUSTIC_COU
+*createentity groups name="BOUNDARY_ACOUSTIC_COUPLING_900000" cardimage=BOUNDARY_ACOUSTIC_COUPLING
+*createentity groups name="BOUNDARY_ACOUSTIC_COUPLING_MISMATCH_900000" cardimage=BOUNDARY_ACOUSTIC_COUPLING_MISMATCH
+*createentity groups name="BOUNDARY_ACOUSTIC_COUPLING_SPECTRAL_900000" cardimage=BOUNDARY_ACOUSTIC_COUPLING_SPECTRAL
+*createentity groups name="BOUNDARY_ACOUSTIC_FREE_SUR_900000" cardimage=BOUNDARY_ACOUSTIC_FREE_SUR
+*createentity groups name="BOUNDARY_ACOUSTIC_FREE_SURFACE_900000" cardimage=BOUNDARY_ACOUSTIC_FREE_SURFACE
+*createentity groups name="BOUNDARY_ACOUSTIC_IMPEDANCE_900000" cardimage=BOUNDARY_ACOUSTIC_IMPEDANCE
+*createentity groups name="BOUNDARY_ACOUSTIC_IMPEDANCE_COMPLEX_900000" cardimage=BOUNDARY_ACOUSTIC_IMPEDANCE_COMPLEX
+*createentity groups name="BOUNDARY_ACOUSTIC_IMPEDANCE_MECHANICAL_900000" cardimage=BOUNDARY_ACOUSTIC_IMPEDANCE_MECHANICAL
+*createentity groups name="BOUNDARY_ACOUSTIC_IN_900000" cardimage=BOUNDARY_ACOUSTIC_IN
+*createentity groups name="BOUNDARY_ACOUSTIC_INTERFACE_900000" cardimage=BOUNDARY_ACOUSTIC_INTERFACE
+*createentity groups name="BOUNDARY_ACOUSTIC_MAPPING_900000" cardimage=BOUNDARY_ACOUSTIC_MAPPING
+*createentity groups name="BOUNDARY_ACOUSTIC_MECHANICAL_900000" cardimage=BOUNDARY_ACOUSTIC_MECHANICAL
+*createentity groups name="BOUNDARY_ACOUSTIC_NON_RE_900000" cardimage=BOUNDARY_ACOUSTIC_NON_RE
+*createentity groups name="BOUNDARY_ACOUSTIC_NON_REFLECTING_900000" cardimage=BOUNDARY_ACOUSTIC_NON_REFLECTING
+*createentity groups name="BOUNDARY_ACOUSTIC_PRESCRIBED_MOTION_900000" cardimage=BOUNDARY_ACOUSTIC_PRESCRIBED_MOTION
+*createentity groups name="BOUNDARY_ACOUSTIC_PRESSURE_SPECTRAL_900000" cardimage=BOUNDARY_ACOUSTIC_PRESSURE_SPECTRAL
+*createentity groups name="BOUNDARY_ALE_MAPPING_900000" cardimage=BOUNDARY_ALE_MAPPING
+*createentity groups name="BOUNDARY_AMBIENT_900000" cardimage=BOUNDARY_AMBIENT
+*createentity groups name="BOUNDARY_AMBIENT_EOS_900000" cardimage=BOUNDARY_AMBIENT_EOS
+*createentity groups name="BOUNDARY_CONVECTION_900000" cardimage=BOUNDARY_CONVECTION
+*createentity groups name="BOUNDARY_CONVECTION_OPTION_900000" cardimage=BOUNDARY_CONVECTION_OPTION
+*createentity groups name="BOUNDARY_CONVECTION_SET_900000" cardimage=BOUNDARY_CONVECTION_SET
+*createentity groups name="BOUNDARY_COUPLED_900000" cardimage=BOUNDARY_COUPLED
+*createentity groups name="BOUNDARY_CYCLIC_900000" cardimage=BOUNDARY_CYCLIC
+*createentity groups name="BOUNDARY_DE_NON_REFLECTING_900000" cardimage=BOUNDARY_DE_NON_REFLECTING
+*createentity groups name="BOUNDARY_ELEMENT_METHOD_900000" cardimage=BOUNDARY_ELEMENT_METHOD
+*createentity groups name="BOUNDARY_ELEMENT_METHOD_CONTROL_900000" cardimage=BOUNDARY_ELEMENT_METHOD_CONTROL
+*createentity groups name="BOUNDARY_ELEMENT_METHOD_FLOW_900000" cardimage=BOUNDARY_ELEMENT_METHOD_FLOW
+*createentity groups name="BOUNDARY_ELEMENT_METHOD_NEIGHBOR_900000" cardimage=BOUNDARY_ELEMENT_METHOD_NEIGHBOR
+*createentity groups name="BOUNDARY_ELEMENT_METHOD_OPTION_900000" cardimage=BOUNDARY_ELEMENT_METHOD_OPTION
+*createentity groups name="BOUNDARY_ELEMENT_METHOD_SYMMETRY_900000" cardimage=BOUNDARY_ELEMENT_METHOD_SYMMETRY
+*createentity groups name="BOUNDARY_ELEMENT_METHOD_WAKE_900000" cardimage=BOUNDARY_ELEMENT_METHOD_WAKE
+*createentity groups name="BOUNDARY_ENCLOSURE_RADIATION_900000" cardimage=BOUNDARY_ENCLOSURE_RADIATION
+*createentity groups name="BOUNDARY_FLUX_900000" cardimage=BOUNDARY_FLUX
+*createentity groups name="BOUNDARY_FLUX_OPTION_900000" cardimage=BOUNDARY_FLUX_OPTION
+*createentity groups name="BOUNDARY_FLUX_TRAJECTORY_900000" cardimage=BOUNDARY_FLUX_TRAJECTORY
+*createentity groups name="BOUNDARY_MCOL_900000" cardimage=BOUNDARY_MCOL
+*createentity groups name="BOUNDARY_NON_REFLECT_900000" cardimage=BOUNDARY_NON_REFLECT
+*createentity groups name="BOUNDARY_NON_REFLECTING_900000" cardimage=BOUNDARY_NON_REFLECTING
+*createentity groups name="BOUNDARY_NON_REFLECTING_2D_900000" cardimage=BOUNDARY_NON_REFLECTING_2D
+*createentity groups name="BOUNDARY_OPTION_900000" cardimage=BOUNDARY_OPTION
+*createentity groups name="BOUNDARY_PAP_900000" cardimage=BOUNDARY_PAP
+*createentity groups name="BOUNDARY_PORE_FLUID_900000" cardimage=BOUNDARY_PORE_FLUID
+*createentity groups name="BOUNDARY_PORE_FLUID_OPTION_900000" cardimage=BOUNDARY_PORE_FLUID_OPTION
+*createentity groups name="BOUNDARY_PRE_900000" cardimage=BOUNDARY_PRE
+*createentity groups name="BOUNDARY_PRECRACK_900000" cardimage=BOUNDARY_PRECRACK
+*createentity groups name="BOUNDARY_PRESCRIBED_ACCELEROMETER_900000" cardimage=BOUNDARY_PRESCRIBED_ACCELEROMETER
+*createentity groups name="BOUNDARY_PRESCRIBED_ACCELEROMETER_RIGID_900000" cardimage=BOUNDARY_PRESCRIBED_ACCELEROMETER_RIGID
+*createentity groups name="BOUNDARY_PRESCRIBED_FINAL_GEOMETRY_900000" cardimage=BOUNDARY_PRESCRIBED_FINAL_GEOMETRY
+*createentity groups name="BOUNDARY_PRESCRIBED_MO_900000" cardimage=BOUNDARY_PRESCRIBED_MO
+*createentity groups name="BOUNDARY_PRESCRIBED_MOTION_900000" cardimage=BOUNDARY_PRESCRIBED_MOTION
+*createentity groups name="BOUNDARY_PRESCRIBED_MOTION_FINAL_GEOMETRY_900000" cardimage=BOUNDARY_PRESCRIBED_MOTION_FINAL_GEOMETRY
+*createentity loadcols name="BOUNDARY_PRESCRIBED_MOTION_NODE_900000" cardimage=BOUNDARY_PRESCRIBED_MOTION_NODE
+*createentity groups name="BOUNDARY_PRESCRIBED_MOTION_NODE_ID_900000" cardimage=BOUNDARY_PRESCRIBED_MOTION_NODE_ID
+*createentity groups name="BOUNDARY_PRESCRIBED_MOTION_OPTION_900000" cardimage=BOUNDARY_PRESCRIBED_MOTION_OPTION
+*createentity groups name="BOUNDARY_PRESCRIBED_MOTION_RIGID_900000" cardimage=BOUNDARY_PRESCRIBED_MOTION_RIGID
+*createentity groups name="BOUNDARY_PRESCRIBED_MOTION_RIGID_LOCAL_900000" cardimage=BOUNDARY_PRESCRIBED_MOTION_RIGID_LOCAL
+*createentity loadcols name="BOUNDARY_PRESCRIBED_MOTION_SET_900000" cardimage=BOUNDARY_PRESCRIBED_MOTION_SET
+*createentity groups name="BOUNDARY_PRESCRIBED_MOTION_SET_BOX_900000" cardimage=BOUNDARY_PRESCRIBED_MOTION_SET_BOX
+*createentity groups name="BOUNDARY_PRESCRIBED_MOTION_SET_LINE_900000" cardimage=BOUNDARY_PRESCRIBED_MOTION_SET_LINE
+*createentity groups name="BOUNDARY_PRESCRIBED_MOTION_SET_SEGMENT_900000" cardimage=BOUNDARY_PRESCRIBED_MOTION_SET_SEGMENT
+*createentity groups name="BOUNDARY_PRESCRIBED_ORIEN_900000" cardimage=BOUNDARY_PRESCRIBED_ORIEN
+*createentity groups name="BOUNDARY_PRESCRIBED_ORIENTA_900000" cardimage=BOUNDARY_PRESCRIBED_ORIENTA
+*createentity groups name="BOUNDARY_PRESCRIBED_ORIENTATION_RIGID_900000" cardimage=BOUNDARY_PRESCRIBED_ORIENTATION_RIGID
+*createentity groups name="BOUNDARY_PRESCRIBED_ORIENTATION_RIGID_DIRCOS_900000" cardimage=BOUNDARY_PRESCRIBED_ORIENTATION_RIGID_DIRCOS
+*createentity groups name="BOUNDARY_PRESCRIBED_ORIENTATION_RIGID_OPTION_900000" cardimage=BOUNDARY_PRESCRIBED_ORIENTATION_RIGID_OPTION
+*createentity groups name="BOUNDARY_PRESCRIBED_ORIENTATION_VECTOR_900000" cardimage=BOUNDARY_PRESCRIBED_ORIENTATION_VECTOR
+*createentity groups name="BOUNDARY_PRESCRIBED_RIGID_BODY_900000" cardimage=BOUNDARY_PRESCRIBED_RIGID_BODY
+*createentity groups name="BOUNDARY_PRESCRIBED_SPC_900000" cardimage=BOUNDARY_PRESCRIBED_SPC
+*createentity groups name="BOUNDARY_PRESCRIPTION_RIGID_900000" cardimage=BOUNDARY_PRESCRIPTION_RIGID
+*createentity groups name="BOUNDARY_PRESSURE_OUTFLOW_900000" cardimage=BOUNDARY_PRESSURE_OUTFLOW
+*createentity groups name="BOUNDARY_PRESSURE_OUTFLOW_OPTION_900000" cardimage=BOUNDARY_PRESSURE_OUTFLOW_OPTION
+*createentity groups name="BOUNDARY_PWP_900000" cardimage=BOUNDARY_PWP
+*createentity groups name="BOUNDARY_PWP_NODE_900000" cardimage=BOUNDARY_PWP_NODE
+*createentity groups name="BOUNDARY_PWP_OPTION_900000" cardimage=BOUNDARY_PWP_OPTION
+*createentity groups name="BOUNDARY_PWP_TA_900000" cardimage=BOUNDARY_PWP_TA
+*createentity groups name="BOUNDARY_PWP_TABLE_900000" cardimage=BOUNDARY_PWP_TABLE
+*createentity groups name="BOUNDARY_PZEPOT_900000" cardimage=BOUNDARY_PZEPOT
+*createentity groups name="BOUNDARY_RADIA_900000" cardimage=BOUNDARY_RADIA
+*createentity groups name="BOUNDARY_RADIATION_900000" cardimage=BOUNDARY_RADIATION
+*createentity groups name="BOUNDARY_RADIATION_ENCLOSURE_900000" cardimage=BOUNDARY_RADIATION_ENCLOSURE
+*createentity groups name="BOUNDARY_RADIATION_OPTION_900000" cardimage=BOUNDARY_RADIATION_OPTION
+*createentity groups name="BOUNDARY_RADIATION_SEGMENT_900000" cardimage=BOUNDARY_RADIATION_SEGMENT
+*createentity groups name="BOUNDARY_RADIATION_SEGMENT_VF_900000" cardimage=BOUNDARY_RADIATION_SEGMENT_VF
+*createentity groups name="BOUNDARY_RADIATION_SEGMENT_VF_CALCULATE_900000" cardimage=BOUNDARY_RADIATION_SEGMENT_VF_CALCULATE
+*createentity groups name="BOUNDARY_RADIATION_SEGMENT_VF_OPTION_900000" cardimage=BOUNDARY_RADIATION_SEGMENT_VF_OPTION
+*createentity groups name="BOUNDARY_RADIATION_SEGMENT_VF_READ_900000" cardimage=BOUNDARY_RADIATION_SEGMENT_VF_READ
+*createentity groups name="BOUNDARY_RADIATION_SET_900000" cardimage=BOUNDARY_RADIATION_SET
+*createentity groups name="BOUNDARY_RADIATION_SET_VF_900000" cardimage=BOUNDARY_RADIATION_SET_VF
+*createentity groups name="BOUNDARY_RADIATION_SET_VF_CALCULATE_900000" cardimage=BOUNDARY_RADIATION_SET_VF_CALCULATE
+*createentity groups name="BOUNDARY_RADIATION_SET_VF_OPTION_900000" cardimage=BOUNDARY_RADIATION_SET_VF_OPTION
+*createentity groups name="BOUNDARY_RADIATION_SET_VF_READ_900000" cardimage=BOUNDARY_RADIATION_SET_VF_READ
+*createentity groups name="BOUNDARY_SALE_MESH_FACE_900000" cardimage=BOUNDARY_SALE_MESH_FACE
+*createentity groups name="BOUNDARY_SLIDING_PLANE_900000" cardimage=BOUNDARY_SLIDING_PLANE
+*createentity loadcols name="BOUNDARY_SPC_900000" cardimage=BOUNDARY_SPC
+*createentity groups name="BOUNDARY_SPC_NODE_900000" cardimage=BOUNDARY_SPC_NODE
+*createentity groups name="BOUNDARY_SPC_NODE_BIRTH_DEATH_900000" cardimage=BOUNDARY_SPC_NODE_BIRTH_DEATH
+*createentity groups name="BOUNDARY_SPC_OPTION_900000" cardimage=BOUNDARY_SPC_OPTION
+*createentity loadcols name="BOUNDARY_SPC_SET_900000" cardimage=BOUNDARY_SPC_SET
+*createentity groups name="BOUNDARY_SPC_SYMMETRY_PLANE_900000" cardimage=BOUNDARY_SPC_SYMMETRY_PLANE
+*createentity groups name="BOUNDARY_SPH_FLOW_900000" cardimage=BOUNDARY_SPH_FLOW
+*createentity groups name="BOUNDARY_SPH_NON_REFLECTING_900000" cardimage=BOUNDARY_SPH_NON_REFLECTING
+*createentity groups name="BOUNDARY_SPH_SYMMETRY_PLANE_900000" cardimage=BOUNDARY_SPH_SYMMETRY_PLANE
+*createentity groups name="BOUNDARY_SYMMETRY_FAILURE_900000" cardimage=BOUNDARY_SYMMETRY_FAILURE
+*createentity groups name="BOUNDARY_TEMPERATURE_900000" cardimage=BOUNDARY_TEMPERATURE
+*createentity groups name="BOUNDARY_TEMPERATURE_NODE_900000" cardimage=BOUNDARY_TEMPERATURE_NODE
+*createentity groups name="BOUNDARY_TEMPERATURE_OPTION_900000" cardimage=BOUNDARY_TEMPERATURE_OPTION
+*createentity groups name="BOUNDARY_TEMPERATURE_PERIODIC_SET_900000" cardimage=BOUNDARY_TEMPERATURE_PERIODIC_SET
+*createentity groups name="BOUNDARY_TEMPERATURE_RSW_900000" cardimage=BOUNDARY_TEMPERATURE_RSW
+*createentity groups name="BOUNDARY_TEMPERATURE_TRAJECTORY_900000" cardimage=BOUNDARY_TEMPERATURE_TRAJECTORY
+*createentity groups name="BOUNDARY_THERMAL_BULKFLOW_900000" cardimage=BOUNDARY_THERMAL_BULKFLOW
+*createentity groups name="BOUNDARY_THERMAL_BULKFLOW_OPTION1_OPTION2_900000" cardimage=BOUNDARY_THERMAL_BULKFLOW_OPTION1_OPTION2
+*createentity groups name="BOUNDARY_THERMAL_BULKNODE_900000" cardimage=BOUNDARY_THERMAL_BULKNODE
+*createentity groups name="BOUNDARY_THERMAL_WELD_900000" cardimage=BOUNDARY_THERMAL_WELD
+*createentity groups name="BOUNDARY_THERMAL_WELD_TRAJECTORY_900000" cardimage=BOUNDARY_THERMAL_WELD_TRAJECTORY
+*createentity groups name="BOUNDARY_USA_COUPLING_900000" cardimage=BOUNDARY_USA_COUPLING
+*createentity groups name="BOUNDARY_USA_SUR_900000" cardimage=BOUNDARY_USA_SUR
+*createentity groups name="BOUNDARY_USA_SURFACE_900000" cardimage=BOUNDARY_USA_SURFACE
+*createentity groups name="LOAD_ACOUSTIC_SOURCE_900000" cardimage=LOAD_ACOUSTIC_SOURCE
+*createentity groups name="LOAD_ALE_CONVECTION_900000" cardimage=LOAD_ALE_CONVECTION
+*createentity groups name="LOAD_ALE_CONVECTION_ID_900000" cardimage=LOAD_ALE_CONVECTION_ID
+*createentity groups name="LOAD_BEAM_900000" cardimage=LOAD_BEAM
+*createentity groups name="LOAD_BEAM_OPTION_900000" cardimage=LOAD_BEAM_OPTION
+*createentity groups name="LOAD_BLAST_900000" cardimage=LOAD_BLAST
+*createentity groups name="LOAD_BLAST_CLEARING_900000" cardimage=LOAD_BLAST_CLEARING
+*createentity groups name="LOAD_BLAST_EN_900000" cardimage=LOAD_BLAST_EN
+*createentity groups name="LOAD_BLAST_ENHANCED_900000" cardimage=LOAD_BLAST_ENHANCED
+*createentity groups name="LOAD_BLAST_ENHANCHED_900000" cardimage=LOAD_BLAST_ENHANCHED
+*createentity groups name="LOAD_BLAST_SEG_900000" cardimage=LOAD_BLAST_SEG
+*createentity groups name="LOAD_BLAST_SEGMENT_900000" cardimage=LOAD_BLAST_SEGMENT
+*createentity groups name="LOAD_BLAST_SEGMENT_SET_900000" cardimage=LOAD_BLAST_SEGMENT_SET
+*createentity loadcols name="LOAD_BODY_900000" cardimage=LOAD_BODY
+*createentity groups name="LOAD_BODY_GENERALIZED_900000" cardimage=LOAD_BODY_GENERALIZED
+*createentity groups name="LOAD_BODY_GENERALIZED_OPTION_900000" cardimage=LOAD_BODY_GENERALIZED_OPTION
+*createentity groups name="LOAD_BODY_OPTION_900000" cardimage=LOAD_BODY_OPTION
+*createentity groups name="LOAD_BODY_PARTS_900000" cardimage=LOAD_BODY_PARTS
+*createentity groups name="LOAD_BODY_POROUS_900000" cardimage=LOAD_BODY_POROUS
+*createentity groups name="LOAD_BODY_VECTOR_900000" cardimage=LOAD_BODY_VECTOR
+*createentity groups name="LOAD_BODY_Y_900000" cardimage=LOAD_BODY_Y
+*createentity groups name="LOAD_BODY_Z_900000" cardimage=LOAD_BODY_Z
+*createentity groups name="LOAD_BRODE_900000" cardimage=LOAD_BRODE
+*createentity groups name="LOAD_DENSI_900000" cardimage=LOAD_DENSI
+*createentity groups name="LOAD_DENSITY_DEPTH_900000" cardimage=LOAD_DENSITY_DEPTH
+*createentity groups name="LOAD_ERODING_PART_SET_900000" cardimage=LOAD_ERODING_PART_SET
+*createentity groups name="LOAD_EXPANSION_PRESSURE_900000" cardimage=LOAD_EXPANSION_PRESSURE
+*createentity groups name="LOAD_GRAVITY_PART_900000" cardimage=LOAD_GRAVITY_PART
+*createentity groups name="LOAD_HEAT_CONTROLLER_900000" cardimage=LOAD_HEAT_CONTROLLER
+*createentity groups name="LOAD_HEAT_EXOTHERMIC_REACTION_900000" cardimage=LOAD_HEAT_EXOTHERMIC_REACTION
+*createentity groups name="LOAD_HEAT_GENERATION_900000" cardimage=LOAD_HEAT_GENERATION
+*createentity groups name="LOAD_HEAT_GENERATION_OPTION_900000" cardimage=LOAD_HEAT_GENERATION_OPTION
+*createentity groups name="LOAD_MASK_900000" cardimage=LOAD_MASK
+*createentity groups name="LOAD_MOTION_NODE_900000" cardimage=LOAD_MOTION_NODE
+*createentity groups name="LOAD_MOVING_PRESSURE_900000" cardimage=LOAD_MOVING_PRESSURE
+*createentity loadcols name="LOAD_NODE_900000" cardimage=LOAD_NODE
+*createentity groups name="LOAD_NODE_OPTION_900000" cardimage=LOAD_NODE_OPTION
+*createentity groups name="LOAD_NODE_POINT_900000" cardimage=LOAD_NODE_POINT
+*createentity groups name="LOAD_NODE_SET_900000" cardimage=LOAD_NODE_SET
+*createentity groups name="LOAD_NURBS_SHELL_900000" cardimage=LOAD_NURBS_SHELL
+*createentity loadcols name="LOAD_PRESCRIBED_MOTION_SET_900000" cardimage=LOAD_PRESCRIBED_MOTION_SET
+*createentity groups name="LOAD_PYRO_ACTUATOR_900000" cardimage=LOAD_PYRO_ACTUATOR
+*createentity groups name="LOAD_PZE_900000" cardimage=LOAD_PZE
+*createentity groups name="LOAD_REMOVE_PART_900000" cardimage=LOAD_REMOVE_PART
+*createentity loadcols name="LOAD_RIGID_BODY_900000" cardimage=LOAD_RIGID_BODY
+*createentity groups name="LOAD_SEG_900000" cardimage=LOAD_SEG
+*createentity loadcols name="LOAD_SEGMENT_900000" cardimage=LOAD_SEGMENT
+*createentity groups name="LOAD_SEGMENT_CONTACT_MASK_900000" cardimage=LOAD_SEGMENT_CONTACT_MASK
+*createentity groups name="LOAD_SEGMENT_FILE_900000" cardimage=LOAD_SEGMENT_FILE
+*createentity groups name="LOAD_SEGMENT_FSILINK_900000" cardimage=LOAD_SEGMENT_FSILINK
+*createentity groups name="LOAD_SEGMENT_FSILNK_900000" cardimage=LOAD_SEGMENT_FSILNK
+*createentity groups name="LOAD_SEGMENT_ID_900000" cardimage=LOAD_SEGMENT_ID
+*createentity groups name="LOAD_SEGMENT_NONUNIFORM_900000" cardimage=LOAD_SEGMENT_NONUNIFORM
+*createentity groups name="LOAD_SEGMENT_OPTION_900000" cardimage=LOAD_SEGMENT_OPTION
+*createentity groups name="LOAD_SEGMENT_SET_900000" cardimage=LOAD_SEGMENT_SET
+*createentity groups name="LOAD_SEGMENT_SET_ANGLE_900000" cardimage=LOAD_SEGMENT_SET_ANGLE
+*createentity groups name="LOAD_SEGMENT_SET_NONUNI_900000" cardimage=LOAD_SEGMENT_SET_NONUNI
+*createentity groups name="LOAD_SEGMENT_SET_NONUNIFORM_900000" cardimage=LOAD_SEGMENT_SET_NONUNIFORM
+*createentity groups name="LOAD_SEISMIC_SSI_900000" cardimage=LOAD_SEISMIC_SSI
+*createentity groups name="LOAD_SEISMIC_SSI_AUX_900000" cardimage=LOAD_SEISMIC_SSI_AUX
+*createentity groups name="LOAD_SETMENT_SET_NONUNIFORM_900000" cardimage=LOAD_SETMENT_SET_NONUNIFORM
+*createentity loadcols name="LOAD_SHELL_900000" cardimage=LOAD_SHELL
+*createentity groups name="LOAD_SHELL_ELEMENT_900000" cardimage=LOAD_SHELL_ELEMENT
+*createentity groups name="LOAD_SHELL_OPTION_900000" cardimage=LOAD_SHELL_OPTION
+*createentity groups name="LOAD_SHELL_SET_900000" cardimage=LOAD_SHELL_SET
+*createentity groups name="LOAD_SPCFORC_900000" cardimage=LOAD_SPCFORC
+*createentity groups name="LOAD_SSA_900000" cardimage=LOAD_SSA
+*createentity groups name="LOAD_STEADY_STATE_ROLLING_900000" cardimage=LOAD_STEADY_STATE_ROLLING
+*createentity groups name="LOAD_STIFFEN_PART_900000" cardimage=LOAD_STIFFEN_PART
+*createentity groups name="LOAD_STRESS_SURFACE_900000" cardimage=LOAD_STRESS_SURFACE
+*createentity groups name="LOAD_SUPERPLASTIC_FORMING_900000" cardimage=LOAD_SUPERPLASTIC_FORMING
+*createentity groups name="LOAD_SUPERPLASTIC_OPTION_900000" cardimage=LOAD_SUPERPLASTIC_OPTION
+*createentity groups name="LOAD_SURFACE_STRESS_900000" cardimage=LOAD_SURFACE_STRESS
+*createentity groups name="LOAD_THERMAL_900000" cardimage=LOAD_THERMAL
+*createentity groups name="LOAD_THERMAL_BINOUT_900000" cardimage=LOAD_THERMAL_BINOUT
+*createentity groups name="LOAD_THERMAL_CONSTANT_900000" cardimage=LOAD_THERMAL_CONSTANT
+*createentity groups name="LOAD_THERMAL_CONSTANT_ELEMENT_900000" cardimage=LOAD_THERMAL_CONSTANT_ELEMENT
+*createentity groups name="LOAD_THERMAL_CONSTANT_ELEMENT_OPTION_900000" cardimage=LOAD_THERMAL_CONSTANT_ELEMENT_OPTION
+*createentity groups name="LOAD_THERMAL_CONSTANT_NODE_900000" cardimage=LOAD_THERMAL_CONSTANT_NODE
+*createentity groups name="LOAD_THERMAL_D3PLOT_900000" cardimage=LOAD_THERMAL_D3PLOT
+*createentity groups name="LOAD_THERMAL_ELEMENT_900000" cardimage=LOAD_THERMAL_ELEMENT
+*createentity groups name="LOAD_THERMAL_LOAD_CURVE_900000" cardimage=LOAD_THERMAL_LOAD_CURVE
+*createentity groups name="LOAD_THERMAL_NODE_900000" cardimage=LOAD_THERMAL_NODE
+*createentity groups name="LOAD_THERMAL_OP_900000" cardimage=LOAD_THERMAL_OP
+*createentity groups name="LOAD_THERMAL_OPTION_900000" cardimage=LOAD_THERMAL_OPTION
+*createentity groups name="LOAD_THERMAL_RSW_900000" cardimage=LOAD_THERMAL_RSW
+*createentity groups name="LOAD_THERMAL_TOPAZ_900000" cardimage=LOAD_THERMAL_TOPAZ
+*createentity groups name="LOAD_THERMAL_VARIABLE_900000" cardimage=LOAD_THERMAL_VARIABLE
+*createentity groups name="LOAD_THERMAL_VARIABLE_BEAM_900000" cardimage=LOAD_THERMAL_VARIABLE_BEAM
+*createentity groups name="LOAD_THERMAL_VARIABLE_ELEMENT_900000" cardimage=LOAD_THERMAL_VARIABLE_ELEMENT
+*createentity groups name="LOAD_THERMAL_VARIABLE_ELEMENT_BEAM_900000" cardimage=LOAD_THERMAL_VARIABLE_ELEMENT_BEAM
+*createentity groups name="LOAD_THERMAL_VARIABLE_ELEMENT_OPTION_900000" cardimage=LOAD_THERMAL_VARIABLE_ELEMENT_OPTION
+*createentity groups name="LOAD_THERMAL_VARIABLE_ELEMENT_TSHELL_900000" cardimage=LOAD_THERMAL_VARIABLE_ELEMENT_TSHELL
+*createentity groups name="LOAD_THERMAL_VARIABLE_NODE_900000" cardimage=LOAD_THERMAL_VARIABLE_NODE
+*createentity groups name="LOAD_THERMAL_VARIABLE_SHELL_900000" cardimage=LOAD_THERMAL_VARIABLE_SHELL
+*createentity groups name="LOAD_VOLUME_LOSS_900000" cardimage=LOAD_VOLUME_LOSS
+*createentity groups name="SET_2D_SEGMENT_900000" cardimage=SET_2D_SEGMENT
+*createentity groups name="SET_BEAM_900000" cardimage=SET_BEAM
+*createentity groups name="SET_BEAM_ADD_900000" cardimage=SET_BEAM_ADD
+*createentity groups name="SET_BEAM_INTERSECT_900000" cardimage=SET_BEAM_INTERSECT
+*createentity groups name="SET_BOX_900000" cardimage=SET_BOX
+*createentity groups name="SET_DISCRETE_900000" cardimage=SET_DISCRETE
+*createentity groups name="SET_DISCRETE_ADD_900000" cardimage=SET_DISCRETE_ADD
+*createentity groups name="SET_IGA_EDGE_900000" cardimage=SET_IGA_EDGE
+*createentity groups name="SET_IGA_EDGE_UVW_900000" cardimage=SET_IGA_EDGE_UVW
+*createentity groups name="SET_IGA_FACE_900000" cardimage=SET_IGA_FACE
+*createentity groups name="SET_IGA_FACE_XYZ_900000" cardimage=SET_IGA_FACE_XYZ
+*createentity groups name="SET_IGA_POINT_UVW_900000" cardimage=SET_IGA_POINT_UVW
+*createentity groups name="SET_MODE_900000" cardimage=SET_MODE
+*createentity groups name="SET_MUL_900000" cardimage=SET_MUL
+*createentity groups name="SET_MULTI_900000" cardimage=SET_MULTI
+*createentity groups name="SET_MULTIMATERIAL_GROUP_LIST_900000" cardimage=SET_MULTIMATERIAL_GROUP_LIST
+*createentity groups name="SET_NODE_900000" cardimage=SET_NODE
+*createentity groups name="SET_NODE_ADD_900000" cardimage=SET_NODE_ADD
+*createentity groups name="SET_NODE_COLLECT_900000" cardimage=SET_NODE_COLLECT
+*createentity groups name="SET_NODE_GENERAL_900000" cardimage=SET_NODE_GENERAL
+*createentity groups name="SET_NODE_INTERSECT_900000" cardimage=SET_NODE_INTERSECT
+*createentity groups name="SET_NODE_LIST_900000" cardimage=SET_NODE_LIST
+*createentity groups name="SET_NODE_LIST_SMOOTH_900000" cardimage=SET_NODE_LIST_SMOOTH
+*createentity groups name="SET_NODE_OPTION_900000" cardimage=SET_NODE_OPTION
+*createentity groups name="SET_NODES_900000" cardimage=SET_NODES
+*createentity groups name="SET_OPTION_900000" cardimage=SET_OPTION
+*createentity groups name="SET_PART_900000" cardimage=SET_PART
+*createentity groups name="SET_PART_ADD_900000" cardimage=SET_PART_ADD
+*createentity groups name="SET_PART_COLLECT_900000" cardimage=SET_PART_COLLECT
+*createentity groups name="SET_PART_COLUMN_900000" cardimage=SET_PART_COLUMN
+*createentity groups name="SET_PART_LIST_900000" cardimage=SET_PART_LIST
+*createentity groups name="SET_PART_LIST_GENERATE_COLLECT_900000" cardimage=SET_PART_LIST_GENERATE_COLLECT
+*createentity groups name="SET_PART_LIST_TITLE_900000" cardimage=SET_PART_LIST_TITLE
+*createentity groups name="SET_PART_OPTION_900000" cardimage=SET_PART_OPTION
+*createentity groups name="SET_PART_TREE_900000" cardimage=SET_PART_TREE
+*createentity groups name="SET_PERI_LAMINATE_900000" cardimage=SET_PERI_LAMINATE
+*createentity groups name="SET_POROUS_ALE_900000" cardimage=SET_POROUS_ALE
+*createentity groups name="SET_POROUS_LAGRANGIAN_900000" cardimage=SET_POROUS_LAGRANGIAN
+*createentity groups name="SET_SEG_900000" cardimage=SET_SEG
+*createentity groups name="SET_SEGMENT_900000" cardimage=SET_SEGMENT
+*createentity groups name="SET_SEGMENT_ADD_900000" cardimage=SET_SEGMENT_ADD
+*createentity groups name="SET_SEGMENT_GENERAL_900000" cardimage=SET_SEGMENT_GENERAL
+*createentity groups name="SET_SEGMENT_INTER_900000" cardimage=SET_SEGMENT_INTER
+*createentity groups name="SET_SEGMENT_INTERSECT_900000" cardimage=SET_SEGMENT_INTERSECT
+*createentity groups name="SET_SEGMENT_TITLE_900000" cardimage=SET_SEGMENT_TITLE
+*createentity groups name="SET_SHELL_900000" cardimage=SET_SHELL
+*createentity groups name="SET_SHELL_ADD_900000" cardimage=SET_SHELL_ADD
+*createentity groups name="SET_SHELL_GENERAL_900000" cardimage=SET_SHELL_GENERAL
+*createentity groups name="SET_SHELL_INTERSECT_900000" cardimage=SET_SHELL_INTERSECT
+*createentity groups name="SET_SHELL_LIST_900000" cardimage=SET_SHELL_LIST
+*createentity groups name="SET_SHELL_LIST_GENERATE_900000" cardimage=SET_SHELL_LIST_GENERATE
+*createentity groups name="SET_SHELL_OPTION_900000" cardimage=SET_SHELL_OPTION
+*createentity groups name="SET_SOL_900000" cardimage=SET_SOL
+*createentity groups name="SET_SOLID_900000" cardimage=SET_SOLID
+*createentity groups name="SET_SOLID_ADD_900000" cardimage=SET_SOLID_ADD
+*createentity groups name="SET_SOLID_GENERAL_900000" cardimage=SET_SOLID_GENERAL
+*createentity groups name="SET_SOLID_INTERSECT_900000" cardimage=SET_SOLID_INTERSECT
+*createentity groups name="SET_SOLID_LIST_900000" cardimage=SET_SOLID_LIST
+*createentity groups name="SET_SPRING_900000" cardimage=SET_SPRING
+*createentity groups name="SET_T_900000" cardimage=SET_T
+*createentity groups name="SET_TSHELL_900000" cardimage=SET_TSHELL
+*createentity elems name="ELEMENT_BEAM_ELBOW_900000" cardimage=ELEMENT_BEAM_ELBOW
+*createentity elems name="ELEMENT_BEAM_OFFSET_900000" cardimage=ELEMENT_BEAM_OFFSET
+*createentity elems name="ELEMENT_BEAM_PIPE_900000" cardimage=ELEMENT_BEAM_PIPE
+*createentity elems name="ELEMENT_BEAM_PULLEY_900000" cardimage=ELEMENT_BEAM_PULLEY
+*createentity elems name="ELEMENT_BEAM_SCALAR_900000" cardimage=ELEMENT_BEAM_SCALAR
+*createentity elems name="ELEMENT_BEAM_SOURCE_900000" cardimage=ELEMENT_BEAM_SOURCE
+*createentity elems name="ELEMENT_BEAM_THICKNESS_900000" cardimage=ELEMENT_BEAM_THICKNESS
+*createentity elems name="ELEMENT_BEARING_900000" cardimage=ELEMENT_BEARING
+*createentity elems name="ELEMENT_BEARING_OPTION_900000" cardimage=ELEMENT_BEARING_OPTION
+*createentity elems name="ELEMENT_BLANKING_900000" cardimage=ELEMENT_BLANKING
+*createentity elems name="ELEMENT_DI_900000" cardimage=ELEMENT_DI
+*createentity elems name="ELEMENT_DIRECT_MATRIX_IN_900000" cardimage=ELEMENT_DIRECT_MATRIX_IN
+*createentity elems name="ELEMENT_DIRECT_MATRIX_INPUT_900000" cardimage=ELEMENT_DIRECT_MATRIX_INPUT
+*createentity elems name="ELEMENT_DIRECT_MATRIX_INPUT_BINARY_900000" cardimage=ELEMENT_DIRECT_MATRIX_INPUT_BINARY
+*createentity elems name="ELEMENT_DIS_900000" cardimage=ELEMENT_DIS
+*createentity elems name="ELEMENT_DISCRETE_900000" cardimage=ELEMENT_DISCRETE
+*createentity elems name="ELEMENT_DISCRETE_SPHERE_900000" cardimage=ELEMENT_DISCRETE_SPHERE
+*createentity elems name="ELEMENT_FIBER_INFO_900000" cardimage=ELEMENT_FIBER_INFO
+*createentity elems name="ELEMENT_GENER_900000" cardimage=ELEMENT_GENER
+*createentity elems name="ELEMENT_GENERAL_900000" cardimage=ELEMENT_GENERAL
+*createentity elems name="ELEMENT_GENERALIZED_SHELL_900000" cardimage=ELEMENT_GENERALIZED_SHELL
+*createentity elems name="ELEMENT_GENERALIZED_SOLID_900000" cardimage=ELEMENT_GENERALIZED_SOLID
+*createentity elems name="ELEMENT_INERTIA_900000" cardimage=ELEMENT_INERTIA
+*createentity elems name="ELEMENT_INTERPOLATION_SHELL_900000" cardimage=ELEMENT_INTERPOLATION_SHELL
+*createentity elems name="ELEMENT_INTERPOLATION_SOLID_900000" cardimage=ELEMENT_INTERPOLATION_SOLID
+*createentity elems name="ELEMENT_LANCING_900000" cardimage=ELEMENT_LANCING
+*createentity elems name="ELEMENT_MASS_900000" cardimage=ELEMENT_MASS
+*createentity elems name="ELEMENT_MASS_MATRIX_900000" cardimage=ELEMENT_MASS_MATRIX
+*createentity elems name="ELEMENT_MASS_PART_900000" cardimage=ELEMENT_MASS_PART
+*createentity elems name="ELEMENT_NURB_SOLID_PATH_900000" cardimage=ELEMENT_NURB_SOLID_PATH
+*createentity elems name="ELEMENT_PLOTEL_900000" cardimage=ELEMENT_PLOTEL
+*createentity elems name="ELEMENT_SEAT_900000" cardimage=ELEMENT_SEAT
+*createentity elems name="ELEMENT_SEATBELT_900000" cardimage=ELEMENT_SEATBELT
+*createentity elems name="ELEMENT_SEATBELT_AC_900000" cardimage=ELEMENT_SEATBELT_AC
+*createentity elems name="ELEMENT_SEATBELT_ACCELEROMETER_900000" cardimage=ELEMENT_SEATBELT_ACCELEROMETER
+*createentity elems name="ELEMENT_SEATBELT_OPTION_900000" cardimage=ELEMENT_SEATBELT_OPTION
+*createentity elems name="ELEMENT_SEATBELT_PRETENSIONER_900000" cardimage=ELEMENT_SEATBELT_PRETENSIONER
+*createentity elems name="ELEMENT_SEATBELT_RETRACTOR_900000" cardimage=ELEMENT_SEATBELT_RETRACTOR
+*createentity elems name="ELEMENT_SEATBELT_SEN_900000" cardimage=ELEMENT_SEATBELT_SEN
+*createentity elems name="ELEMENT_SEATBELT_SENSOR_900000" cardimage=ELEMENT_SEATBELT_SENSOR
+*createentity elems name="ELEMENT_SEATBELT_SLIPRING_900000" cardimage=ELEMENT_SEATBELT_SLIPRING
+*createentity elems name="ELEMENT_SHELL_BETA_900000" cardimage=ELEMENT_SHELL_BETA
+*createentity elems name="ELEMENT_SHELL_COM_900000" cardimage=ELEMENT_SHELL_COM
+*createentity elems name="ELEMENT_SHELL_COMPOS_900000" cardimage=ELEMENT_SHELL_COMPOS
+*createentity elems name="ELEMENT_SHELL_COMPOSITE_900000" cardimage=ELEMENT_SHELL_COMPOSITE
+*createentity elems name="ELEMENT_SHELL_DOF_900000" cardimage=ELEMENT_SHELL_DOF
+*createentity elems name="ELEMENT_SHELL_MCID_900000" cardimage=ELEMENT_SHELL_MCID
+*createentity elems name="ELEMENT_SHELL_NURBS_PATCH_900000" cardimage=ELEMENT_SHELL_NURBS_PATCH
+*createentity elems name="ELEMENT_SHELL_NURBS_PATCH_TRIMMED_900000" cardimage=ELEMENT_SHELL_NURBS_PATCH_TRIMMED
+*createentity elems name="ELEMENT_SHELL_OFFSET_900000" cardimage=ELEMENT_SHELL_OFFSET
+*createentity elems name="ELEMENT_SHELL_OFFSET_COMPOSITE_900000" cardimage=ELEMENT_SHELL_OFFSET_COMPOSITE
+*createentity elems name="ELEMENT_SHELL_OPTION_900000" cardimage=ELEMENT_SHELL_OPTION
+*createentity elems name="ELEMENT_SHELL_SOURCE_SINK_900000" cardimage=ELEMENT_SHELL_SOURCE_SINK
+*createentity elems name="ELEMENT_SHELL_THICK_900000" cardimage=ELEMENT_SHELL_THICK
+*createentity elems name="ELEMENT_SHELL_THICKNESS_900000" cardimage=ELEMENT_SHELL_THICKNESS
+*createentity elems name="ELEMENT_SOL_900000" cardimage=ELEMENT_SOL
+*createentity elems name="ELEMENT_SOLID_DOF_900000" cardimage=ELEMENT_SOLID_DOF
+*createentity elems name="ELEMENT_SOLID_NURBS_PATCH_900000" cardimage=ELEMENT_SOLID_NURBS_PATCH
+*createentity elems name="ELEMENT_SOLID_OR_900000" cardimage=ELEMENT_SOLID_OR
+*createentity elems name="ELEMENT_SOLID_ORTHO_900000" cardimage=ELEMENT_SOLID_ORTHO
+*createentity elems name="ELEMENT_SOLID_PERI_900000" cardimage=ELEMENT_SOLID_PERI
+*createentity elems name="ELEMENT_SOLID_T4TOT10_900000" cardimage=ELEMENT_SOLID_T4TOT10
+*createentity elems name="ELEMENT_SOLID_TET4_900000" cardimage=ELEMENT_SOLID_TET4
+*createentity elems name="ELEMENT_SOURCE_SINK_900000" cardimage=ELEMENT_SOURCE_SINK
+*createentity elems name="ELEMENT_SPH_900000" cardimage=ELEMENT_SPH
+*createentity elems name="ELEMENT_SPH_VOLUME_900000" cardimage=ELEMENT_SPH_VOLUME
+*createentity elems name="ELEMENT_T_900000" cardimage=ELEMENT_T
+*createentity elems name="ELEMENT_TRIM_900000" cardimage=ELEMENT_TRIM
+*createentity elems name="ELEMENT_TSHELL_BETA_900000" cardimage=ELEMENT_TSHELL_BETA
+*createentity elems name="ELEMENT_TSHELL_COMPOSITE_900000" cardimage=ELEMENT_TSHELL_COMPOSITE
+*createentity groups name="DEFINE__CO_900000" cardimage=DEFINE__CO
+*createentity groups name="DEFINE_ADAPTIVE_900000" cardimage=DEFINE_ADAPTIVE
+*createentity groups name="DEFINE_ADAPTIVE_BOX_900000" cardimage=DEFINE_ADAPTIVE_BOX
+*createentity groups name="DEFINE_ADAPTIVE_SOLID_TO_DES_900000" cardimage=DEFINE_ADAPTIVE_SOLID_TO_DES
+*createentity groups name="DEFINE_ADAPTIVE_SOLID_TO_SPH_900000" cardimage=DEFINE_ADAPTIVE_SOLID_TO_SPH
+*createentity groups name="DEFINE_BEAM_SOLID_COUPLING_900000" cardimage=DEFINE_BEAM_SOLID_COUPLING
+*createentity groups name="DEFINE_BOX_900000" cardimage=DEFINE_BOX
+*createentity groups name="DEFINE_BOX_ADAP_900000" cardimage=DEFINE_BOX_ADAP
+*createentity groups name="DEFINE_BOX_ADAPTIVE_900000" cardimage=DEFINE_BOX_ADAPTIVE
+*createentity groups name="DEFINE_BOX_COARSEN_900000" cardimage=DEFINE_BOX_COARSEN
+*createentity groups name="DEFINE_BOX_DRAWBEAD_900000" cardimage=DEFINE_BOX_DRAWBEAD
+*createentity groups name="DEFINE_BOX_LOCAL_900000" cardimage=DEFINE_BOX_LOCAL
+*createentity groups name="DEFINE_BOX_NODES_ADAPTIVE_900000" cardimage=DEFINE_BOX_NODES_ADAPTIVE
+*createentity groups name="DEFINE_BOX_SPH_900000" cardimage=DEFINE_BOX_SPH
+*createentity groups name="DEFINE_CO_900000" cardimage=DEFINE_CO
+*createentity groups name="DEFINE_CON_900000" cardimage=DEFINE_CON
+*createentity groups name="DEFINE_CONNEC_900000" cardimage=DEFINE_CONNEC
+*createentity groups name="DEFINE_CONNECTION_900000" cardimage=DEFINE_CONNECTION
+*createentity groups name="DEFINE_CONNECTION_PROPERTIES_900000" cardimage=DEFINE_CONNECTION_PROPERTIES
+*createentity groups name="DEFINE_CONSTRUCTION_STAGES_900000" cardimage=DEFINE_CONSTRUCTION_STAGES
+*createentity groups name="DEFINE_CONTACT_EXCLUSION_900000" cardimage=DEFINE_CONTACT_EXCLUSION
+*createentity groups name="DEFINE_CONTACT_VOLUME_900000" cardimage=DEFINE_CONTACT_VOLUME
+*createentity groups name="DEFINE_CONTROL_VOLUME_900000" cardimage=DEFINE_CONTROL_VOLUME
+*createentity groups name="DEFINE_CONTROL_VOLUME_FLOW_AREA_900000" cardimage=DEFINE_CONTROL_VOLUME_FLOW_AREA
+*createentity groups name="DEFINE_CONTROL_VOLUME_INTERACTION_900000" cardimage=DEFINE_CONTROL_VOLUME_INTERACTION
+*createentity groups name="DEFINE_COOR_900000" cardimage=DEFINE_COOR
+*createentity groups name="DEFINE_COORDI_900000" cardimage=DEFINE_COORDI
+*createentity groups name="DEFINE_COORDINATE_900000" cardimage=DEFINE_COORDINATE
+*createentity groups name="DEFINE_COORDINATE_NODES_900000" cardimage=DEFINE_COORDINATE_NODES
+*createentity groups name="DEFINE_COORDINATE_NOTES_900000" cardimage=DEFINE_COORDINATE_NOTES
+*createentity groups name="DEFINE_COORDINATE_OPTION_900000" cardimage=DEFINE_COORDINATE_OPTION
+*createentity groups name="DEFINE_COORDINATE_SYS_900000" cardimage=DEFINE_COORDINATE_SYS
+*createentity groups name="DEFINE_COORDINATE_SYSTEM_900000" cardimage=DEFINE_COORDINATE_SYSTEM
+*createentity groups name="DEFINE_COORDINATE_SYSTEM_IGES_TITLE_900000" cardimage=DEFINE_COORDINATE_SYSTEM_IGES_TITLE
+*createentity groups name="DEFINE_COORDINATE_VEC_900000" cardimage=DEFINE_COORDINATE_VEC
+*createentity groups name="DEFINE_COORDINATE_VECTOR_900000" cardimage=DEFINE_COORDINATE_VECTOR
+*createentity groups name="DEFINE_COORINDATE_VECTOR_900000" cardimage=DEFINE_COORINDATE_VECTOR
+*createentity groups name="DEFINE_CPM_BAG_INTERACTION_900000" cardimage=DEFINE_CPM_BAG_INTERACTION
+*createentity groups name="DEFINE_CPM_CHAMBER_900000" cardimage=DEFINE_CPM_CHAMBER
+*createentity groups name="DEFINE_CPM_GAS_PROPERTIES_900000" cardimage=DEFINE_CPM_GAS_PROPERTIES
+*createentity groups name="DEFINE_CPM_NPDATA_900000" cardimage=DEFINE_CPM_NPDATA
+*createentity groups name="DEFINE_CPM_VENT_900000" cardimage=DEFINE_CPM_VENT
+*createentity groups name="DEFINE_CUR_900000" cardimage=DEFINE_CUR
+*createentity groups name="DEFINE_CURVE_900000" cardimage=DEFINE_CURVE
+*createentity groups name="DEFINE_CURVE_BOX_ADAPTIVITY_900000" cardimage=DEFINE_CURVE_BOX_ADAPTIVITY
+*createentity groups name="DEFINE_CURVE_COMPENSATION_CONSTRAINT_900000" cardimage=DEFINE_CURVE_COMPENSATION_CONSTRAINT
+*createentity groups name="DEFINE_CURVE_COMPENSATION_CONSTRAINT_BEGIN_900000" cardimage=DEFINE_CURVE_COMPENSATION_CONSTRAINT_BEGIN
+*createentity groups name="DEFINE_CURVE_COMPENSATION_CONSTRAINT_END_900000" cardimage=DEFINE_CURVE_COMPENSATION_CONSTRAINT_END
+*createentity groups name="DEFINE_CURVE_COMPENSATION_CONSTRAINT_OPTION_900000" cardimage=DEFINE_CURVE_COMPENSATION_CONSTRAINT_OPTION
+*createentity groups name="DEFINE_CURVE_DRAWBEAD_900000" cardimage=DEFINE_CURVE_DRAWBEAD
+*createentity groups name="DEFINE_CURVE_DUPLICATE_900000" cardimage=DEFINE_CURVE_DUPLICATE
+*createentity groups name="DEFINE_CURVE_ENTITY_900000" cardimage=DEFINE_CURVE_ENTITY
+*createentity groups name="DEFINE_CURVE_FEEDBACK_900000" cardimage=DEFINE_CURVE_FEEDBACK
+*createentity groups name="DEFINE_CURVE_FLC_900000" cardimage=DEFINE_CURVE_FLC
+*createentity groups name="DEFINE_CURVE_FLD_FROM_TRIAXI_900000" cardimage=DEFINE_CURVE_FLD_FROM_TRIAXI
+*createentity groups name="DEFINE_CURVE_FLD_FROM_TRIAXIAL_LIMIT_900000" cardimage=DEFINE_CURVE_FLD_FROM_TRIAXIAL_LIMIT
+*createentity groups name="DEFINE_CURVE_FUNC_900000" cardimage=DEFINE_CURVE_FUNC
+*createentity groups name="DEFINE_CURVE_FUNCTION_900000" cardimage=DEFINE_CURVE_FUNCTION
+*createentity groups name="DEFINE_CURVE_FUNCTION_TITLE_900000" cardimage=DEFINE_CURVE_FUNCTION_TITLE
+*createentity groups name="DEFINE_CURVE_SMOOTH_900000" cardimage=DEFINE_CURVE_SMOOTH
+*createentity groups name="DEFINE_CURVE_STRESS_900000" cardimage=DEFINE_CURVE_STRESS
+*createentity groups name="DEFINE_CURVE_TITLE_900000" cardimage=DEFINE_CURVE_TITLE
+*createentity groups name="DEFINE_CURVE_TRIAXI_900000" cardimage=DEFINE_CURVE_TRIAXI
+*createentity groups name="DEFINE_CURVE_TRIAXIAL_LIMIT_FROM_FLD_900000" cardimage=DEFINE_CURVE_TRIAXIAL_LIMIT_FROM_FLD
+*createentity groups name="DEFINE_CURVE_TRIM_900000" cardimage=DEFINE_CURVE_TRIM
+*createentity groups name="DEFINE_CURVE_TRIM_2D_900000" cardimage=DEFINE_CURVE_TRIM_2D
+*createentity groups name="DEFINE_CURVE_TRIM_3D_900000" cardimage=DEFINE_CURVE_TRIM_3D
+*createentity groups name="DEFINE_CURVE_TRIM_NEW_900000" cardimage=DEFINE_CURVE_TRIM_NEW
+*createentity groups name="DEFINE_DE_ACTIVE_REGION_900000" cardimage=DEFINE_DE_ACTIVE_REGION
+*createentity groups name="DEFINE_DE_BOND_900000" cardimage=DEFINE_DE_BOND
+*createentity groups name="DEFINE_DE_BOND_OVERRIDE_900000" cardimage=DEFINE_DE_BOND_OVERRIDE
+*createentity groups name="DEFINE_DE_BY_PART_900000" cardimage=DEFINE_DE_BY_PART
+*createentity groups name="DEFINE_DE_COHESIVE_900000" cardimage=DEFINE_DE_COHESIVE
+*createentity groups name="DEFINE_DE_FLOW_DRAG_900000" cardimage=DEFINE_DE_FLOW_DRAG
+*createentity groups name="DEFINE_DE_HBOND_900000" cardimage=DEFINE_DE_HBOND
+*createentity groups name="DEFINE_DE_IN_900000" cardimage=DEFINE_DE_IN
+*createentity groups name="DEFINE_DE_INJECT_BONDED_900000" cardimage=DEFINE_DE_INJECT_BONDED
+*createentity groups name="DEFINE_DE_INJECT_SHAPE_900000" cardimage=DEFINE_DE_INJECT_SHAPE
+*createentity groups name="DEFINE_DE_INJECTION_900000" cardimage=DEFINE_DE_INJECTION
+*createentity groups name="DEFINE_DE_INJECTION_ELLIPSE_900000" cardimage=DEFINE_DE_INJECTION_ELLIPSE
+*createentity groups name="DEFINE_DE_MASS_900000" cardimage=DEFINE_DE_MASS
+*createentity groups name="DEFINE_DE_MASSFLOW_PLANE_900000" cardimage=DEFINE_DE_MASSFLOW_PLANE
+*createentity groups name="DEFINE_DE_MESH_BEAM_900000" cardimage=DEFINE_DE_MESH_BEAM
+*createentity groups name="DEFINE_DE_MESH_SURFACE_900000" cardimage=DEFINE_DE_MESH_SURFACE
+*createentity groups name="DEFINE_DE_TO_BEAM_COUPLING_900000" cardimage=DEFINE_DE_TO_BEAM_COUPLING
+*createentity groups name="DEFINE_DE_TO_SURFACE_COUPLING_900000" cardimage=DEFINE_DE_TO_SURFACE_COUPLING
+*createentity groups name="DEFINE_DE_TO_SURFACE_TIED_900000" cardimage=DEFINE_DE_TO_SURFACE_TIED
+*createentity groups name="DEFINE_DEATH_TIMES_900000" cardimage=DEFINE_DEATH_TIMES
+*createentity groups name="DEFINE_DEATH_TIMES_OPTION_900000" cardimage=DEFINE_DEATH_TIMES_OPTION
+*createentity groups name="DEFINE_DRAWBEAD_BEAM_900000" cardimage=DEFINE_DRAWBEAD_BEAM
+*createentity groups name="DEFINE_DRIFT_REMOVE_900000" cardimage=DEFINE_DRIFT_REMOVE
+*createentity groups name="DEFINE_EL_900000" cardimage=DEFINE_EL
+*createentity groups name="DEFINE_ELE_900000" cardimage=DEFINE_ELE
+*createentity groups name="DEFINE_ELEMENT_DEATH_900000" cardimage=DEFINE_ELEMENT_DEATH
+*createentity groups name="DEFINE_ELEMENT_DEATH_OPTION_900000" cardimage=DEFINE_ELEMENT_DEATH_OPTION
+*createentity groups name="DEFINE_ELEMENT_EROSION_900000" cardimage=DEFINE_ELEMENT_EROSION
+*createentity groups name="DEFINE_ELEMENT_EROSION_OPTION_900000" cardimage=DEFINE_ELEMENT_EROSION_OPTION
+*createentity groups name="DEFINE_ELEMENT_EROSION_SHELL_900000" cardimage=DEFINE_ELEMENT_EROSION_SHELL
+*createentity groups name="DEFINE_ELEMENT_GENERALIZED_SHELL_900000" cardimage=DEFINE_ELEMENT_GENERALIZED_SHELL
+*createentity groups name="DEFINE_ELEMENT_GENERALIZED_SOL_900000" cardimage=DEFINE_ELEMENT_GENERALIZED_SOL
+*createentity groups name="DEFINE_ELEMENT_GENERALIZED_SOLID_900000" cardimage=DEFINE_ELEMENT_GENERALIZED_SOLID
+*createentity groups name="DEFINE_FABRIC_ASSEM_900000" cardimage=DEFINE_FABRIC_ASSEM
+*createentity groups name="DEFINE_FABRIC_ASSEMBLIES_900000" cardimage=DEFINE_FABRIC_ASSEMBLIES
+*createentity groups name="DEFINE_FIBERS_900000" cardimage=DEFINE_FIBERS
+*createentity groups name="DEFINE_FIL_900000" cardimage=DEFINE_FIL
+*createentity groups name="DEFINE_FILTER_900000" cardimage=DEFINE_FILTER
+*createentity groups name="DEFINE_FORMING_BLANKMESH_900000" cardimage=DEFINE_FORMING_BLANKMESH
+*createentity groups name="DEFINE_FORMING_CLAMP_900000" cardimage=DEFINE_FORMING_CLAMP
+*createentity groups name="DEFINE_FORMING_CONTACT_900000" cardimage=DEFINE_FORMING_CONTACT
+*createentity groups name="DEFINE_FORMING_ONESTEP_MASTER_900000" cardimage=DEFINE_FORMING_ONESTEP_MASTER
+*createentity groups name="DEFINE_FORMING_ONESTEP_PRI_900000" cardimage=DEFINE_FORMING_ONESTEP_PRI
+*createentity groups name="DEFINE_FORMING_ONESTEP_PRIMARY_900000" cardimage=DEFINE_FORMING_ONESTEP_PRIMARY
+*createentity groups name="DEFINE_FP_TO_SURFACE_COUPLING_900000" cardimage=DEFINE_FP_TO_SURFACE_COUPLING
+*createentity groups name="DEFINE_FRIC_900000" cardimage=DEFINE_FRIC
+*createentity groups name="DEFINE_FRICTION_900000" cardimage=DEFINE_FRICTION
+*createentity groups name="DEFINE_FRICTION_ORIENTATION_900000" cardimage=DEFINE_FRICTION_ORIENTATION
+*createentity groups name="DEFINE_FRICTION_SCALING_900000" cardimage=DEFINE_FRICTION_SCALING
+*createentity groups name="DEFINE_FUNC_900000" cardimage=DEFINE_FUNC
+*createentity groups name="DEFINE_FUNCTION_900000" cardimage=DEFINE_FUNCTION
+*createentity groups name="DEFINE_FUNCTION_TABULATED_900000" cardimage=DEFINE_FUNCTION_TABULATED
+*createentity groups name="DEFINE_GROUND_MOTION_900000" cardimage=DEFINE_GROUND_MOTION
+*createentity groups name="DEFINE_HAZ_PROP_900000" cardimage=DEFINE_HAZ_PROP
+*createentity groups name="DEFINE_HAZ_PROPERTIES_900000" cardimage=DEFINE_HAZ_PROPERTIES
+*createentity groups name="DEFINE_HAZ_TAILOR_WELDED_BLANK_900000" cardimage=DEFINE_HAZ_TAILOR_WELDED_BLANK
+*createentity groups name="DEFINE_HEX_SPOTWELD_ASSEM_900000" cardimage=DEFINE_HEX_SPOTWELD_ASSEM
+*createentity groups name="DEFINE_HEX_SPOTWELD_ASSEMBLY_900000" cardimage=DEFINE_HEX_SPOTWELD_ASSEMBLY
+*createentity groups name="DEFINE_LANCE_SEED_POINT_COORDINATES_900000" cardimage=DEFINE_LANCE_SEED_POINT_COORDINATES
+*createentity groups name="DEFINE_MA_900000" cardimage=DEFINE_MA
+*createentity groups name="DEFINE_MATERI_900000" cardimage=DEFINE_MATERI
+*createentity groups name="DEFINE_MATERIAL_HIS_900000" cardimage=DEFINE_MATERIAL_HIS
+*createentity groups name="DEFINE_MATERIAL_HISTO_900000" cardimage=DEFINE_MATERIAL_HISTO
+*createentity groups name="DEFINE_MATERIAL_HISTORIES_900000" cardimage=DEFINE_MATERIAL_HISTORIES
+*createentity groups name="DEFINE_MATERIAL_HISTORIES_NAMES_900000" cardimage=DEFINE_MATERIAL_HISTORIES_NAMES
+*createentity groups name="DEFINE_MULTI_DRAWBEADS_IGES_900000" cardimage=DEFINE_MULTI_DRAWBEADS_IGES
+*createentity groups name="DEFINE_MULTISCALE_900000" cardimage=DEFINE_MULTISCALE
+*createentity groups name="DEFINE_NURBS_CURVE_900000" cardimage=DEFINE_NURBS_CURVE
+*createentity groups name="DEFINE_OPTION_900000" cardimage=DEFINE_OPTION
+*createentity groups name="DEFINE_PART_FROM_LAYER_900000" cardimage=DEFINE_PART_FROM_LAYER
+*createentity groups name="DEFINE_PARTI_900000" cardimage=DEFINE_PARTI
+*createentity groups name="DEFINE_PARTICLE_BLAST_900000" cardimage=DEFINE_PARTICLE_BLAST
+*createentity groups name="DEFINE_PBLAST_AIRGEO_900000" cardimage=DEFINE_PBLAST_AIRGEO
+*createentity groups name="DEFINE_PBLAST_GEOMETRY_900000" cardimage=DEFINE_PBLAST_GEOMETRY
+*createentity groups name="DEFINE_PLANE_900000" cardimage=DEFINE_PLANE
+*createentity groups name="DEFINE_POROUS_900000" cardimage=DEFINE_POROUS
+*createentity groups name="DEFINE_POROUS_ALE_900000" cardimage=DEFINE_POROUS_ALE
+*createentity groups name="DEFINE_POROUS_LA_900000" cardimage=DEFINE_POROUS_LA
+*createentity groups name="DEFINE_POROUS_LAGRANGIAN_900000" cardimage=DEFINE_POROUS_LAGRANGIAN
+*createentity groups name="DEFINE_POROUS_OPTION_900000" cardimage=DEFINE_POROUS_OPTION
+*createentity groups name="DEFINE_PRESSURE_TUBE_900000" cardimage=DEFINE_PRESSURE_TUBE
+*createentity groups name="DEFINE_QUASAR_COUPLING_900000" cardimage=DEFINE_QUASAR_COUPLING
+*createentity groups name="DEFINE_REGION_900000" cardimage=DEFINE_REGION
+*createentity groups name="DEFINE_SD_ORI_900000" cardimage=DEFINE_SD_ORI
+*createentity groups name="DEFINE_SD_ORIENTATION_900000" cardimage=DEFINE_SD_ORIENTATION
+*createentity groups name="DEFINE_SENSOR_900000" cardimage=DEFINE_SENSOR
+*createentity groups name="DEFINE_SET_ADAPTIVE_900000" cardimage=DEFINE_SET_ADAPTIVE
+*createentity groups name="DEFINE_SPH_AC_900000" cardimage=DEFINE_SPH_AC
+*createentity groups name="DEFINE_SPH_ACTIVE_REGION_900000" cardimage=DEFINE_SPH_ACTIVE_REGION
+*createentity groups name="DEFINE_SPH_AMBIENT_DRAG_900000" cardimage=DEFINE_SPH_AMBIENT_DRAG
+*createentity groups name="DEFINE_SPH_DE_COUPLING_900000" cardimage=DEFINE_SPH_DE_COUPLING
+*createentity groups name="DEFINE_SPH_INJEC_900000" cardimage=DEFINE_SPH_INJEC
+*createentity groups name="DEFINE_SPH_INJECTION_900000" cardimage=DEFINE_SPH_INJECTION
+*createentity groups name="DEFINE_SPH_MASS_900000" cardimage=DEFINE_SPH_MASS
+*createentity groups name="DEFINE_SPH_MASSFLOW_PLANE_900000" cardimage=DEFINE_SPH_MASSFLOW_PLANE
+*createentity groups name="DEFINE_SPH_MESH_BOX_900000" cardimage=DEFINE_SPH_MESH_BOX
+*createentity groups name="DEFINE_SPH_MESH_SURFACE_900000" cardimage=DEFINE_SPH_MESH_SURFACE
+*createentity groups name="DEFINE_SPH_T_900000" cardimage=DEFINE_SPH_T
+*createentity groups name="DEFINE_SPH_TO_SPH_COUPLING_900000" cardimage=DEFINE_SPH_TO_SPH_COUPLING
+*createentity groups name="DEFINE_SPH_VICINITY_SENSOR_900000" cardimage=DEFINE_SPH_VICINITY_SENSOR
+*createentity groups name="DEFINE_SPOTWELD_FAIL_900000" cardimage=DEFINE_SPOTWELD_FAIL
+*createentity groups name="DEFINE_SPOTWELD_FAILURE_900000" cardimage=DEFINE_SPOTWELD_FAILURE
+*createentity groups name="DEFINE_SPOTWELD_FAILURE_RESULTANTS_900000" cardimage=DEFINE_SPOTWELD_FAILURE_RESULTANTS
+*createentity groups name="DEFINE_SPOTWELD_MULTISCALE_900000" cardimage=DEFINE_SPOTWELD_MULTISCALE
+*createentity groups name="DEFINE_SPOTWELD_RUPTURE_900000" cardimage=DEFINE_SPOTWELD_RUPTURE
+*createentity groups name="DEFINE_SPOTWELD_RUPTURE_PARAMETER_900000" cardimage=DEFINE_SPOTWELD_RUPTURE_PARAMETER
+*createentity groups name="DEFINE_SPOTWELD_RUPTURE_STRESS_900000" cardimage=DEFINE_SPOTWELD_RUPTURE_STRESS
+*createentity groups name="DEFINE_SPOW_900000" cardimage=DEFINE_SPOW
+*createentity groups name="DEFINE_STAGED_CONSTRUC_900000" cardimage=DEFINE_STAGED_CONSTRUC
+*createentity groups name="DEFINE_STAGED_CONSTRUCTION_PART_900000" cardimage=DEFINE_STAGED_CONSTRUCTION_PART
+*createentity groups name="DEFINE_STO_900000" cardimage=DEFINE_STO
+*createentity groups name="DEFINE_STOCH_900000" cardimage=DEFINE_STOCH
+*createentity groups name="DEFINE_STOCHAS_900000" cardimage=DEFINE_STOCHAS
+*createentity groups name="DEFINE_STOCHASTIC_ELEMENT_900000" cardimage=DEFINE_STOCHASTIC_ELEMENT
+*createentity groups name="DEFINE_STOCHASTIC_ELEMENT_OPTION_900000" cardimage=DEFINE_STOCHASTIC_ELEMENT_OPTION
+*createentity groups name="DEFINE_STOCHASTIC_VARI_900000" cardimage=DEFINE_STOCHASTIC_VARI
+*createentity groups name="DEFINE_STOCHASTIC_VARIA_900000" cardimage=DEFINE_STOCHASTIC_VARIA
+*createentity groups name="DEFINE_STOCHASTIC_VARIATION_900000" cardimage=DEFINE_STOCHASTIC_VARIATION
+*createentity groups name="DEFINE_STOCHASTIC_VARIATION_PROPERTIES_900000" cardimage=DEFINE_STOCHASTIC_VARIATION_PROPERTIES
+*createentity groups name="DEFINE_TA_900000" cardimage=DEFINE_TA
+*createentity groups name="DEFINE_TABLE_900000" cardimage=DEFINE_TABLE
+*createentity groups name="DEFINE_TABLE_2D_900000" cardimage=DEFINE_TABLE_2D
+*createentity groups name="DEFINE_TABLE_3D_900000" cardimage=DEFINE_TABLE_3D
+*createentity groups name="DEFINE_TABLE_4D_900000" cardimage=DEFINE_TABLE_4D
+*createentity groups name="DEFINE_TABLE_COMPACT_900000" cardimage=DEFINE_TABLE_COMPACT
+*createentity groups name="DEFINE_TABLE_MATRIX_900000" cardimage=DEFINE_TABLE_MATRIX
+*createentity groups name="DEFINE_TABLE_XD_900000" cardimage=DEFINE_TABLE_XD
+*createentity groups name="DEFINE_TAR_900000" cardimage=DEFINE_TAR
+*createentity groups name="DEFINE_TARGET_BOUNDARY_900000" cardimage=DEFINE_TARGET_BOUNDARY
+*createentity groups name="DEFINE_TRACER_PARTICLES_2D_900000" cardimage=DEFINE_TRACER_PARTICLES_2D
+*createentity groups name="DEFINE_TRANS_900000" cardimage=DEFINE_TRANS
+*createentity groups name="DEFINE_TRANSFOR_900000" cardimage=DEFINE_TRANSFOR
+*createentity groups name="DEFINE_TRANSFORM_900000" cardimage=DEFINE_TRANSFORM
+*createentity groups name="DEFINE_TRANSFORMA_900000" cardimage=DEFINE_TRANSFORMA
+*createentity groups name="DEFINE_TRANSFORMATION_900000" cardimage=DEFINE_TRANSFORMATION
+*createentity groups name="DEFINE_TRIM_SEED_POINT_COORDINATES_900000" cardimage=DEFINE_TRIM_SEED_POINT_COORDINATES
+*createentity groups name="DEFINE_VEC_900000" cardimage=DEFINE_VEC
+*createentity groups name="DEFINE_VECTOR_900000" cardimage=DEFINE_VECTOR
+*createentity groups name="DEFINE_VECTOR_NODES_900000" cardimage=DEFINE_VECTOR_NODES
+*createentity groups name="DEFINE_VECTOR_TITLE_900000" cardimage=DEFINE_VECTOR_TITLE
+*createentity groups name="INITIAL_900000" cardimage=INITIAL
+*createentity groups name="INITIAL_AIRBAG_PARTICLE_900000" cardimage=INITIAL_AIRBAG_PARTICLE
+*createentity groups name="INITIAL_AIRBAG_PARTICLE_PO_900000" cardimage=INITIAL_AIRBAG_PARTICLE_PO
+*createentity groups name="INITIAL_AIRBAG_PARTICLE_POSITION_900000" cardimage=INITIAL_AIRBAG_PARTICLE_POSITION
+*createentity groups name="INITIAL_ALE_HYDROSTATIC_900000" cardimage=INITIAL_ALE_HYDROSTATIC
+*createentity groups name="INITIAL_ALE_MAPPING_900000" cardimage=INITIAL_ALE_MAPPING
+*createentity groups name="INITIAL_AXIAL_FORCE_BEAM_900000" cardimage=INITIAL_AXIAL_FORCE_BEAM
+*createentity groups name="INITIAL_BLANK_900000" cardimage=INITIAL_BLANK
+*createentity groups name="INITIAL_CONTACT_WEAR_900000" cardimage=INITIAL_CONTACT_WEAR
+*createentity groups name="INITIAL_CRASHFRONT_900000" cardimage=INITIAL_CRASHFRONT
+*createentity groups name="INITIAL_DETONA_900000" cardimage=INITIAL_DETONA
+*createentity groups name="INITIAL_DETONATION_900000" cardimage=INITIAL_DETONATION
+*createentity groups name="INITIAL_EOS_ALE_900000" cardimage=INITIAL_EOS_ALE
+*createentity groups name="INITIAL_FATIGUE_DAMAGE_RATIO_900000" cardimage=INITIAL_FATIGUE_DAMAGE_RATIO
+*createentity groups name="INITIAL_FIELD_SOLID_900000" cardimage=INITIAL_FIELD_SOLID
+*createentity groups name="INITIAL_FOAM_REF_900000" cardimage=INITIAL_FOAM_REF
+*createentity groups name="INITIAL_FOAM_REFER_900000" cardimage=INITIAL_FOAM_REFER
+*createentity groups name="INITIAL_FOAM_REFERENCE_GEOM_900000" cardimage=INITIAL_FOAM_REFERENCE_GEOM
+*createentity groups name="INITIAL_FOAM_REFERENCE_GEOME_900000" cardimage=INITIAL_FOAM_REFERENCE_GEOME
+*createentity groups name="INITIAL_FOAM_REFERENCE_GEOMETRY_900000" cardimage=INITIAL_FOAM_REFERENCE_GEOMETRY
+*createentity groups name="INITIAL_GAS_MIXTURE_900000" cardimage=INITIAL_GAS_MIXTURE
+*createentity groups name="INITIAL_HISTORY_NODE_900000" cardimage=INITIAL_HISTORY_NODE
+*createentity groups name="INITIAL_HISTORY_NODE_SET_900000" cardimage=INITIAL_HISTORY_NODE_SET
+*createentity groups name="INITIAL_HISTORY_STRESS_SHELL_SET_900000" cardimage=INITIAL_HISTORY_STRESS_SHELL_SET
+*createentity groups name="INITIAL_HYDROSTAT_900000" cardimage=INITIAL_HYDROSTAT
+*createentity groups name="INITIAL_HYDROSTATIC_ALE_900000" cardimage=INITIAL_HYDROSTATIC_ALE
+*createentity groups name="INITIAL_IMPULSE_MINE_900000" cardimage=INITIAL_IMPULSE_MINE
+*createentity groups name="INITIAL_INTERNAL_DOF_SOLID_900000" cardimage=INITIAL_INTERNAL_DOF_SOLID
+*createentity groups name="INITIAL_INTERNAL_DOF_SOLID_OPTION_900000" cardimage=INITIAL_INTERNAL_DOF_SOLID_OPTION
+*createentity groups name="INITIAL_INTERNAL_DOF_SOLID_TYPE4_900000" cardimage=INITIAL_INTERNAL_DOF_SOLID_TYPE4
+*createentity groups name="INITIAL_LAG_MAP_900000" cardimage=INITIAL_LAG_MAP
+*createentity groups name="INITIAL_LAG_MAPPING_900000" cardimage=INITIAL_LAG_MAPPING
+*createentity groups name="INITIAL_LAG_MAPPING_WRITE3DAXI_900000" cardimage=INITIAL_LAG_MAPPING_WRITE3DAXI
+*createentity groups name="INITIAL_MOMENTUM_900000" cardimage=INITIAL_MOMENTUM
+*createentity groups name="INITIAL_PWP_DEPTH_900000" cardimage=INITIAL_PWP_DEPTH
+*createentity groups name="INITIAL_PWP_NODAL_DATA_900000" cardimage=INITIAL_PWP_NODAL_DATA
+*createentity groups name="INITIAL_SOIL_PILE_DATA_900000" cardimage=INITIAL_SOIL_PILE_DATA
+*createentity groups name="INITIAL_SOLID_VOLUME_900000" cardimage=INITIAL_SOLID_VOLUME
+*createentity groups name="INITIAL_STRAIN_SHELL_900000" cardimage=INITIAL_STRAIN_SHELL
+*createentity groups name="INITIAL_STRAIN_SHELL_NURBS_PATCH_900000" cardimage=INITIAL_STRAIN_SHELL_NURBS_PATCH
+*createentity groups name="INITIAL_STRAIN_SOLID_900000" cardimage=INITIAL_STRAIN_SOLID
+*createentity groups name="INITIAL_STRAIN_SOLID_NURBS_PATCH_900000" cardimage=INITIAL_STRAIN_SOLID_NURBS_PATCH
+*createentity groups name="INITIAL_STRAIN_TSHELL_900000" cardimage=INITIAL_STRAIN_TSHELL
+*createentity groups name="INITIAL_STRESS_900000" cardimage=INITIAL_STRESS
+*createentity groups name="INITIAL_STRESS_BEAM_900000" cardimage=INITIAL_STRESS_BEAM
+*createentity groups name="INITIAL_STRESS_CROSS_SECTION_900000" cardimage=INITIAL_STRESS_CROSS_SECTION
+*createentity groups name="INITIAL_STRESS_DEPTH_900000" cardimage=INITIAL_STRESS_DEPTH
+*createentity groups name="INITIAL_STRESS_DES_900000" cardimage=INITIAL_STRESS_DES
+*createentity groups name="INITIAL_STRESS_OPTION_900000" cardimage=INITIAL_STRESS_OPTION
+*createentity groups name="INITIAL_STRESS_SEC_900000" cardimage=INITIAL_STRESS_SEC
+*createentity groups name="INITIAL_STRESS_SECTION_900000" cardimage=INITIAL_STRESS_SECTION
+*createentity groups name="INITIAL_STRESS_SHELL_900000" cardimage=INITIAL_STRESS_SHELL
+*createentity groups name="INITIAL_STRESS_SHELL_NURBS_PATCH_900000" cardimage=INITIAL_STRESS_SHELL_NURBS_PATCH
+*createentity groups name="INITIAL_STRESS_SOL_900000" cardimage=INITIAL_STRESS_SOL
+*createentity groups name="INITIAL_STRESS_SOLID_900000" cardimage=INITIAL_STRESS_SOLID
+*createentity groups name="INITIAL_STRESS_SOLID_NURBS_PATCH_900000" cardimage=INITIAL_STRESS_SOLID_NURBS_PATCH
+*createentity groups name="INITIAL_STRESS_SPH_900000" cardimage=INITIAL_STRESS_SPH
+*createentity groups name="INITIAL_STRESS_TSHELL_900000" cardimage=INITIAL_STRESS_TSHELL
+*createentity groups name="INITIAL_TEMPER_900000" cardimage=INITIAL_TEMPER
+*createentity groups name="INITIAL_TEMPERATURE_900000" cardimage=INITIAL_TEMPERATURE
+*createentity groups name="INITIAL_TEMPERATURE_OPTION_900000" cardimage=INITIAL_TEMPERATURE_OPTION
+*createentity groups name="INITIAL_VAPOR_PART_900000" cardimage=INITIAL_VAPOR_PART
+*createentity groups name="INITIAL_VE_900000" cardimage=INITIAL_VE
+*createentity groups name="INITIAL_VEHCILE_KINEMATICS_900000" cardimage=INITIAL_VEHCILE_KINEMATICS
+*createentity groups name="INITIAL_VEHICLE_KINEMATICS_900000" cardimage=INITIAL_VEHICLE_KINEMATICS
+*createentity groups name="INITIAL_VELOC_900000" cardimage=INITIAL_VELOC
+*createentity groups name="INITIAL_VELOCI_900000" cardimage=INITIAL_VELOCI
+*createentity groups name="INITIAL_VELOCITY_900000" cardimage=INITIAL_VELOCITY
+*createentity groups name="INITIAL_VELOCITY_GEN_900000" cardimage=INITIAL_VELOCITY_GEN
+*createentity groups name="INITIAL_VELOCITY_GENERA_900000" cardimage=INITIAL_VELOCITY_GENERA
+*createentity groups name="INITIAL_VELOCITY_GENERATION_900000" cardimage=INITIAL_VELOCITY_GENERATION
+*createentity groups name="INITIAL_VELOCITY_GENERATION_START_TIME_900000" cardimage=INITIAL_VELOCITY_GENERATION_START_TIME
+*createentity groups name="INITIAL_VELOCITY_NODE_900000" cardimage=INITIAL_VELOCITY_NODE
+*createentity groups name="INITIAL_VELOCITY_OPTION_900000" cardimage=INITIAL_VELOCITY_OPTION
+*createentity groups name="INITIAL_VELOCITY_RIGID_BODY_900000" cardimage=INITIAL_VELOCITY_RIGID_BODY
+*createentity groups name="INITIAL_VOID_900000" cardimage=INITIAL_VOID
+*createentity groups name="INITIAL_VOID_OPTION_900000" cardimage=INITIAL_VOID_OPTION
+*createentity groups name="INITIAL_VOLIME_FRACTION_GEOMETRY_900000" cardimage=INITIAL_VOLIME_FRACTION_GEOMETRY
+*createentity groups name="INITIAL_VOLUME_FRAC_900000" cardimage=INITIAL_VOLUME_FRAC
+*createentity groups name="INITIAL_VOLUME_FRACTION_900000" cardimage=INITIAL_VOLUME_FRACTION
+*createentity groups name="INITIAL_VOLUME_FRACTION_GEOME_900000" cardimage=INITIAL_VOLUME_FRACTION_GEOME
+*createentity groups name="INITIAL_VOLUME_FRACTION_GEOMETRY_900000" cardimage=INITIAL_VOLUME_FRACTION_GEOMETRY
+*createentity groups name="INITIAL_VOLUME_FRACTON_GEOMETRY_900000" cardimage=INITIAL_VOLUME_FRACTON_GEOMETRY
+*createentity groups name="CONSTRAINED_900000" cardimage=CONSTRAINED
+*createentity groups name="CONSTRAINED_ADAPTIVITY_900000" cardimage=CONSTRAINED_ADAPTIVITY
+*createentity groups name="CONSTRAINED_BEAM_900000" cardimage=CONSTRAINED_BEAM
+*createentity groups name="CONSTRAINED_BEAM_IN_SOL_900000" cardimage=CONSTRAINED_BEAM_IN_SOL
+*createentity groups name="CONSTRAINED_BEAM_IN_SOLID_900000" cardimage=CONSTRAINED_BEAM_IN_SOLID
+*createentity groups name="CONSTRAINED_BEAM_IN_SOLID_PENALTY_900000" cardimage=CONSTRAINED_BEAM_IN_SOLID_PENALTY
+*createentity groups name="CONSTRAINED_BEARING_900000" cardimage=CONSTRAINED_BEARING
+*createentity groups name="CONSTRAINED_BUTT_WELD_900000" cardimage=CONSTRAINED_BUTT_WELD
+*createentity groups name="CONSTRAINED_COORDINATE_900000" cardimage=CONSTRAINED_COORDINATE
+*createentity groups name="CONSTRAINED_EULER_IN_EULER_900000" cardimage=CONSTRAINED_EULER_IN_EULER
+*createentity groups name="CONSTRAINED_EXTRA_NODES_900000" cardimage=CONSTRAINED_EXTRA_NODES
+*createentity groups name="CONSTRAINED_EXTRA_NODES_OPTION_900000" cardimage=CONSTRAINED_EXTRA_NODES_OPTION
+*createentity groups name="CONSTRAINED_EXTRA_NODES_SET_900000" cardimage=CONSTRAINED_EXTRA_NODES_SET
+*createentity groups name="CONSTRAINED_GEN_900000" cardimage=CONSTRAINED_GEN
+*createentity groups name="CONSTRAINED_GENERALIZED_WELD_900000" cardimage=CONSTRAINED_GENERALIZED_WELD
+*createentity groups name="CONSTRAINED_GENERALIZED_WELD_BUTT_900000" cardimage=CONSTRAINED_GENERALIZED_WELD_BUTT
+*createentity groups name="CONSTRAINED_GENERALIZED_WELD_FILLET_900000" cardimage=CONSTRAINED_GENERALIZED_WELD_FILLET
+*createentity groups name="CONSTRAINED_GENERALIZED_WELD_OPTION_900000" cardimage=CONSTRAINED_GENERALIZED_WELD_OPTION
+*createentity groups name="CONSTRAINED_GENERALIZED_WELD_WELDTYPE_900000" cardimage=CONSTRAINED_GENERALIZED_WELD_WELDTYPE
+*createentity groups name="CONSTRAINED_GLOBAL_900000" cardimage=CONSTRAINED_GLOBAL
+*createentity groups name="CONSTRAINED_IMMERSED_IN_SPG_900000" cardimage=CONSTRAINED_IMMERSED_IN_SPG
+*createentity groups name="CONSTRAINED_IMPLICIT_INERTIA_RE_900000" cardimage=CONSTRAINED_IMPLICIT_INERTIA_RE
+*createentity groups name="CONSTRAINED_INTER_900000" cardimage=CONSTRAINED_INTER
+*createentity groups name="CONSTRAINED_INTERPO_900000" cardimage=CONSTRAINED_INTERPO
+*createentity groups name="CONSTRAINED_INTERPOLA_900000" cardimage=CONSTRAINED_INTERPOLA
+*createentity groups name="CONSTRAINED_INTERPOLATION_900000" cardimage=CONSTRAINED_INTERPOLATION
+*createentity groups name="CONSTRAINED_INTERPOLATION_SPOTWELD_900000" cardimage=CONSTRAINED_INTERPOLATION_SPOTWELD
+*createentity groups name="CONSTRAINED_JOINT_900000" cardimage=CONSTRAINED_JOINT
+*createentity groups name="CONSTRAINED_JOINT_CONSTANT_VELOCITY_900000" cardimage=CONSTRAINED_JOINT_CONSTANT_VELOCITY
+*createentity groups name="CONSTRAINED_JOINT_COOR_900000" cardimage=CONSTRAINED_JOINT_COOR
+*createentity groups name="CONSTRAINED_JOINT_COOR_CONSTANT_VELOCITY_900000" cardimage=CONSTRAINED_JOINT_COOR_CONSTANT_VELOCITY
+*createentity groups name="CONSTRAINED_JOINT_COOR_CYLINDRICAL_900000" cardimage=CONSTRAINED_JOINT_COOR_CYLINDRICAL
+*createentity groups name="CONSTRAINED_JOINT_COOR_GEARS_900000" cardimage=CONSTRAINED_JOINT_COOR_GEARS
+*createentity groups name="CONSTRAINED_JOINT_COOR_LOCKING_900000" cardimage=CONSTRAINED_JOINT_COOR_LOCKING
+*createentity groups name="CONSTRAINED_JOINT_COOR_PLANAR_900000" cardimage=CONSTRAINED_JOINT_COOR_PLANAR
+*createentity groups name="CONSTRAINED_JOINT_COOR_PULLEY_900000" cardimage=CONSTRAINED_JOINT_COOR_PULLEY
+*createentity groups name="CONSTRAINED_JOINT_COOR_RACK_AND_PINION_900000" cardimage=CONSTRAINED_JOINT_COOR_RACK_AND_PINION
+*createentity groups name="CONSTRAINED_JOINT_COOR_REVOLUTE_900000" cardimage=CONSTRAINED_JOINT_COOR_REVOLUTE
+*createentity groups name="CONSTRAINED_JOINT_COOR_ROTATIONAL_MOTOR_900000" cardimage=CONSTRAINED_JOINT_COOR_ROTATIONAL_MOTOR
+*createentity groups name="CONSTRAINED_JOINT_COOR_SCREW_900000" cardimage=CONSTRAINED_JOINT_COOR_SCREW
+*createentity groups name="CONSTRAINED_JOINT_COOR_SPHERICAL_900000" cardimage=CONSTRAINED_JOINT_COOR_SPHERICAL
+*createentity groups name="CONSTRAINED_JOINT_COOR_TRANSLATIONAL_900000" cardimage=CONSTRAINED_JOINT_COOR_TRANSLATIONAL
+*createentity groups name="CONSTRAINED_JOINT_COOR_TRANSLATIONAL_MOTOR_900000" cardimage=CONSTRAINED_JOINT_COOR_TRANSLATIONAL_MOTOR
+*createentity groups name="CONSTRAINED_JOINT_COOR_TYPE_900000" cardimage=CONSTRAINED_JOINT_COOR_TYPE
+*createentity groups name="CONSTRAINED_JOINT_COOR_UNIVERSAL_900000" cardimage=CONSTRAINED_JOINT_COOR_UNIVERSAL
+*createentity groups name="CONSTRAINED_JOINT_CYLINDRICAL_900000" cardimage=CONSTRAINED_JOINT_CYLINDRICAL
+*createentity groups name="CONSTRAINED_JOINT_GEARS_900000" cardimage=CONSTRAINED_JOINT_GEARS
+*createentity groups name="CONSTRAINED_JOINT_LOCKING_900000" cardimage=CONSTRAINED_JOINT_LOCKING
+*createentity groups name="CONSTRAINED_JOINT_OPTION_900000" cardimage=CONSTRAINED_JOINT_OPTION
+*createentity groups name="CONSTRAINED_JOINT_PLANAR_900000" cardimage=CONSTRAINED_JOINT_PLANAR
+*createentity groups name="CONSTRAINED_JOINT_PULLEY_900000" cardimage=CONSTRAINED_JOINT_PULLEY
+*createentity groups name="CONSTRAINED_JOINT_RACK_AND_PINION_900000" cardimage=CONSTRAINED_JOINT_RACK_AND_PINION
+*createentity groups name="CONSTRAINED_JOINT_REVOLUTE_900000" cardimage=CONSTRAINED_JOINT_REVOLUTE
+*createentity groups name="CONSTRAINED_JOINT_ROTATIONAL_MOTOR_900000" cardimage=CONSTRAINED_JOINT_ROTATIONAL_MOTOR
+*createentity groups name="CONSTRAINED_JOINT_SCREW_900000" cardimage=CONSTRAINED_JOINT_SCREW
+*createentity groups name="CONSTRAINED_JOINT_SPHERICAL_900000" cardimage=CONSTRAINED_JOINT_SPHERICAL
+*createentity groups name="CONSTRAINED_JOINT_STIFF_900000" cardimage=CONSTRAINED_JOINT_STIFF
+*createentity groups name="CONSTRAINED_JOINT_STIFFNESS_900000" cardimage=CONSTRAINED_JOINT_STIFFNESS
+*createentity groups name="CONSTRAINED_JOINT_STIFFNESS_CYLINDRICAL_900000" cardimage=CONSTRAINED_JOINT_STIFFNESS_CYLINDRICAL
+*createentity groups name="CONSTRAINED_JOINT_STIFFNESS_GENERALIZED_900000" cardimage=CONSTRAINED_JOINT_STIFFNESS_GENERALIZED
+*createentity groups name="CONSTRAINED_JOINT_STIFFNESS_OPTION_900000" cardimage=CONSTRAINED_JOINT_STIFFNESS_OPTION
+*createentity groups name="CONSTRAINED_JOINT_STIFFNESS_TRANSLA_900000" cardimage=CONSTRAINED_JOINT_STIFFNESS_TRANSLA
+*createentity groups name="CONSTRAINED_JOINT_TRANSLATIONAL_900000" cardimage=CONSTRAINED_JOINT_TRANSLATIONAL
+*createentity groups name="CONSTRAINED_JOINT_TRANSLATIONAL_MOTOR_900000" cardimage=CONSTRAINED_JOINT_TRANSLATIONAL_MOTOR
+*createentity groups name="CONSTRAINED_JOINT_TYPE_900000" cardimage=CONSTRAINED_JOINT_TYPE
+*createentity groups name="CONSTRAINED_JOINT_UNIVERSAL_900000" cardimage=CONSTRAINED_JOINT_UNIVERSAL
+*createentity groups name="CONSTRAINED_JOINT_USER_FORCE_900000" cardimage=CONSTRAINED_JOINT_USER_FORCE
+*createentity groups name="CONSTRAINED_LA_900000" cardimage=CONSTRAINED_LA
+*createentity groups name="CONSTRAINED_LAG_900000" cardimage=CONSTRAINED_LAG
+*createentity groups name="CONSTRAINED_LAGRANGE_IN_900000" cardimage=CONSTRAINED_LAGRANGE_IN
+*createentity groups name="CONSTRAINED_LAGRANGE_IN_SOL_900000" cardimage=CONSTRAINED_LAGRANGE_IN_SOL
+*createentity groups name="CONSTRAINED_LAGRANGE_IN_SOLD_900000" cardimage=CONSTRAINED_LAGRANGE_IN_SOLD
+*createentity groups name="CONSTRAINED_LAGRANGE_IN_SOLID_900000" cardimage=CONSTRAINED_LAGRANGE_IN_SOLID
+*createentity groups name="CONSTRAINED_LAGRANGE_IN_SOLID_EDGE_900000" cardimage=CONSTRAINED_LAGRANGE_IN_SOLID_EDGE
+*createentity groups name="CONSTRAINED_LAGRANGE_IN_SOLID_ID_900000" cardimage=CONSTRAINED_LAGRANGE_IN_SOLID_ID
+*createentity groups name="CONSTRAINED_LINEAR_900000" cardimage=CONSTRAINED_LINEAR
+*createentity groups name="CONSTRAINED_LINEAR_GLOBAL_900000" cardimage=CONSTRAINED_LINEAR_GLOBAL
+*createentity groups name="CONSTRAINED_LINEAR_LOCAL_900000" cardimage=CONSTRAINED_LINEAR_LOCAL
+*createentity groups name="CONSTRAINED_LINEAR_OPTION_900000" cardimage=CONSTRAINED_LINEAR_OPTION
+*createentity groups name="CONSTRAINED_LO_900000" cardimage=CONSTRAINED_LO
+*createentity groups name="CONSTRAINED_LOCAL_900000" cardimage=CONSTRAINED_LOCAL
+*createentity groups name="CONSTRAINED_MULTIPLE_GLOB_900000" cardimage=CONSTRAINED_MULTIPLE_GLOB
+*createentity groups name="CONSTRAINED_MULTIPLE_GLOBAL_900000" cardimage=CONSTRAINED_MULTIPLE_GLOBAL
+*createentity groups name="CONSTRAINED_NODAL_RIGID_BODY_INERTIA_900000" cardimage=CONSTRAINED_NODAL_RIGID_BODY_INERTIA
+*createentity groups name="CONSTRAINED_NODAL_RIGID_BODY_SPC_900000" cardimage=CONSTRAINED_NODAL_RIGID_BODY_SPC
+*createentity groups name="CONSTRAINED_NODE_INTERPO_900000" cardimage=CONSTRAINED_NODE_INTERPO
+*createentity groups name="CONSTRAINED_NODE_INTERPOLA_900000" cardimage=CONSTRAINED_NODE_INTERPOLA
+*createentity groups name="CONSTRAINED_NODE_INTERPOLATION_900000" cardimage=CONSTRAINED_NODE_INTERPOLATION
+*createentity groups name="CONSTRAINED_NODE_SET_900000" cardimage=CONSTRAINED_NODE_SET
+*createentity groups name="CONSTRAINED_NODE_TO_NURBS_PATCH_900000" cardimage=CONSTRAINED_NODE_TO_NURBS_PATCH
+*createentity groups name="CONSTRAINED_NODES_TO_NURBS_SHELL_900000" cardimage=CONSTRAINED_NODES_TO_NURBS_SHELL
+*createentity groups name="CONSTRAINED_POINTS_900000" cardimage=CONSTRAINED_POINTS
+*createentity groups name="CONSTRAINED_RIGID_BODIES_900000" cardimage=CONSTRAINED_RIGID_BODIES
+*createentity groups name="CONSTRAINED_RIGID_BODY_INSERT_900000" cardimage=CONSTRAINED_RIGID_BODY_INSERT
+*createentity groups name="CONSTRAINED_RIGID_BODY_STOPPERS_900000" cardimage=CONSTRAINED_RIGID_BODY_STOPPERS
+*createentity groups name="CONSTRAINED_RIVET_900000" cardimage=CONSTRAINED_RIVET
+*createentity groups name="CONSTRAINED_SHELL_IN_SOLID_900000" cardimage=CONSTRAINED_SHELL_IN_SOLID
+*createentity groups name="CONSTRAINED_SHELL_IN_SOLID_PENALTY_900000" cardimage=CONSTRAINED_SHELL_IN_SOLID_PENALTY
+*createentity groups name="CONSTRAINED_SHELL_TO_SOLID_900000" cardimage=CONSTRAINED_SHELL_TO_SOLID
+*createentity groups name="CONSTRAINED_SOIL_PILE_900000" cardimage=CONSTRAINED_SOIL_PILE
+*createentity groups name="CONSTRAINED_SOLID_IN_SOLID_900000" cardimage=CONSTRAINED_SOLID_IN_SOLID
+*createentity groups name="CONSTRAINED_SOLID_IN_SOLID_PENALTY_900000" cardimage=CONSTRAINED_SOLID_IN_SOLID_PENALTY
+*createentity groups name="CONSTRAINED_SPLINE_900000" cardimage=CONSTRAINED_SPLINE
+*createentity groups name="CONSTRAINED_SPOT_WELD_900000" cardimage=CONSTRAINED_SPOT_WELD
+*createentity groups name="CONSTRAINED_SPOTWELD_ID_900000" cardimage=CONSTRAINED_SPOTWELD_ID
+*createentity groups name="CONSTRAINED_SPR2_900000" cardimage=CONSTRAINED_SPR2
+*createentity groups name="CONSTRAINED_SPR3_900000" cardimage=CONSTRAINED_SPR3
+*createentity groups name="CONSTRAINED_TIE_900000" cardimage=CONSTRAINED_TIE
+*createentity groups name="CONSTRAINED_TIEBREAK_900000" cardimage=CONSTRAINED_TIEBREAK
+*createentity groups name="CONSTRAINED_TIED_NODES_FAILURE_900000" cardimage=CONSTRAINED_TIED_NODES_FAILURE
+*createentity groups name="CONSTRAINED_TIED_NODES_WITH_FAILURE_900000" cardimage=CONSTRAINED_TIED_NODES_WITH_FAILURE
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*setvalue mats id=5 Rho=7.85e-09
+*setvalue mats id=5 E=210000
+*setvalue mats id=5 Nu=0.3
+*createentity mats name="MAT_ELASTIC_1" cardimage=MATL1
+*setvalue mats id=5 Rho=7.85e-09
+*setvalue mats id=5 E=210000
+*setvalue mats id=5 Nu=0.3
+*createentity mats name="MAT_ELASTIC_500" cardimage=MATL1
+*setvalue mats id=6 Rho=7.85e-09
+*setvalue mats id=6 E=210000
+*setvalue mats id=6 Nu=0.3
+*createentity props name="SECTION_SHELL_500" cardimage=SectShl
+*setvalue props id=7 STATUS=2
+*setvalue props id=7
+*setvalue props id=7
+*setvalue props id=7
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*setvalue cards id=29 LSD_ENDTIM=0.01
+*setvalue cards id=29 LSD_ENDCYCLE=0
+*setvalue cards id=29 LSD_TSMIN=0
+*setvalue cards id=29 LSD_TERMRAT=0
+*setvalue cards id=29 LSD_PERMASS=0
+*createentity cards name="CONTROL_TIMESTEP" cardimage=Timestep
+*setvalue cards id=31 STATUS=2
+*setvalue cards id=31
+*setvalue cards id=31
+*setvalue cards id=31
+*setvalue cards id=31
+*setvalue cards id=31
+*setvalue cards id=31
+*setvalue cards id=31
+*setvalue cards id=31
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*setvalue cards id=30 LSD_DT=0.001
+*setvalue cards id=30 LSD_LCID=0
+*setvalue cards id=30 LSD_NOBEAM=0
+*setvalue cards id=30 LSD_NPLTC=0
+*setvalue cards id=30 LSD_PSID=0
+*createentity cards name="DATABASE_GLSTAT" cardimage=DBglst
+*setvalue cards id=32 STATUS=2
+*setvalue cards id=32
+*createentity cards name="DATABASE_MATSUM" cardimage=DBmats
+*setvalue cards id=33 STATUS=2
+*setvalue cards id=33
+*setvalue mats id=5 cardimage=MATL1
+*setvalue mats id=5 STATUS=2
+*setvalue mats id=5
+*setvalue mats id=5
+*setvalue mats id=5
+*templatefileset "E:/HM2021/2021/hwdesktop/templates/feoutput/ls-dyna971/dyna.key"
+*createentity mats name="MAT_ELASTIC_900" cardimage=MATL1
+*setvalue mats id=7 Rho=7.85e-09
+*setvalue mats id=7 E=210000
+*setvalue mats id=7 Nu=0.3
+*createentity props name="SECTION_SHELL_900" cardimage=SectShl
+*setvalue props id=8 STATUS=2
+*setvalue props id=8
+*setvalue props id=8
+*setvalue props id=8
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*setvalue cards id=29 LSD_ENDTIM=0.01
+*setvalue cards id=29 LSD_ENDCYCLE=0
+*setvalue cards id=29 LSD_TSMIN=0
+*setvalue cards id=29 LSD_TERMRAT=0
+*setvalue cards id=29 LSD_PERMASS=0
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*setvalue cards id=30 LSD_DT=0.001
+*setvalue cards id=30 LSD_LCID=0
+*setvalue cards id=30 LSD_NOBEAM=0
+*setvalue cards id=30 LSD_NPLTC=0
+*setvalue cards id=30 LSD_PSID=0
+*createentity groups name="CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_1" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE
+*setvalue groups id=STATUS=2
+*setvalue groups id=dataname=SSID
+*setvalue groups id=dataname=MSID
+*setvalue groups id=dataname=SSTYP
+*setvalue groups id=dataname=MSTYP
+*setvalue groups id=dataname=SBOXID
+*setvalue groups id=dataname=MBOXID
+*setvalue groups id=dataname=SPR
+*setvalue groups id=dataname=MPR
+*setvalue mats id=900
+*setvalue mats id=900 STATUS=2
+*setvalue mats id=900
+*setvalue mats id=900
+*setvalue mats id=900
+*createentity mats name="MAT_ELASTIC_900000" cardimage=MATL1
+*createentity groups name="CONTACT_AUTOMATIC_SURFACE_TO_SURFACE_1" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE
+*setvalue groups id=STATUS=2
+*setvalue groups id=dataname=SSID
+*setvalue groups id=dataname=MSID
+*setvalue groups id=dataname=SSTYP
+*setvalue groups id=dataname=MSTYP
+*setvalue groups id=dataname=SBOXID
+*setvalue groups id=dataname=MBOXID
+*setvalue groups id=dataname=SPR
+*setvalue groups id=dataname=MPR
+*createentity groups name="TEST_CONTACT" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE
+*createentity loads name="TEST_CONTACT" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE
+*createentity groups name="CONTACT_S2S_1_2" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE
+*setvalue groups id=next STATUS=2
+*setvalue groups id=next
+*setvalue groups id=next
+*setvalue groups id=next
+*setvalue groups id=next
+*templatefileset "E:/HM2021/2021/hwdesktop/templates/feoutput/ls-dyna971/dyna.key"
+*createentity mats name="MAT_ELASTIC_900" cardimage=MATL1
+*setvalue mats id=7 Rho=7.85e-09
+*setvalue mats id=7 E=210000
+*setvalue mats id=7 Nu=0.3
+*createentity props name="SECTION_SHELL_900" cardimage=SectShl
+*setvalue props id=8 STATUS=2
+*setvalue props id=8
+*setvalue props id=8
+*setvalue props id=8
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*setvalue cards id=29 LSD_ENDTIM=0.01
+*setvalue cards id=29 LSD_ENDCYCLE=0
+*setvalue cards id=29 LSD_TSMIN=0
+*setvalue cards id=29 LSD_TERMRAT=0
+*setvalue cards id=29 LSD_PERMASS=0
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*setvalue cards id=30 LSD_DT=0.001
+*setvalue cards id=30 LSD_LCID=0
+*setvalue cards id=30 LSD_NOBEAM=0
+*setvalue cards id=30 LSD_NPLTC=0
+*setvalue cards id=30 LSD_PSID=0
+*createentity groups name="CONTACT_S2S_1_2" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE
+*setvalue groups id=next STATUS=2
+*setvalue groups id=next
+*setvalue groups id=next
+*setvalue groups id=next
+*setvalue groups id=next
+*setvalue mats id=900
+*setvalue mats id=900 STATUS=2
+*setvalue mats id=900
+*setvalue mats id=900
+*setvalue mats id=900
+*createentity mats name="MAT_ELASTIC_900000" cardimage=MATL1
+# Session ended at "6-7-2026  11:51:19"
+return; # Stop script and return to application 
+# *quit 1; # Uncomment to exit application
+*begin "version 2021.0.0.33  6-7-2026  11:55:18"
+*createstringarray 17 " 0 penalty value              0.00    0.00    0.80    1.00   10.00" \
+  "  1 min length        1 1.0  10.000   9.000   4.000   2.000   1.000    1   59    0" \
+  "  2 max length        1 1.0  10.000  12.000  15.000  20.000  30.000    0   39    1" \
+  "  3 aspect ratio      1 1.0   1.000   2.000   4.400   5.000  10.000    0   41    2" \
+  "  4 warpage           1 1.0   0.000   5.000  13.000  15.000  30.000    0   56    3" \
+  "  5 max angle quad    1 1.0  90.000 110.000 134.000 140.000 160.000    0   28    4" \
+  "  6 min angle quad    1 1.0  90.000  70.000  46.000  40.000  20.000    0   61    5" \
+  "  7 max angle tria    1 1.0  60.000  80.000 112.000 120.000 150.000    0   19    6" \
+  "  8 min angle tria    1 1.0  60.000  50.000  34.000  30.000  15.000    0   22    7" \
+  "  9 skew              1 1.0   0.000  10.000  34.000  40.000  70.000    0   46    8" \
+  " 10 jacobian          1 1.0   1.000   0.900   0.700   0.600   0.300    0   57    9" \
+  " 11 chordal dev       0 1.0   0.000   0.300   0.800   1.000   2.000    0   29   10" \
+  " 12 taper             1 1.0   0.000   0.200   0.500   0.600   0.900    0   53   11" \
+  " 13 % of trias        1 1.0   0.000   6.000  10.000  15.000  20.000    0    0   -1" \
+  " 14 QI color legend            32      32       7       6       3           3   -1" \
+  " 15 time_step         1      10.000                   0.010            0   59   12" \
+  "   Global_solver 0"
+*setqualitycriteria 1 17 0
+*templatefileset "E:/HM2021/2021/hwdesktop/templates/feoutput/ls-dyna971/dyna.key"
+*menufilterset "*"
+*menufilterdisable 
+*viewset 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 10 10
+*viewset 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 10 10
+*readfile "F:\\hyper-dyna-mcp\\output\\test8_daota_lou.hm"
+*setgeomrefinelevel 1
+*menufont 2
+*setsolverusessegmentsets 0
+*ME_CoreBehaviorAdjust "allowable_actions_policy=TC_lite"
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*setelementcolormode 16
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*setelementcolormode 1
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*setelementcolormode 16
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*clearmarkall 3
+*clearmark collections 1
+*clearmark collections 2
+*clearmark controllers 1
+*loaddefaultattributevaluesfromxml 
+# Session ended at "6-7-2026  12:40:52"
+return; # Stop script and return to application 
+# *quit 1; # Uncomment to exit application
+*begin "version 2021.0.0.33  6-7-2026  12:41:49"
+*createstringarray 17 " 0 penalty value              0.00    0.00    0.80    1.00   10.00" \
+  "  1 min length        1 1.0  10.000   9.000   4.000   2.000   1.000    1   59    0" \
+  "  2 max length        1 1.0  10.000  12.000  15.000  20.000  30.000    0   39    1" \
+  "  3 aspect ratio      1 1.0   1.000   2.000   4.400   5.000  10.000    0   41    2" \
+  "  4 warpage           1 1.0   0.000   5.000  13.000  15.000  30.000    0   56    3" \
+  "  5 max angle quad    1 1.0  90.000 110.000 134.000 140.000 160.000    0   28    4" \
+  "  6 min angle quad    1 1.0  90.000  70.000  46.000  40.000  20.000    0   61    5" \
+  "  7 max angle tria    1 1.0  60.000  80.000 112.000 120.000 150.000    0   19    6" \
+  "  8 min angle tria    1 1.0  60.000  50.000  34.000  30.000  15.000    0   22    7" \
+  "  9 skew              1 1.0   0.000  10.000  34.000  40.000  70.000    0   46    8" \
+  " 10 jacobian          1 1.0   1.000   0.900   0.700   0.600   0.300    0   57    9" \
+  " 11 chordal dev       0 1.0   0.000   0.300   0.800   1.000   2.000    0   29   10" \
+  " 12 taper             1 1.0   0.000   0.200   0.500   0.600   0.900    0   53   11" \
+  " 13 % of trias        1 1.0   0.000   6.000  10.000  15.000  20.000    0    0   -1" \
+  " 14 QI color legend            32      32       7       6       3           3   -1" \
+  " 15 time_step         1      10.000                   0.010            0   59   12" \
+  "   Global_solver 0"
+*setqualitycriteria 1 17 0
+*templatefileset "E:/HM2021/2021/hwdesktop/templates/feoutput/ls-dyna971/dyna.key"
+*menufilterset "*"
+*menufilterdisable 
+*viewset 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 10 10
+*viewset 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 10 10
+*readfile "F:\\hyper-dyna-mcp\\output\\test8_daota_lou.hm"
+*setgeomrefinelevel 1
+*menufont 2
+*setsolverusessegmentsets 0
+*ME_CoreBehaviorAdjust "allowable_actions_policy=TC_lite"
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*setelementcolormode 16
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*setelementcolormode 1
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*setelementcolormode 16
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*clearmarkall 3
+*clearmark collections 1
+*clearmark collections 2
+*clearmark controllers 1
+*loaddefaultattributevaluesfromxml 
+*createentity mats name="MAT_ELASTIC_800" cardimage=MATL1
+*setvalue mats id=5 Rho=7.85e-09
+*setvalue mats id=5 E=210000
+*setvalue mats id=5 Nu=0.3
+*createentity mats name="MAT_RIGID_801" cardimage=MATL20
+*setvalue mats id=6 STATUS=2
+*setvalue mats id=6 Rho=7.85e-09
+*setvalue mats id=6 E=210000
+*setvalue mats id=6 Nu=0.3
+*setvalue mats id=6
+*setvalue mats id=6
+*setvalue mats id=6
+*setvalue mats id=6
+*createentity props name="SECTION_SHELL_800" cardimage=SectShl
+*setvalue props id=6 STATUS=2
+*setvalue props id=6
+*setvalue props id=6
+*setvalue props id=6
+*createentity props name="SECTION_SOLID_801" cardimage=SectSld
+*createentity cards name="CONTROL_TERMINATION" cardimage=Termin
+*setvalue cards id=29 LSD_ENDTIM=0.005
+*setvalue cards id=29 LSD_ENDCYCLE=0
+*setvalue cards id=29 LSD_TSMIN=0
+*setvalue cards id=29 LSD_TERMRAT=0
+*setvalue cards id=29 LSD_PERMASS=0
+*createentity cards name="DATABASE_BINARY_D3PLOT" cardimage=DBplot
+*setvalue cards id=30 LSD_DT=0.001
+*setvalue cards id=30 LSD_LCID=0
+*setvalue cards id=30 LSD_NOBEAM=0
+*setvalue cards id=30 LSD_NPLTC=0
+*setvalue cards id=30 LSD_PSID=0
+*createentity groups name="CONTACT_S2S_1_2" cardimage=CONTACT_AUTOMATIC_SURFACE_TO_SURFACE
+*setvalue groups id=next STATUS=2
+*setvalue groups id=next
+*setvalue groups id=next
+*setvalue groups id=next
+*setvalue groups id=next
+*templatefileset "E:/HM2021/2021/hwdesktop/templates/feoutput/ls-dyna971/dyna.key"
+*setvalue comps id=1 name=JOINT_ZONE
+*setvalue comps id=2 name=CONCRETE_BODY
+*setvalue comps id=3 name=REBAR_CAGE
+*setvalue comps id=4 name=LOADING_PLATE
+*createmark components 1 "Undefined_1"
+*deletemark components 1
+*setvalue mats id=1 name=JOINT_MATERIAL
+*setvalue mats id=2 name=CONCRETE_C40
+*setvalue mats id=3 name=STEEL_REBAR_HRB400
+*setvalue mats id=4 name=LOADING_PLATE_STEEL
+*createentity sensors cardimage=SOLID_COLLECTOR name=SEC_SOLID_JOINT
+*createentity sensors cardimage=SOLID_COLLECTOR name=SEC_SOLID_CONCRETE
+*createentity sensors cardimage=SOLID_COLLECTOR name=SEC_SOLID_REBAR
+*createentity sensors cardimage=SOLID_COLLECTOR name=SEC_SOLID_PLATE
+*setvalue comps id=1
+*createentity loadcols cardimage=SPC name=FIX_BASE
+*currentcollector loadcols "FIX_BASE"
+*createmark nodes 1 1181 1186 1188 1272 1283 1292 1303 1312
+*loadcreate 1 1181 0 1 1 1 1 1 1
+*createmark nodes 1 1181 1186 1188 1272 1283 1292 1303 1312
+*loadcreate 1 1186 0 1 1 1 1 1 1
+*createmark nodes 1 1181 1186 1188 1272 1283 1292 1303 1312
+*loadcreate 1 1188 0 1 1 1 1 1 1
+*createmark nodes 1 1181 1186 1188 1272 1283 1292 1303 1312
+*loadcreate 1 1272 0 1 1 1 1 1 1
+*createmark nodes 1 1181 1186 1188 1272 1283 1292 1303 1312
+*loadcreate 1 1283 0 1 1 1 1 1 1
+*createmark nodes 1 1181 1186 1188 1272 1283 1292 1303 1312
+*loadcreate 1 1292 0 1 1 1 1 1 1
+*createmark nodes 1 1181 1186 1188 1272 1283 1292 1303 1312
+*loadcreate 1 1303 0 1 1 1 1 1 1
+*createmark nodes 1 1181 1186 1188 1272 1283 1292 1303 1312
+*loadcreate 1 1312 0 1 1 1 1 1 1
+*begin "version 2021.0.0.33  6-7-2026  12:52:17"
+*createstringarray 17 " 0 penalty value              0.00    0.00    0.80    1.00   10.00" \
+  "  1 min length        1 1.0  10.000   9.000   4.000   2.000   1.000    1   59    0" \
+  "  2 max length        1 1.0  10.000  12.000  15.000  20.000  30.000    0   39    1" \
+  "  3 aspect ratio      1 1.0   1.000   2.000   4.400   5.000  10.000    0   41    2" \
+  "  4 warpage           1 1.0   0.000   5.000  13.000  15.000  30.000    0   56    3" \
+  "  5 max angle quad    1 1.0  90.000 110.000 134.000 140.000 160.000    0   28    4" \
+  "  6 min angle quad    1 1.0  90.000  70.000  46.000  40.000  20.000    0   61    5" \
+  "  7 max angle tria    1 1.0  60.000  80.000 112.000 120.000 150.000    0   19    6" \
+  "  8 min angle tria    1 1.0  60.000  50.000  34.000  30.000  15.000    0   22    7" \
+  "  9 skew              1 1.0   0.000  10.000  34.000  40.000  70.000    0   46    8" \
+  " 10 jacobian          1 1.0   1.000   0.900   0.700   0.600   0.300    0   57    9" \
+  " 11 chordal dev       0 1.0   0.000   0.300   0.800   1.000   2.000    0   29   10" \
+  " 12 taper             1 1.0   0.000   0.200   0.500   0.600   0.900    0   53   11" \
+  " 13 % of trias        1 1.0   0.000   6.000  10.000  15.000  20.000    0    0   -1" \
+  " 14 QI color legend            32      32       7       6       3           3   -1" \
+  " 15 time_step         1      10.000                   0.010            0   59   12" \
+  "   Global_solver 0"
+*setqualitycriteria 1 17 0
+*templatefileset "E:/HM2021/2021/hwdesktop/templates/feoutput/ls-dyna971/dyna.key"
+*menufilterset "*"
+*menufilterdisable 
+*viewset 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 10 10
+*viewset 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 10 10
+*readfile "F:\\hyper-dyna-mcp\\output\\test8_daota_lou.hm"
+*setgeomrefinelevel 1
+*menufont 2
+*setsolverusessegmentsets 0
+*ME_CoreBehaviorAdjust "allowable_actions_policy=TC_lite"
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*setelementcolormode 16
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*setelementcolormode 1
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*setelementcolormode 16
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*clearmarkall 3
+*clearmark collections 1
+*clearmark collections 2
+*clearmark controllers 1
+*loaddefaultattributevaluesfromxml 
+*templatefileset "E:/HM2021/2021/hwdesktop/templates/feoutput/ls-dyna971/dyna.key"
+*setvalue comps id=1 name=JOINT_ZONE
+*setvalue comps id=2 name=CONCRETE_BODY
+*setvalue comps id=3 name=REBAR_CAGE
+*setvalue comps id=4 name=LOADING_PLATE
+*createmark components 1 "Undefined_1"
+*deletemark components 1
+*setvalue mats id=1 name=JOINT_MATERIAL
+*setvalue mats id=2 name=CONCRETE_C40
+*setvalue mats id=3 name=STEEL_REBAR_HRB400
+*setvalue mats id=4 name=LOADING_PLATE_STEEL
+*createentity sensors cardimage=SOLID_COLLECTOR name=SEC_SOLID_JOINT
+*createentity sensors cardimage=SOLID_COLLECTOR name=SEC_SOLID_CONCRETE
+*createentity sensors cardimage=SOLID_COLLECTOR name=SEC_SOLID_REBAR
+*createentity sensors cardimage=SOLID_COLLECTOR name=SEC_SOLID_PLATE
+*setvalue comps id=1
+*createentity sensors cardimage=SOLID_COLLECTOR name=SEC_SOLID_JOINT
+*createentity sensors cardimage=SOLID_COLLECTOR name=SEC_SOLID_CONCRETE
+*createentity sensors cardimage=SOLID_COLLECTOR name=SEC_SOLID_REBAR
+*createentity sensors cardimage=SOLID_COLLECTOR name=SEC_SOLID_PLATE
+*setvalue comps id=1
+*setvalue comps id=2
+*setvalue comps id=3
+*setvalue comps id=4
+*begin "version 2021.0.0.33  6-7-2026  13:08:55"
+*createstringarray 17 " 0 penalty value              0.00    0.00    0.80    1.00   10.00" \
+  "  1 min length        1 1.0  10.000   9.000   4.000   2.000   1.000    1   59    0" \
+  "  2 max length        1 1.0  10.000  12.000  15.000  20.000  30.000    0   39    1" \
+  "  3 aspect ratio      1 1.0   1.000   2.000   4.400   5.000  10.000    0   41    2" \
+  "  4 warpage           1 1.0   0.000   5.000  13.000  15.000  30.000    0   56    3" \
+  "  5 max angle quad    1 1.0  90.000 110.000 134.000 140.000 160.000    0   28    4" \
+  "  6 min angle quad    1 1.0  90.000  70.000  46.000  40.000  20.000    0   61    5" \
+  "  7 max angle tria    1 1.0  60.000  80.000 112.000 120.000 150.000    0   19    6" \
+  "  8 min angle tria    1 1.0  60.000  50.000  34.000  30.000  15.000    0   22    7" \
+  "  9 skew              1 1.0   0.000  10.000  34.000  40.000  70.000    0   46    8" \
+  " 10 jacobian          1 1.0   1.000   0.900   0.700   0.600   0.300    0   57    9" \
+  " 11 chordal dev       0 1.0   0.000   0.300   0.800   1.000   2.000    0   29   10" \
+  " 12 taper             1 1.0   0.000   0.200   0.500   0.600   0.900    0   53   11" \
+  " 13 % of trias        1 1.0   0.000   6.000  10.000  15.000  20.000    0    0   -1" \
+  " 14 QI color legend            32      32       7       6       3           3   -1" \
+  " 15 time_step         1      10.000                   0.010            0   59   12" \
+  "   Global_solver 0"
+*setqualitycriteria 1 17 0
+*templatefileset "E:/HM2021/2021/hwdesktop/templates/feoutput/ls-dyna971/dyna.key"
+*menufilterset "*"
+*menufilterdisable 
+*viewset 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 10 10
+*viewset 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 10 10
+*readfile "F:\\hyper-dyna-mcp\\output\\test8_daota_lou.hm"
+*setgeomrefinelevel 1
+*menufont 2
+*setsolverusessegmentsets 0
+*ME_CoreBehaviorAdjust "allowable_actions_policy=TC_lite"
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*setelementcolormode 16
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*setelementcolormode 1
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*setelementcolormode 16
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*settopologydisplaymode 0
+*clearmarkall 3
+*clearmarkall 3
+*clearmark collections 1
+*clearmark collections 2
+*clearmark controllers 1
+*loaddefaultattributevaluesfromxml 
+*createentity loadcols cardimage=SPC name=FIX_BASE
+*currentcollector loadcols "FIX_BASE"
+*createmark nodes 1
+*loadcreate 1 0 0 1 1 1 1 1 1
+*createentity loadcols cardimage=SPC name=FIX_BASE_SAFE
+*currentcollector loadcols "FIX_BASE_SAFE"
+*createentity loadcols cardimage=SPC name=FIX_BASE_SAFE
+*createentity loadcols cardimage=SPC name=FIX_BASE
+*createentity loadcols cardimage=SPC name=FIX_BASE
+*createentity loadcols cardimage=SPC name=FIX_BASE
+*createentity loadcols cardimage=SPC name=FIX_BASE
+*createentity loadcols cardimage=SPC name=FIX_BASE_SAFE
+*createentity loadcols cardimage=SPC name=FIX_BASE
+*createentity loadcols cardimage=SPC name=FIX_BASE
+*rotateabout 0 0 0 0
+*rotateabout 0 0 0 0
+*rotateabout 0 0 0 0
+*window 3 -5369.79784 5001.49322 -1881.96817 6931.01771
+*templatefileset "E:/HM2021/2021/hwdesktop/templates/feoutput/ls-dyna971/dyna.key"
+*createentity loadcols name=FIX_BASE_NEW cardimage=BOUNDARY_SPC
+*setvalue loadcols name=FIX_BASE_NEW STATUS=2
+*setvalue loadcols name=FIX_BASE_NEW
+*setvalue loadcols id=5
+*begin "version 2021.0.0.33  6-7-2026  13:14:56"
+*createstringarray 17 " 0 penalty value              0.00    0.00    0.80    1.00   10.00" \
+  "  1 min length        1 1.0  10.000   9.000   4.000   2.000   1.000    1   59    0" \
+  "  2 max length        1 1.0  10.000  12.000  15.000  20.000  30.000    0   39    1" \
+  "  3 aspect ratio      1 1.0   1.000   2.000   4.400   5.000  10.000    0   41    2" \
+  "  4 warpage           1 1.0   0.000   5.000  13.000  15.000  30.000    0   56    3" \
+  "  5 max angle quad    1 1.0  90.000 110.000 134.000 140.000 160.000    0   28    4" \
+  "  6 min angle quad    1 1.0  90.000  70.000  46.000  40.000  20.000    0   61    5" \
+  "  7 max angle tria    1 1.0  60.000  80.000 112.000 120.000 150.000    0   19    6" \
+  "  8 min angle tria    1 1.0  60.000  50.000  34.000  30.000  15.000    0   22    7" \
+  "  9 skew              1 1.0   0.000  10.000  34.000  40.000  70.000    0   46    8" \
+  " 10 jacobian          1 1.0   1.000   0.900   0.700   0.600   0.300    0   57    9" \
+  " 11 chordal dev       0 1.0   0.000   0.300   0.800   1.000   2.000    0   29   10" \
+  " 12 taper             1 1.0   0.000   0.200   0.500   0.600   0.900    0   53   11" \
+  " 13 % of trias        1 1.0   0.000   6.000  10.000  15.000  20.000    0    0   -1" \
+  " 14 QI color legend            32      32       7       6       3           3   -1" \
+  " 15 time_step         1      10.000                   0.010            0   59   12" \
+  "   Global_solver 0"
+*setqualitycriteria 1 17 0
+*templatefileset "E:/HM2021/2021/hwdesktop/templates/feoutput/ls-dyna971/dyna.key"
+*menufilterset "*"
+*menufilterdisable 
+*viewset 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 10 10
+*viewset 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 10 10
+*readfile "F:\\hyper-dyna-mcp\\output\\test8_daota_lou.hm"
+*setgeomrefinelevel 1
