@@ -6,10 +6,14 @@ MCP 配置生成器
 
 import json
 import sys
+import io
 from pathlib import Path
 from typing import Dict, Any
 
 import yaml
+
+# 设置标准输出编码为 UTF-8
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 
 def load_local_paths() -> Dict[str, Any]:
@@ -25,14 +29,16 @@ def load_local_paths() -> Dict[str, Any]:
 
 def generate_claude_desktop_config(project_root: str, python_exe: str) -> Dict[str, Any]:
     """生成 Claude Desktop 配置"""
+    # 确保项目根目录是绝对路径
+    abs_project_root = str(Path(project_root).resolve())
     return {
         "mcpServers": {
             "hyper-dyna-mcp": {
                 "command": python_exe,
                 "args": ["-m", "program.server"],
-                "cwd": project_root,
+                "cwd": abs_project_root,
                 "env": {
-                    "PYTHONPATH": project_root
+                    "PYTHONPATH": abs_project_root
                 }
             }
         }
@@ -41,14 +47,16 @@ def generate_claude_desktop_config(project_root: str, python_exe: str) -> Dict[s
 
 def generate_claude_code_config(project_root: str, python_exe: str) -> Dict[str, Any]:
     """生成 Claude Code 配置"""
+    # 确保项目根目录是绝对路径
+    abs_project_root = str(Path(project_root).resolve())
     return {
         "mcpServers": {
             "hyper-dyna-mcp": {
                 "command": python_exe,
                 "args": ["-m", "program.server"],
-                "cwd": project_root,
+                "cwd": abs_project_root,
                 "env": {
-                    "PYTHONPATH": project_root
+                    "PYTHONPATH": abs_project_root
                 }
             }
         }
