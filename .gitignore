@@ -1,23 +1,98 @@
+# ==================== Python ====================
 __pycache__/
 *.pyc
 *.pyo
-.env
-.venv/
+*.pyd
+.Python
+*.egg
 *.egg-info/
 dist/
 build/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.manifest
+*.spec
+
+# ==================== Virtual Environments ====================
+.venv/
+venv/
+ENV/
+env/
+.env
+.env.local
+.env.*.local
+
+# ==================== Testing ====================
 .pytest_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+*.cover
+.hypothesis/
+
+# ==================== Type Checking ====================
 .mypy_cache/
+.pytype/
+
+# ==================== IDE ====================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ==================== Claude Code ====================
+# Claude session data
+.claude/sessions/
+.claude/cache/
+.claude/projects/
+.claude/todos/
+.claude/statsig/
+.claude/messages/
+.claude/conversations/
+.claude/fetches/
+.claude/temp/
+
+# Claude worktrees (temporary)
+.claude/worktrees/
+
+# Claude hooks (temporary state)
+.claude/hooks/.handoff-turn-count
+.claude/hooks/task-progress.md
+
+# Claude settings (user-specific)
+.claude/settings.json
+
+# Claude logs
+.claude/*.log
+.claude/**/*.log
+
+# ==================== Project Specific ====================
+# Run data (runtime generated)
 runs/*
 !runs/.gitkeep
+
+# Logs (runtime generated)
 logs/*
 !logs/.gitkeep
 *.log
+
+# IPC temporary files
 ipc/commands/*.json
 ipc/results/*.json
 ipc/archive/*.json
-temp_*.tcl
-*.bat.setup
 
 # Reference materials (optional, not required for runtime)
 lsdyna-maunal/
@@ -33,11 +108,6 @@ ref/
 *.fem
 *.pkl
 *.tmp
-*.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db
 
 # Temporary output files (not referenced by function calls)
 output/command1.tcl
@@ -52,4 +122,42 @@ output/hmmenu.set
 output/validation_report.md
 output/test[0-9]*.hm
 output/test_hysteresis*.hm
-temp_safe_execute.py
+temp_*.py
+temp_*.tcl
+*.bat.setup
+
+# ==================== OS Specific ====================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ==================== Documentation Build ====================
+docs/_build/
+docs/build/
+site/
+
+# ==================== Jupyter ====================
+.ipynb_checkpoints/
+*.ipynb
+
+# ==================== Coverage Reports ====================
+.coverage
+.coverage.*
+htmlcov/
+*.cover
+coverage/
+lcov/
+lcov.info
+
+# ==================== Misc ====================
+*.bak
+*.backup
+*.old
+*.orig
+*~
