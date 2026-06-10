@@ -36,6 +36,184 @@
         "Do not use *solidblock or *tetmesh for this route."
       ]
     },
+    "create_structured_quad4_shell_plate": {
+      "status": "verified",
+      "description": "Create a structured QUAD4 shell finite-element plate using nodes and elements in the XY plane. This creates FE shell mesh entities, not HyperMesh geometry surfaces.",
+      "entity_kind": "fe_mesh",
+      "element_config": 104,
+      "limits": {
+        "max_elements": 5000,
+        "max_nodes": 8000
+      },
+      "commands": [
+        "*collectorcreateonly comps",
+        "*currentcollector comps",
+        "*createnode",
+        "*createlist nodes",
+        "*createelement 104",
+        "hm_latestentityid"
+      ],
+      "source_evidence": [
+        {
+          "path": "D:/Zotero/ZoteroNote/Agent/dyna mcp/handoff/handoff_260610.md",
+          "evidence": "*createlist nodes 1 1 2 3 4; *createelement 104 1 1 1; SHELL_TEST_ELEM_AFTER=1"
+        },
+        {
+          "path": "D:/Zotero/ZoteroNote/Agent/dyna mcp/handoff/handoff_260610.md",
+          "evidence": "Full FE plate creation: nodes=66, QUAD4 shell elements=50, SHELL_PLATE_CREATE_ERRORS=0"
+        }
+      ],
+      "tested_in_session": true,
+      "runtime_validation": [
+        "Create four-node shell elements with *createlist nodes and *createelement 104 1 1 1.",
+        "Verify element_count increases after execution.",
+        "Verify the structured plate generated 66 nodes and 50 QUAD4 shell elements for a 200x100 plate with 20 mm element size in HyperMesh 2021."
+      ],
+      "notes": [
+        "Verified in HyperMesh 2021 through the GUI listener on 2026-06-10.",
+        "This route creates FE shell elements directly; it does not create geometry surfaces and does not run surface automesh.",
+        "Shell property/material/thickness assignment remains blocked until datanames are execution-verified."
+      ]
+    },
+    "create_beam_line": {
+      "status": "verified",
+      "description": "Create a straight line with structured BAR2/BEAM finite elements using nodes and *createelement 60. This creates 1D FE beam elements plus a visual geometry line.",
+      "entity_kind": "fe_mesh",
+      "element_config": 60,
+      "limits": {
+        "max_elements": 5000,
+        "max_nodes": 8000
+      },
+      "commands": [
+        "*collectorcreateonly comps",
+        "*currentcollector comps",
+        "*linecreatestraight",
+        "*createnode",
+        "*createlist nodes",
+        "*createelement 60",
+        "hm_getvalue elements id typename",
+        "hm_getvalue elements id config",
+        "hm_latestentityid"
+      ],
+      "source_evidence": [
+        {
+          "path": "E:/HM2025/program/hwdesktop/hm/scripts/context/widgets/filter.tcl",
+          "evidence": "bar2 60 \"1d\""
+        },
+        {
+          "path": "D:/Zotero/ZoteroNote/Agent/dyna mcp/handoff/handoff_260610.md",
+          "evidence": "*createelement 60 1 1 1; BAR2_PROBE_TYPE=BEAM; BAR2_PROBE_CONFIG=60"
+        },
+        {
+          "path": "D:/Zotero/ZoteroNote/Agent/dyna mcp/handoff/handoff_260610.md",
+          "evidence": "BEAM_LINE_ELEM_AFTER=10; CREATED=10; ERRORS=0; BEAM_LINE_LAST_TYPE=BEAM; BEAM_LINE_LAST_CONFIG=60"
+        }
+      ],
+      "tested_in_session": true,
+      "runtime_validation": [
+        "Reject *createelement 2 because it produced typename=Plotel, not BEAM.",
+        "Create two-node BAR2/BEAM elements with *createlist nodes and *createelement 60 1 1 1.",
+        "Verify element_count increases and hm_getvalue reports typename=BEAM and config=60.",
+        "For the 500 mm / 10 division beam test, verify 11 nodes, 10 elements, and a visual geometry line."
+      ],
+      "notes": [
+        "Verified in HyperMesh 2021 through the GUI listener on 2026-06-10.",
+        "This route creates FE beam elements directly; line meshing, orientation vectors, and exact LS-DYNA beam section datanames remain separate verification work.",
+        "Material/property component binding through materialid/propertyid had session evidence, but beam section width/height datanames remain blocked until verified."
+      ]
+    },
+    "create_discrete_element": {
+      "status": "verified",
+      "description": "Create a two-node HyperMesh DISCRETE spring element using *spring. This creates the FE connector element only; LS-DYNA SECTION_DISCRETE stiffness/damping datanames remain unverified.",
+      "entity_kind": "fe_mesh",
+      "element_config": 21,
+      "limits": {
+        "max_elements": 1,
+        "max_nodes": 2
+      },
+      "commands": [
+        "*collectorcreateonly comps",
+        "*currentcollector comps",
+        "*createnode",
+        "*spring",
+        "hm_getvalue elements id typename",
+        "hm_getvalue elements id config",
+        "hm_latestentityid"
+      ],
+      "source_evidence": [
+        {
+          "path": "E:/HM2025/program/hwdesktop/hm/scripts/analyzer/star_commands.txt",
+          "evidence": "*spring"
+        },
+        {
+          "path": "E:/HM2025/program/hwdesktop/hm/scripts/EngineeringSolutions/aerospace/ZeroLengthElem/ZeroLengthElem.tcl",
+          "evidence": "*spring $node1 $node2 1 \"\" 0"
+        },
+        {
+          "path": "D:/Zotero/ZoteroNote/Agent/dyna mcp/handoff/handoff_260610.md",
+          "evidence": "*spring $node_a $node_b 1 \"\" 0; TYPE=DISCRETE; CONFIG=21; NODES=1 2"
+        }
+      ],
+      "tested_in_session": true,
+      "runtime_validation": [
+        "Create two nodes in the current component.",
+        "Execute *spring node_a node_b 1 \"\" 0.",
+        "Verify hm_latestentityid elements is non-zero.",
+        "Verify hm_getvalue reports typename=DISCRETE and config=21.",
+        "Do not set SECTION_DISCRETE stiffness/damping datanames until those fields are command-recorded and verified without catch."
+      ],
+      "notes": [
+        "Verified in HyperMesh 2021 through the GUI listener on 2026-06-10.",
+        "This route creates the DISCRETE element only; property/card binding and LS-DYNA K export are outside the executable MCP route."
+      ]
+    },
+    "create_lumped_mass": {
+      "status": "verified",
+      "description": "Create a one-node HyperMesh MASS element using *masselement on a marked node. This creates the FE mass element only; property/card datanames remain unverified.",
+      "entity_kind": "fe_mesh",
+      "element_config": 1,
+      "limits": {
+        "max_elements": 1,
+        "max_nodes": 1
+      },
+      "commands": [
+        "*collectorcreateonly comps",
+        "*currentcollector comps",
+        "*createnode",
+        "*createmark nodes",
+        "*masselement",
+        "hm_getvalue elements id typename",
+        "hm_getvalue elements id config",
+        "hm_latestentityid"
+      ],
+      "source_evidence": [
+        {
+          "path": "E:/HM2025/program/hwdesktop/hm/scripts/analyzer/star_commands.txt",
+          "evidence": "*masselement"
+        },
+        {
+          "path": "E:/HM2025/program/hwdesktop/hm/scripts/connectors/prop_ansys.tcl",
+          "evidence": "*createmark nodes 1 $nodeId; *masselement 1 0 \"\" 0"
+        },
+        {
+          "path": "D:/Zotero/ZoteroNote/Agent/dyna mcp/handoff/handoff_260610.md",
+          "evidence": "*createmark nodes 1 $node_a; *masselement 1 10 \"\" 0; TYPE=MASS; CONFIG=1; NODES=1"
+        }
+      ],
+      "tested_in_session": true,
+      "runtime_validation": [
+        "Create one node in the current component.",
+        "Mark that node with *createmark nodes 1 node_id.",
+        "Execute *masselement 1 mass \"\" 0.",
+        "Verify hm_latestentityid elements is non-zero.",
+        "Verify hm_getvalue reports typename=MASS and config=1.",
+        "Do not set ELEMENT_MASS property/card datanames until those fields are command-recorded and verified without catch."
+      ],
+      "notes": [
+        "Verified in HyperMesh 2021 through the GUI listener on 2026-06-10 with mass=10.",
+        "This route creates the MASS element only; material/property assignment remains blocked."
+      ]
+    },
     "create_geometry_solid_box": {
       "status": "verified",
       "description": "Create an axis-aligned HyperMesh geometry solid box using *solidblock. This creates CAD/geometry solid entities, not FE elements.",
@@ -73,12 +251,208 @@
         "This route is source-verified from local Altair HM2025 scripts and still requires GUI runtime validation in the target HyperMesh 2024/older session.",
         "Do not reuse this route for FE mesh creation."
       ]
+    },
+    "create_geometry_surface_rect_nurbs": {
+      "status": "verified",
+      "description": "Create an axis-aligned rectangular HyperMesh geometry surface in the XY plane using *surfacecreatenurbs. This creates geometry surface entities, not shell FE elements.",
+      "entity_kind": "geometry_surface",
+      "commands": [
+        "*collectorcreateonly comps",
+        "*currentcollector comps",
+        "*createdoublearray",
+        "*surfacecreatenurbs",
+        "hm_entitylist surfaces id",
+        "hm_marklength surfaces",
+        "hm_latestentityid surfaces"
+      ],
+      "source_evidence": [
+        {
+          "path": "E:/HM2025/program/hwdesktop/hm/scripts/analyzer/star_commands.txt",
+          "evidence": "*surfacecreatenurbs"
+        },
+        {
+          "path": "D:/Zotero/ZoteroNote/Agent/dyna mcp/handoff/handoff_260610.md",
+          "evidence": "*createdoublearray 16 0 1 0 1 0 0 0 200 0 0 0 100 0 200 100 0; *surfacecreatenurbs 1 1 2 2 2 2 0 1 16"
+        }
+      ],
+      "tested_in_session": true,
+      "runtime_validation": [
+        "Capture SURFACES_BEFORE from hm_entitylist surfaces id, with *createmark/hm_marklength fallback for older HyperMesh Tcl.",
+        "Execute *createdoublearray with u/v knots and four rectangular control points.",
+        "Execute *surfacecreatenurbs 1 1 2 2 2 2 0 1 16.",
+        "Capture SURFACES_AFTER and SURFACE_ID; hm_latestentityid is wrapped in catch.",
+        "Treat the route as failed unless surfaces_count increases."
+      ],
+      "notes": [
+        "Verified in HyperMesh 2021 through the GUI listener on 2026-06-10.",
+        "This route creates a geometry surface only; it does not create QUAD4 shell FE elements.",
+        "Surface meshing and LS-DYNA shell property/material assignment remain separate unsupported routes until recorded and verified."
+      ]
     }
   },
   "unsupported_routes": {
     "tetmesh_geometry_solid": {
       "status": "unsupported",
-      "reason": "Tetra meshing a geometry solid was not verified in the current HyperMesh profile."
+      "entity_kind": "geometry_mesh",
+      "commands": [
+        "*tetmesh"
+      ],
+      "reason": "Tetra meshing a geometry solid was not verified in the current HyperMesh profile.",
+      "required_verification": [
+        "Record the geometry-solid tetra meshing workflow in HyperMesh command recording.",
+        "Verify entity marks, element size parameters, output element counts, and display state in the target HyperMesh profile.",
+        "Promote this route only after connected GUI runtime validation proves element_count increases."
+      ]
+    },
+    "surface_automesh": {
+      "status": "unsupported",
+      "entity_kind": "surface_mesh",
+      "commands": [
+        "*automesh"
+      ],
+      "reason": "Surface automesh Tcl is present in legacy generators but is not verified for the current GUI-only MCP execution path.",
+      "required_verification": [
+        "Record the surface meshing workflow in HyperMesh command recording.",
+        "Verify surface marks, mesh controls, created element count, and display state.",
+        "Add a dedicated verified route before exposing an execution tool."
+      ]
+    },
+    "create_tet_element": {
+      "status": "unsupported",
+      "entity_kind": "solid_tet",
+      "commands": [
+        "*createelement"
+      ],
+      "reason": "Direct TET element creation is not verified in the current HyperMesh profile.",
+      "required_verification": [
+        "Record direct TET element creation from selected nodes in HyperMesh.",
+        "Verify element config, node order, property assignment, and created element count.",
+        "Add a dedicated verified route before exposing an execution tool."
+      ]
+    },
+    "create_shell_tria3": {
+      "status": "unsupported",
+      "entity_kind": "shell_tria",
+      "commands": [
+        "*createelement"
+      ],
+      "reason": "Direct TRIA3 shell creation is not verified in the current HyperMesh profile.",
+      "required_verification": [
+        "Record TRIA3 shell creation from three nodes in HyperMesh.",
+        "Verify element config, node order, normal direction, property assignment, and created element count.",
+        "Add a dedicated verified route before exposing an execution tool."
+      ]
+    },
+    "line_mesh_beam": {
+      "status": "unsupported",
+      "entity_kind": "beam_mesh",
+      "commands": [],
+      "reason": "Line-to-beam meshing command sequence is not verified.",
+      "required_verification": [
+        "Record line mesh or beam mesh generation in HyperMesh.",
+        "Verify line marks, element size/count, orientation, and display state.",
+        "Add a dedicated verified route before exposing an execution tool."
+      ]
+    },
+    "mesh_lumped_mass": {
+      "status": "unsupported",
+      "entity_kind": "lumped_mass",
+      "commands": [],
+      "reason": "Lumped masses are attached to nodes/sets rather than meshed from geometry; node/set route is unverified.",
+      "required_verification": [
+        "Verify node or node-set creation/selection route.",
+        "Verify lumped mass assignment to that target.",
+        "Add a dedicated verified route before exposing an execution tool."
+      ]
+    },
+    "mesh_discrete_element": {
+      "status": "unsupported",
+      "entity_kind": "discrete",
+      "commands": [],
+      "reason": "Discrete elements connect existing nodes/sets rather than being generated by geometry meshing; route is unverified.",
+      "required_verification": [
+        "Verify node pair or node set selection route.",
+        "Verify discrete element creation and property assignment.",
+        "Add a dedicated verified route before exposing an execution tool."
+      ]
+    },
+    "assign_material_to_hex_part": {
+      "status": "unsupported",
+      "entity_kind": "material_assignment",
+      "commands": [
+        "*setvalue"
+      ],
+      "reason": "Solid material/property/part assignment datanames are not execution-verified.",
+      "required_verification": [
+        "Record LS-DYNA material, section/property, and component/part assignment in HyperMesh.",
+        "Verify materialid/propertyid/cardimage datanames for the target profile.",
+        "Add a dedicated verified route before exposing an execution tool."
+      ]
+    },
+    "assign_material_to_tet_part": {
+      "status": "unsupported",
+      "entity_kind": "material_assignment",
+      "commands": [
+        "*setvalue"
+      ],
+      "reason": "TET material/property assignment depends on an unverified TET creation/meshing route.",
+      "required_verification": [
+        "First verify TET creation/meshing.",
+        "Record material/property assignment for the generated part/component.",
+        "Add a dedicated verified route before exposing an execution tool."
+      ]
+    },
+    "assign_material_to_shell_part": {
+      "status": "unsupported",
+      "entity_kind": "material_assignment",
+      "commands": [
+        "*setvalue"
+      ],
+      "reason": "Shell material/property/thickness assignment datanames are not execution-verified.",
+      "required_verification": [
+        "Record shell section/property creation with thickness and material reference.",
+        "Verify component/part assignment datanames.",
+        "Add a dedicated verified route before exposing an execution tool."
+      ]
+    },
+    "assign_material_to_beam_part": {
+      "status": "unsupported",
+      "entity_kind": "material_assignment",
+      "commands": [
+        "*setvalue"
+      ],
+      "reason": "Beam material/section/orientation assignment datanames are not execution-verified.",
+      "required_verification": [
+        "Record beam section/property and material assignment.",
+        "Verify orientation and section datanames.",
+        "Add a dedicated verified route before exposing an execution tool."
+      ]
+    },
+    "assign_material_to_lumped_mass": {
+      "status": "unsupported",
+      "entity_kind": "material_assignment",
+      "commands": [
+        "*setvalue"
+      ],
+      "reason": "Lumped mass usually uses mass/property definitions rather than ordinary material assignment; route is unverified.",
+      "required_verification": [
+        "Record the target LS-DYNA lumped mass card workflow.",
+        "Verify whether material assignment is applicable or replaced by mass/property fields.",
+        "Add a dedicated verified route before exposing an execution tool."
+      ]
+    },
+    "assign_material_to_discrete_element": {
+      "status": "unsupported",
+      "entity_kind": "material_assignment",
+      "commands": [
+        "*setvalue"
+      ],
+      "reason": "Discrete element behavior is property/card driven and route datanames are not verified.",
+      "required_verification": [
+        "Record discrete element property/card assignment.",
+        "Verify whether material assignment is applicable for the selected LS-DYNA discrete formulation.",
+        "Add a dedicated verified route before exposing an execution tool."
+      ]
     }
   }
 }

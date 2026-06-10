@@ -15,7 +15,7 @@ Hyper-Dyna-MCP 是一个面向本机 HyperMesh GUI 的 MCP server。它通过 `F
 - 版本：`1.0.0`
 - MCP 传输：`FastMCP + stdio`
 - 运行目标：本机 HyperMesh GUI listener
-- 工具数量：32 个 HyperMesh 相关 MCP tools
+- 工具数量：33 个 HyperMesh 相关 MCP tools
 - FE 路线：已验证的结构化 HEX8 网格路线，使用 `*createnode`、`*createlist nodes`、`*createelement 208`
 - Solid 路线：`*solidblock` 已有本机脚本证据，仍需要目标 HyperMesh GUI session 的 runtime validation
 - Dyna keyword：结构化 MAP 优先，manual notes / embedding 只用于解释和检索，不作为执行依据
@@ -116,9 +116,15 @@ hm_read_components
 hm_set_keyword
 hm_create_fe_cube
 hm_create_solid_box
+hm_create_surface_plate
+hm_create_shell_plate
+hm_create_beam_line
+hm_create_discrete_spring
+hm_create_lumped_mass
 hm_visual_refresh
 hm_gui_modeling_smoke
 hm_command_map
+hm_element_capability_matrix
 dyna_keyword_policy
 dyna_keyword_map_validate
 dyna_keyword_query
@@ -136,6 +142,31 @@ hm_python_api_current_model_info
 *createlist nodes
 *createelement 208
 ```
+
+当前可执行网格能力只到这里：规则 HEX8 FE cube。`hm_mesh_box` 不会再发送未验证的 `*tetmesh`；它会返回 `unsupported_route=tetmesh_geometry_solid`，直到该路线通过 HyperMesh command recording 和真实 GUI runtime validation。
+
+`hm_element_capability_matrix` 用于检查单元族能力边界：当前 `solid_hex` 的 FE 单元创建可执行，`shell_quad` 的结构化 QUAD4 FE plate 直接创建也可执行，`line_beam` 的结构化 BAR2/BEAM line 直接创建也可执行，`discrete` 的两节点 DISCRETE spring 创建可执行，`lumped_mass` 的单节点 MASS 创建可执行；`shell_quad` 另有 geometry surface 创建路线 `hm_create_surface_plate`。但 surface automesh、`SECTION_SHELL` 厚度/属性 datanames、beam section 宽高/orientation datanames、`TET`、`TRIA3`、离散/质量 property datanames、网格划分和材料赋值路线仍是 blocked/unsupported，必须先补 HyperMesh command recording 证据。
+
+`hm_create_surface_plate` 使用已在 HyperMesh 2021 GUI listener 中验证的 `*createdoublearray + *surfacecreatenurbs` 路线创建矩形 geometry surface。它只证明 HyperMesh 几何面实体可创建，不代表 LS-DYNA `*ELEMENT_SHELL`、shell property/material 绑定或 K 文件导出已可执行。
+
+`hm_create_shell_plate` 使用已在 HyperMesh 2021 GUI listener 中验证的 `*createnode + *createlist nodes + *createelement 104` 路线创建结构化 QUAD4 shell FE plate。它不运行 surface automesh，也不设置 `SECTION_SHELL` 厚度/属性或材料绑定。
+
+`hm_create_beam_line` 使用已在 HyperMesh 2021 GUI listener 中验证的 `*linecreatestraight + *createnode + *createlist nodes + *createelement 60` 路线创建结构化 BAR2/BEAM line。不要使用 `*createelement 2` 创建 beam，因为测试证明它生成 `Plotel`。该工具会在同一 Tcl 脚本末尾自动执行可视化刷新；beam section 宽高、orientation 和材料/属性 datanames 仍需后续录制验证。
+
+`hm_create_discrete_spring` 使用已在 HyperMesh 2021 GUI listener 中验证的 `*spring node_a node_b 1 "" 0` 路线创建 `TYPE=DISCRETE, CONFIG=21` 的两节点离散弹簧单元。`hm_create_lumped_mass` 使用 `*createmark nodes 1 node; *masselement 1 mass "" 0` 创建 `TYPE=MASS, CONFIG=1` 的集中质量单元。两者都只创建 FE 元素；`SECTION_DISCRETE` 刚度/阻尼和 `ELEMENT_MASS` property/card datanames 仍未验证，不能作为材料/属性赋值路线使用。
+
+K 文件侧能力与 GUI 创建能力分开判断。当前 `program.tools.k_writer.build_shell_plate_model` 已能生成 QUAD4 shell plate 的 LS-DYNA K 文件，包含：
+
+```text
+*NODE
+*ELEMENT_SHELL
+*ELEMENT_SHELL_THICKNESS
+*SECTION_SHELL
+*MAT_ELASTIC
+*PART
+```
+
+这只证明离线 fixture/验证用的 K 文件生成能力，不代表 HyperMesh GUI 里已经可以通过 MCP 创建 shell 单元。Agent 不得用 `k_writer`、`write_k_file` 或后端 K keyword 拼写来绕过 HyperMesh GUI/Tcl listener；建模和可视化必须优先走 Tcl Console/listener 与 verified route。若用户要求最终 `.k` 导出，当前 GUI-only MCP 应返回“不支持/待验证 HyperMesh GUI 导出路线”，不能静默改成后端写 K 文件。
 
 `hm_create_solid_box` 是独立的 geometry solid 路线，基于 `*solidblock`。它必须在目标 HyperMesh GUI session 中证明：
 

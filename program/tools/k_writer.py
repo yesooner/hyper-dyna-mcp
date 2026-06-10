@@ -72,6 +72,15 @@ class ShellElement:
 
 
 @dataclass
+class ShellThickness:
+    eid: int
+    t1: float
+    t2: float
+    t3: float
+    t4: float
+
+
+@dataclass
 class BeamElement:
     eid: int
     pid: int
@@ -149,6 +158,7 @@ class KModel:
     nodes: list[Node] = field(default_factory=list)
     solid_elements: list[SolidElement] = field(default_factory=list)
     shell_elements: list[ShellElement] = field(default_factory=list)
+    shell_thicknesses: list[ShellThickness] = field(default_factory=list)
     beam_elements: list[BeamElement] = field(default_factory=list)
     boundaries: list[BoundaryCondition] = field(default_factory=list)
     loads: list[LoadSegment] = field(default_factory=list)
@@ -262,6 +272,12 @@ def _gen_elements(model: KModel) -> list[str]:
             nodes_str = "".join(f"{n:8d}" for n in e.nodes[:4])
             lines.append(f" {e.eid:8d} {e.pid:8d}{nodes_str}")
 
+    if model.shell_thicknesses:
+        lines.append("*ELEMENT_SHELL_THICKNESS")
+        lines.append("$   EID        T1        T2        T3        T4")
+        for t in model.shell_thicknesses:
+            lines.append(f" {t.eid:8d} {t.t1:10.4f} {t.t2:10.4f} {t.t3:10.4f} {t.t4:10.4f}")
+
     # Beam elements
     if model.beam_elements:
         lines.append("*ELEMENT_BEAM")
@@ -272,6 +288,70 @@ def _gen_elements(model: KModel) -> list[str]:
             lines.append(f" {e.eid:8d} {e.pid:8d}{nodes_str}")
 
     return lines
+
+
+def build_shell_plate_model(
+    *,
+    title: str = "TEST_SHELL_PLATE",
+    part_name: str = "TEST_SHELL_PLATE",
+    width: float,
+    height: float,
+    mesh_size: float,
+    thickness: float,
+    mid: int = 1,
+    secid: int = 1,
+    pid: int = 1,
+    rho: float = 7.85e-6,
+    e: float = 210000.0,
+    pr: float = 0.3,
+    elform: int = 2,
+    shrf: float = 0.833,
+    nip: int = 5,
+) -> KModel:
+    """Build a rectangular QUAD4 shell plate K model.
+
+    This is an LS-DYNA keyword-file generator, not a HyperMesh GUI creation
+    route. GUI QUAD4 creation remains blocked until command recording verifies
+    the Tcl route in the target profile.
+    """
+    if width <= 0 or height <= 0 or mesh_size <= 0 or thickness <= 0:
+        raise ValueError("width, height, mesh_size, and thickness must be positive.")
+
+    nx = max(1, int(round(width / mesh_size)))
+    ny = max(1, int(round(height / mesh_size)))
+    dx = width / nx
+    dy = height / ny
+
+    nodes: list[Node] = []
+    nid = 1
+    for j in range(ny + 1):
+        for i in range(nx + 1):
+            nodes.append(Node(nid=nid, x=i * dx, y=j * dy, z=0.0))
+            nid += 1
+
+    shell_elements: list[ShellElement] = []
+    shell_thicknesses: list[ShellThickness] = []
+    eid = 1
+    row = nx + 1
+    for j in range(ny):
+        for i in range(nx):
+            n1 = j * row + i + 1
+            n2 = n1 + 1
+            n3 = n2 + row
+            n4 = n1 + row
+            shell_elements.append(ShellElement(eid=eid, pid=pid, nodes=[n1, n2, n3, n4]))
+            shell_thicknesses.append(ShellThickness(eid=eid, t1=thickness, t2=thickness, t3=thickness, t4=thickness))
+            eid += 1
+
+    return KModel(
+        title=title,
+        materials=[Material(mid=mid, rho=rho, e=e, pr=pr, mat_type="ELASTIC")],
+        sections=[Section(secid=secid, sec_type="SHELL", elform=elform, shrf=shrf, nip=nip)],
+        parts=[Part(pid=pid, secid=secid, mid=mid, title=part_name)],
+        nodes=nodes,
+        shell_elements=shell_elements,
+        shell_thicknesses=shell_thicknesses,
+    )
 
 
 def _gen_boundaries(model: KModel) -> list[str]:

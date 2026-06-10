@@ -22,7 +22,6 @@ except ImportError:
 
 from program.tools.hm_gui import execute_tcl_gui
 from program.tools.hm_command_map import get_route_limits, get_unsupported_route, require_verified_route
-from program.tools.hm_policy import wrap_generated_tcl
 
 
 # ---------------------------------------------------------------------------
@@ -824,18 +823,22 @@ def _build_visualization_refresh_tcl() -> str:
             "set _hdm_visual_nodes_all -1",
             "set _hdm_visual_solids_all -1",
             "set _hdm_visual_surfs_all -1",
+            "set _hdm_visual_lines_all -1",
             "set _hdm_visual_elements_displayed -1",
             "set _hdm_visual_nodes_displayed -1",
             "set _hdm_visual_solids_displayed -1",
             "set _hdm_visual_surfs_displayed -1",
+            "set _hdm_visual_lines_displayed -1",
             "set _hdm_visual_elements_all_method unknown",
             "set _hdm_visual_nodes_all_method unknown",
             "set _hdm_visual_solids_all_method unknown",
             "set _hdm_visual_surfs_all_method unknown",
+            "set _hdm_visual_lines_all_method unknown",
             "set _hdm_visual_elements_displayed_method unknown",
             "set _hdm_visual_nodes_displayed_method unknown",
             "set _hdm_visual_solids_displayed_method unknown",
             "set _hdm_visual_surfs_displayed_method unknown",
+            "set _hdm_visual_lines_displayed_method unknown",
             "if {[catch {set _hdm_visual_elements_all [llength [hm_entitylist elements id]]}]} {",
             "    catch {*createmark elements 1 all}",
             "    if {[catch {set _hdm_visual_elements_all [hm_marklength elements 1]}]} {",
@@ -876,18 +879,33 @@ def _build_visualization_refresh_tcl() -> str:
             "} else {",
             "    set _hdm_visual_surfs_all_method entitylist",
             "}",
+            "if {[catch {set _hdm_visual_lines_all [llength [hm_entitylist lines id]]}]} {",
+            "    catch {*createmark lines 1 all}",
+            "    if {[catch {set _hdm_visual_lines_all [hm_marklength lines 1]}]} {",
+            "        set _hdm_visual_lines_all_method failed",
+            "    } else {",
+            "        set _hdm_visual_lines_all_method marklength",
+            "    }",
+            "} else {",
+            "    set _hdm_visual_lines_all_method entitylist",
+            "}",
             "_hdm_visual_try mark_elements_displayed_before {*createmark elements 1 displayed}",
             "_hdm_visual_try mark_elements_all {*createmark elements 1 all}",
             "_hdm_visual_try mark_nodes_all {*createmark nodes 1 all}",
             "_hdm_visual_try mark_solids_all {*createmark solids 1 all}",
             "_hdm_visual_try mark_surfs_all {*createmark surfs 1 all}",
+            "_hdm_visual_try mark_lines_all {*createmark lines 1 all}",
             "_hdm_visual_try entitydisplay_components {*entitydisplay components all 1}",
             "_hdm_visual_try entitydisplay_comps {*entitydisplay comps all 1}",
+            "_hdm_visual_try entitydisplay_elements {*entitydisplay elements all 1}",
+            "_hdm_visual_try entitydisplay_elems {*entitydisplay elems all 1}",
+            "_hdm_visual_try entitydisplay_lines {*entitydisplay lines all 1}",
             "_hdm_visual_try entitydisplay_solids {*entitydisplay solids all 1}",
             "_hdm_visual_try entitydisplay_surfs {*entitydisplay surfs all 1}",
             "_hdm_visual_try elementchecksettings_display {*elementchecksettings display 1}",
             "_hdm_visual_try displaycollector_comps {*displaycollectorwithfilter comps all 1 0}",
             "_hdm_visual_try displaycollector_solids {*displaycollectorwithfilter solids all 1 0}",
+            "_hdm_visual_try displaycollector_lines {*displaycollectorwithfilter lines all 1 0}",
             "catch {*createmark elements 1 displayed}",
             "if {[catch {set _hdm_visual_elements_displayed [hm_marklength elements 1]}]} {",
             "    set _hdm_visual_elements_displayed_method failed",
@@ -912,6 +930,12 @@ def _build_visualization_refresh_tcl() -> str:
             "} else {",
             "    set _hdm_visual_surfs_displayed_method marklength_displayed",
             "}",
+            "catch {*createmark lines 1 displayed}",
+            "if {[catch {set _hdm_visual_lines_displayed [hm_marklength lines 1]}]} {",
+            "    set _hdm_visual_lines_displayed_method failed",
+            "} else {",
+            "    set _hdm_visual_lines_displayed_method marklength_displayed",
+            "}",
             "_hdm_visual_try hm_viewfit {hm_viewfit}",
             "_hdm_visual_try hm_viewfit_all {hm_viewfit all}",
             "_hdm_visual_try viewset_all {*viewset all}",
@@ -921,18 +945,22 @@ def _build_visualization_refresh_tcl() -> str:
             'puts "VISUAL_NODES_ALL=$_hdm_visual_nodes_all"',
             'puts "VISUAL_SOLIDS_ALL=$_hdm_visual_solids_all"',
             'puts "VISUAL_SURFS_ALL=$_hdm_visual_surfs_all"',
+            'puts "VISUAL_LINES_ALL=$_hdm_visual_lines_all"',
             'puts "VISUAL_ELEMENTS_ALL_METHOD=$_hdm_visual_elements_all_method"',
             'puts "VISUAL_NODES_ALL_METHOD=$_hdm_visual_nodes_all_method"',
             'puts "VISUAL_SOLIDS_ALL_METHOD=$_hdm_visual_solids_all_method"',
             'puts "VISUAL_SURFS_ALL_METHOD=$_hdm_visual_surfs_all_method"',
+            'puts "VISUAL_LINES_ALL_METHOD=$_hdm_visual_lines_all_method"',
             'puts "VISUAL_ELEMENTS_DISPLAYED=$_hdm_visual_elements_displayed"',
             'puts "VISUAL_NODES_DISPLAYED=$_hdm_visual_nodes_displayed"',
             'puts "VISUAL_SOLIDS_DISPLAYED=$_hdm_visual_solids_displayed"',
             'puts "VISUAL_SURFS_DISPLAYED=$_hdm_visual_surfs_displayed"',
+            'puts "VISUAL_LINES_DISPLAYED=$_hdm_visual_lines_displayed"',
             'puts "VISUAL_ELEMENTS_DISPLAYED_METHOD=$_hdm_visual_elements_displayed_method"',
             'puts "VISUAL_NODES_DISPLAYED_METHOD=$_hdm_visual_nodes_displayed_method"',
             'puts "VISUAL_SOLIDS_DISPLAYED_METHOD=$_hdm_visual_solids_displayed_method"',
             'puts "VISUAL_SURFS_DISPLAYED_METHOD=$_hdm_visual_surfs_displayed_method"',
+            'puts "VISUAL_LINES_DISPLAYED_METHOD=$_hdm_visual_lines_displayed_method"',
             'puts "VISUAL_REFRESH=attempted"',
             "# HDM_VISUAL_REFRESH_END",
         ]
@@ -961,24 +989,28 @@ def _parse_visualization_response(response: str) -> dict:
         "nodes": _parse_last_int(response, "VISUAL_NODES_ALL"),
         "solids": _parse_last_int(response, "VISUAL_SOLIDS_ALL"),
         "surfaces": _parse_last_int(response, "VISUAL_SURFS_ALL"),
+        "lines": _parse_last_int(response, "VISUAL_LINES_ALL"),
     }
     visual_displayed_counts = {
         "elements": _parse_last_int(response, "VISUAL_ELEMENTS_DISPLAYED"),
         "nodes": _parse_last_int(response, "VISUAL_NODES_DISPLAYED"),
         "solids": _parse_last_int(response, "VISUAL_SOLIDS_DISPLAYED"),
         "surfaces": _parse_last_int(response, "VISUAL_SURFS_DISPLAYED"),
+        "lines": _parse_last_int(response, "VISUAL_LINES_DISPLAYED"),
     }
     visual_count_methods = {
         "elements": _parse_last_value(response, "VISUAL_ELEMENTS_ALL_METHOD"),
         "nodes": _parse_last_value(response, "VISUAL_NODES_ALL_METHOD"),
         "solids": _parse_last_value(response, "VISUAL_SOLIDS_ALL_METHOD"),
         "surfaces": _parse_last_value(response, "VISUAL_SURFS_ALL_METHOD"),
+        "lines": _parse_last_value(response, "VISUAL_LINES_ALL_METHOD"),
     }
     visual_display_count_methods = {
         "elements": _parse_last_value(response, "VISUAL_ELEMENTS_DISPLAYED_METHOD"),
         "nodes": _parse_last_value(response, "VISUAL_NODES_DISPLAYED_METHOD"),
         "solids": _parse_last_value(response, "VISUAL_SOLIDS_DISPLAYED_METHOD"),
         "surfaces": _parse_last_value(response, "VISUAL_SURFS_DISPLAYED_METHOD"),
+        "lines": _parse_last_value(response, "VISUAL_LINES_DISPLAYED_METHOD"),
     }
     visual_steps = _parse_visual_steps(response)
     visibility = _summarize_visibility(visual_counts, visual_displayed_counts)
@@ -1051,7 +1083,8 @@ def _summarize_visibility(
 ) -> dict[str, str]:
     """Classify whether created entity classes appear displayed after refresh."""
     summary: dict[str, str] = {}
-    for key in ("elements", "nodes", "solids", "surfaces"):
+    entity_keys = tuple(dict.fromkeys([*visual_counts.keys(), *visual_displayed_counts.keys()]))
+    for key in entity_keys:
         total = visual_counts.get(key)
         displayed = visual_displayed_counts.get(key)
         if total is None or total < 0:
@@ -1078,7 +1111,7 @@ def _build_visual_diagnostics(
 ) -> list[dict[str, object]]:
     """Build agent-readable diagnostics for FE/solid display problems."""
     diagnostics: list[dict[str, object]] = []
-    for entity_type in ("elements", "nodes", "solids", "surfaces"):
+    for entity_type in ("elements", "nodes", "solids", "surfaces", "lines"):
         state = visibility.get(entity_type, "unknown")
         total = visual_counts.get(entity_type)
         displayed = visual_displayed_counts.get(entity_type)
@@ -1495,6 +1528,927 @@ def create_solid_box(
     }
 
 
+def create_surface_plate(
+    name: str,
+    width: float,
+    height: float,
+    origin_x: float = 0.0,
+    origin_y: float = 0.0,
+    origin_z: float = 0.0,
+    comp_name: str | None = None,
+    timeout: int = 30,
+) -> dict:
+    """Create a rectangular HyperMesh geometry surface in the XY plane.
+
+    This creates a geometry surface entity through ``*surfacecreatenurbs``.
+    It does not create QUAD4 shell FE elements or LS-DYNA shell keyword cards.
+    """
+    route_name = "create_geometry_surface_rect_nurbs"
+    unsupported = get_unsupported_route(route_name)
+    if unsupported:
+        return {
+            "success": False,
+            "supported": False,
+            "route_name": route_name,
+            "name": name,
+            "component": _safe_tcl_name(comp_name or name),
+            "entity_kind": "geometry_surface",
+            "error_type": "unsupported_route",
+            "error": unsupported.get("reason", "Geometry surface route is not verified."),
+            "verification_required": unsupported.get("required_verification", []),
+        }
+
+    require_verified_route(route_name)
+    target_comp = _safe_tcl_name(comp_name or name)
+    dimension_error = _surface_plate_dimension_error(width, height)
+    if dimension_error:
+        return {
+            "success": False,
+            "supported": True,
+            "route_name": route_name,
+            "name": name,
+            "component": target_comp,
+            "entity_kind": "geometry_surface",
+            "error_type": "invalid_geometry_dimensions",
+            "error": dimension_error,
+        }
+
+    script = _build_surface_plate_tcl(
+        comp_name=target_comp,
+        width=width,
+        height=height,
+        origin_x=origin_x,
+        origin_y=origin_y,
+        origin_z=origin_z,
+    )
+    result = execute_tcl_gui(script, timeout=timeout, mode="safe", enforce_rules=False)
+    response = result.get("response", "")
+    before = _parse_last_int(response, "SURFACES_BEFORE")
+    after = _parse_last_int(response, "SURFACES_AFTER")
+    before_method = _parse_last_value(response, "SURFACES_BEFORE_METHOD")
+    after_method = _parse_last_value(response, "SURFACES_AFTER_METHOD")
+    surface_id = _parse_last_int(response, "SURFACE_ID")
+    created_count = None
+    if before is not None and after is not None:
+        created_count = max(0, after - before)
+    visual = _parse_visualization_response(response)
+    ok = bool(result.get("success")) and bool(created_count and created_count > 0)
+    return {
+        "success": ok,
+        "supported": True,
+        "route_name": route_name,
+        "name": name,
+        "component": target_comp,
+        "entity_kind": "geometry_surface",
+        "surface_semantics": "geometry_surface_not_shell_fe_element",
+        "origin": [origin_x, origin_y, origin_z],
+        "width": width,
+        "height": height,
+        "surface_id": surface_id,
+        "surfaces_before": before,
+        "surfaces_after": after,
+        "surfaces_before_count_method": before_method,
+        "surfaces_after_count_method": after_method,
+        "surface_count_methods": {
+            "before": before_method,
+            "after": after_method,
+        },
+        "created_count": created_count,
+        **visual,
+        "response": response,
+        "error": None if ok else result.get("error") or "Geometry surface creation did not increase surfaces_count.",
+    }
+
+
+def _surface_plate_dimension_error(width: float, height: float) -> str | None:
+    invalid = []
+    if width <= 0:
+        invalid.append("width")
+    if height <= 0:
+        invalid.append("height")
+    if invalid:
+        return (
+            "Geometry surface plate dimensions must be positive before sending Tcl "
+            f"to HyperMesh; invalid dimensions: {', '.join(invalid)}."
+        )
+    return None
+
+
+def _build_surface_plate_tcl(
+    *,
+    comp_name: str,
+    width: float,
+    height: float,
+    origin_x: float,
+    origin_y: float,
+    origin_z: float,
+) -> str:
+    """Build Tcl for a rectangular NURBS geometry surface in the XY plane."""
+    x0 = origin_x
+    y0 = origin_y
+    z0 = origin_z
+    x1 = origin_x + width
+    y1 = origin_y + height
+    return "\n".join(
+        [
+            _build_count_entities_tcl("surfaces", "_hdm_surfaces_before"),
+            f'catch {{*collectorcreateonly comps "{comp_name}" "" 7}}',
+            f'*currentcollector comps "{comp_name}"',
+            (
+                "*createdoublearray 16 "
+                f"0 1 0 1 "
+                f"{x0:.12g} {y0:.12g} {z0:.12g} "
+                f"{x1:.12g} {y0:.12g} {z0:.12g} "
+                f"{x0:.12g} {y1:.12g} {z0:.12g} "
+                f"{x1:.12g} {y1:.12g} {z0:.12g}"
+            ),
+            "*surfacecreatenurbs 1 1 2 2 2 2 0 1 16",
+            "set _hdm_surface_id 0",
+            "catch {set _hdm_surface_id [hm_latestentityid surfaces]}",
+            _build_count_entities_tcl("surfaces", "_hdm_surfaces_after"),
+            'puts "SURFACES_BEFORE=$_hdm_surfaces_before"',
+            'puts "SURFACES_AFTER=$_hdm_surfaces_after"',
+            'puts "SURFACES_BEFORE_METHOD=$_hdm_surfaces_before_method"',
+            'puts "SURFACES_AFTER_METHOD=$_hdm_surfaces_after_method"',
+            'puts "SURFACE_ID=$_hdm_surface_id"',
+            _build_visualization_refresh_tcl(),
+        ]
+    )
+
+
+def create_shell_plate(
+    name: str,
+    width: float,
+    height: float,
+    element_size: float,
+    *,
+    origin_x: float = 0.0,
+    origin_y: float = 0.0,
+    origin_z: float = 0.0,
+    comp_name: str | None = None,
+    timeout: int = 90,
+) -> dict:
+    """Create a structured QUAD4 shell FE plate in the XY plane.
+
+    This uses the verified ``*createelement 104`` route from the HyperMesh
+    2021 GUI test. It does not create a geometry surface, run surface automesh,
+    or assign LS-DYNA shell section/material cards.
+    """
+    if width <= 0:
+        return {"success": False, "error": "width must be > 0", "error_type": "invalid_geometry_dimensions"}
+    if height <= 0:
+        return {"success": False, "error": "height must be > 0", "error_type": "invalid_geometry_dimensions"}
+    if element_size <= 0:
+        return {"success": False, "error": "element_size must be > 0", "error_type": "invalid_mesh_size"}
+
+    nx = max(1, int(math.ceil(width / element_size)))
+    ny = max(1, int(math.ceil(height / element_size)))
+    plate = _execute_structured_quad4_shell_plate(
+        name=name,
+        width=width,
+        height=height,
+        origin_x=origin_x,
+        origin_y=origin_y,
+        origin_z=origin_z,
+        comp_name=comp_name or name,
+        nx=nx,
+        ny=ny,
+        timeout=timeout,
+    )
+    if not plate.get("success"):
+        return {
+            "success": False,
+            "stage": "create_shell_plate",
+            "plate": plate,
+            "next_steps": ["Ensure HyperMesh listener is sourced, then retry hm_create_shell_plate."],
+        }
+
+    return {
+        "success": True,
+        "stage": "complete",
+        "name": name,
+        "component": plate.get("component"),
+        "entity_kind": "fe_shell_mesh",
+        "shell_semantics": "quad4_fe_shell_elements_not_geometry_surface",
+        "width": width,
+        "height": height,
+        "element_size": element_size,
+        "divisions": [nx, ny],
+        "node_count": plate.get("node_count"),
+        "element_count": plate.get("element_count"),
+        "first_element_id": plate.get("first_element_id"),
+        "last_element_id": plate.get("last_element_id"),
+        "origin": [origin_x, origin_y, origin_z],
+        "visual_counts": plate.get("visual_counts"),
+        "visual_displayed_counts": plate.get("visual_displayed_counts"),
+        "visual_count_methods": plate.get("visual_count_methods"),
+        "visual_display_count_methods": plate.get("visual_display_count_methods"),
+        "visibility": plate.get("visibility"),
+        "visual_steps": plate.get("visual_steps"),
+        "visual_diagnostics": plate.get("visual_diagnostics"),
+        "visual_refresh_ok": plate.get("visual_refresh_ok"),
+        "visual_refresh_reason": plate.get("visual_refresh_reason"),
+        "visual_failed_steps": plate.get("visual_failed_steps"),
+        "visual_failed_step_count": plate.get("visual_failed_step_count"),
+        "plate": plate,
+        "blocked_next_capabilities": {
+            "surface_automesh": "unsupported until command recording verifies a surface mesh route",
+            "section_shell_property_thickness": "unsupported until shell property datanames are execution-verified",
+            "k_export": "outside the current GUI-only MCP tool surface",
+        },
+        "next_steps": [
+            "Call hm_check_model to verify entity counts.",
+            "Call hm_auto_save(step_name='shell_plate_done') to save the HyperMesh model.",
+        ],
+    }
+
+
+def _execute_structured_quad4_shell_plate(
+    *,
+    name: str,
+    width: float,
+    height: float,
+    origin_x: float,
+    origin_y: float,
+    origin_z: float,
+    comp_name: str | None,
+    nx: int,
+    ny: int,
+    timeout: int,
+) -> dict:
+    target_comp = _safe_tcl_name(comp_name or name)
+    limit_error = _structured_quad4_shell_plate_limit_error(nx, ny)
+    if limit_error:
+        return {
+            "success": False,
+            "name": name,
+            "component": target_comp,
+            "divisions": [max(1, int(nx)), max(1, int(ny))],
+            "error": limit_error,
+            "error_type": "mesh_size_limit",
+        }
+
+    script = _build_structured_quad4_shell_plate_tcl(
+        comp_name=target_comp,
+        width=width,
+        height=height,
+        origin_x=origin_x,
+        origin_y=origin_y,
+        origin_z=origin_z,
+        nx=nx,
+        ny=ny,
+    )
+    result = execute_tcl_gui(script, timeout=timeout, mode="safe", enforce_rules=False)
+    response = result.get("response", "")
+    elem_count = _parse_last_int(response, "SHELL_ELEM_COUNT")
+    node_count = _parse_last_int(response, "SHELL_NODE_COUNT")
+    elem_first = _parse_last_int(response, "SHELL_ELEM_FIRST")
+    elem_last = _parse_last_int(response, "SHELL_ELEM_LAST")
+    visual = _parse_visualization_response(response)
+    ok = bool(result.get("success")) and bool(elem_count and elem_count > 0)
+    return {
+        "success": ok,
+        "name": name,
+        "component": target_comp,
+        "node_count": node_count,
+        "element_count": elem_count,
+        "first_element_id": elem_first,
+        "last_element_id": elem_last,
+        "divisions": [nx, ny],
+        **visual,
+        "response": response,
+        "error": None if ok else result.get("error") or "Structured QUAD4 shell plate creation did not report any elements.",
+    }
+
+
+def _build_structured_quad4_shell_plate_tcl(
+    *,
+    comp_name: str,
+    width: float,
+    height: float,
+    origin_x: float,
+    origin_y: float,
+    origin_z: float,
+    nx: int,
+    ny: int,
+) -> str:
+    """Build Tcl that creates a structured QUAD4 FE shell plate."""
+    route = require_verified_route("create_structured_quad4_shell_plate")
+    element_config = int(route.get("element_config", 104))
+    nx = max(1, int(nx))
+    ny = max(1, int(ny))
+
+    def node_index(i: int, j: int) -> int:
+        return j * (nx + 1) + i
+
+    lines = [
+        f'catch {{*collectorcreateonly comps "{comp_name}" "" 7}}',
+        f'*currentcollector comps "{comp_name}"',
+        "set _hdm_shell_nodes {}",
+    ]
+
+    for j in range(ny + 1):
+        y = origin_y + height * j / ny
+        for i in range(nx + 1):
+            x = origin_x + width * i / nx
+            lines.extend([
+                f"*createnode {x:.12g} {y:.12g} {origin_z:.12g} 0 0 0",
+                "lappend _hdm_shell_nodes [hm_latestentityid nodes]",
+            ])
+
+    lines.extend([
+        "set _hdm_shell_first_elem 0",
+        "set _hdm_shell_last_elem 0",
+        "set _hdm_shell_elem_count 0",
+    ])
+    for j in range(ny):
+        for i in range(nx):
+            ids = [
+                node_index(i, j),
+                node_index(i + 1, j),
+                node_index(i + 1, j + 1),
+                node_index(i, j + 1),
+            ]
+            node_refs = " ".join(f"[lindex $_hdm_shell_nodes {idx}]" for idx in ids)
+            lines.extend([
+                f"*createlist nodes 1 {node_refs}",
+                f"*createelement {element_config} 1 1 1",
+                "set _hdm_shell_last_elem [hm_latestentityid elements]",
+                "if {$_hdm_shell_first_elem == 0} { set _hdm_shell_first_elem $_hdm_shell_last_elem }",
+                "incr _hdm_shell_elem_count",
+            ])
+
+    lines.extend([
+        'puts "SHELL_NODE_COUNT=[llength $_hdm_shell_nodes]"',
+        'puts "SHELL_ELEM_COUNT=$_hdm_shell_elem_count"',
+        'puts "SHELL_ELEM_FIRST=$_hdm_shell_first_elem"',
+        'puts "SHELL_ELEM_LAST=$_hdm_shell_last_elem"',
+        _build_visualization_refresh_tcl(),
+    ])
+    return "\n".join(lines)
+
+
+def _structured_quad4_shell_plate_limit_error(nx: int, ny: int) -> str | None:
+    """Return a clear error if the requested QUAD4 shell plate is too large."""
+    nx = max(1, int(nx))
+    ny = max(1, int(ny))
+    limits = get_route_limits("create_structured_quad4_shell_plate")
+    element_count = nx * ny
+    node_count = (nx + 1) * (ny + 1)
+    if element_count > limits["max_elements"]:
+        return (
+            f"Requested structured QUAD4 shell plate has {element_count} elements, "
+            f"which exceeds the verified route limit of {limits['max_elements']}."
+        )
+    if node_count > limits["max_nodes"]:
+        return (
+            f"Requested structured QUAD4 shell plate has {node_count} nodes, "
+            f"which exceeds the verified route limit of {limits['max_nodes']}."
+        )
+    return None
+
+
+def create_beam_line(
+    name: str,
+    length: float,
+    element_size: float,
+    *,
+    origin_x: float = 0.0,
+    origin_y: float = 0.0,
+    origin_z: float = 0.0,
+    direction_x: float = 1.0,
+    direction_y: float = 0.0,
+    direction_z: float = 0.0,
+    comp_name: str | None = None,
+    timeout: int = 90,
+) -> dict:
+    """Create a straight structured BAR2/BEAM line in the current GUI session."""
+    if length <= 0:
+        return {"success": False, "error": "length must be > 0", "error_type": "invalid_geometry_dimensions"}
+    if element_size <= 0:
+        return {"success": False, "error": "element_size must be > 0", "error_type": "invalid_mesh_size"}
+    direction_norm = math.sqrt(direction_x * direction_x + direction_y * direction_y + direction_z * direction_z)
+    if direction_norm <= 0:
+        return {"success": False, "error": "direction vector must be non-zero", "error_type": "invalid_direction"}
+
+    divisions = max(1, int(math.ceil(length / element_size)))
+    beam = _execute_structured_beam_line(
+        name=name,
+        length=length,
+        origin_x=origin_x,
+        origin_y=origin_y,
+        origin_z=origin_z,
+        direction_x=direction_x / direction_norm,
+        direction_y=direction_y / direction_norm,
+        direction_z=direction_z / direction_norm,
+        comp_name=comp_name or name,
+        divisions=divisions,
+        timeout=timeout,
+    )
+    if not beam.get("success"):
+        return {
+            "success": False,
+            "stage": "create_beam_line",
+            "beam": beam,
+            "next_steps": ["Ensure HyperMesh listener is sourced, then retry hm_create_beam_line."],
+        }
+
+    return {
+        "success": True,
+        "stage": "complete",
+        "name": name,
+        "component": beam.get("component"),
+        "entity_kind": "fe_beam_mesh",
+        "beam_semantics": "bar2_beam_elements_config_60",
+        "length": length,
+        "element_size": element_size,
+        "divisions": divisions,
+        "node_count": beam.get("node_count"),
+        "element_count": beam.get("element_count"),
+        "line_count": beam.get("line_count"),
+        "first_element_id": beam.get("first_element_id"),
+        "last_element_id": beam.get("last_element_id"),
+        "last_element_type": beam.get("last_element_type"),
+        "last_element_config": beam.get("last_element_config"),
+        "origin": [origin_x, origin_y, origin_z],
+        "direction": [direction_x / direction_norm, direction_y / direction_norm, direction_z / direction_norm],
+        "visual_counts": beam.get("visual_counts"),
+        "visual_displayed_counts": beam.get("visual_displayed_counts"),
+        "visual_count_methods": beam.get("visual_count_methods"),
+        "visual_display_count_methods": beam.get("visual_display_count_methods"),
+        "visibility": beam.get("visibility"),
+        "visual_steps": beam.get("visual_steps"),
+        "visual_diagnostics": beam.get("visual_diagnostics"),
+        "visual_refresh_ok": beam.get("visual_refresh_ok"),
+        "visual_refresh_reason": beam.get("visual_refresh_reason"),
+        "visual_failed_steps": beam.get("visual_failed_steps"),
+        "visual_failed_step_count": beam.get("visual_failed_step_count"),
+        "beam": beam,
+        "blocked_next_capabilities": {
+            "line_mesh_beam": "unsupported until command recording verifies line-to-beam meshing",
+            "section_beam_width_height": "unsupported until beam section datanames are execution-verified",
+            "beam_orientation_cards": "unsupported until orientation route is recorded and verified",
+            "k_export": "outside the current GUI-only MCP tool surface",
+        },
+        "next_steps": [
+            "Call hm_check_model to verify entity counts.",
+            "Call hm_auto_save(step_name='beam_line_done') to save the HyperMesh model.",
+        ],
+    }
+
+
+def _execute_structured_beam_line(
+    *,
+    name: str,
+    length: float,
+    origin_x: float,
+    origin_y: float,
+    origin_z: float,
+    direction_x: float,
+    direction_y: float,
+    direction_z: float,
+    comp_name: str | None,
+    divisions: int,
+    timeout: int,
+) -> dict:
+    target_comp = _safe_tcl_name(comp_name or name)
+    limit_error = _structured_beam_line_limit_error(divisions)
+    if limit_error:
+        return {
+            "success": False,
+            "name": name,
+            "component": target_comp,
+            "divisions": max(1, int(divisions)),
+            "error": limit_error,
+            "error_type": "mesh_size_limit",
+        }
+    script = _build_structured_beam_line_tcl(
+        comp_name=target_comp,
+        length=length,
+        origin_x=origin_x,
+        origin_y=origin_y,
+        origin_z=origin_z,
+        direction_x=direction_x,
+        direction_y=direction_y,
+        direction_z=direction_z,
+        divisions=divisions,
+    )
+    result = execute_tcl_gui(script, timeout=timeout, mode="safe", enforce_rules=False)
+    response = result.get("response", "")
+    elem_count = _parse_last_int(response, "BEAM_ELEM_COUNT")
+    node_count = _parse_last_int(response, "BEAM_NODE_COUNT")
+    line_count = _parse_last_int(response, "BEAM_LINE_COUNT")
+    elem_first = _parse_last_int(response, "BEAM_ELEM_FIRST")
+    elem_last = _parse_last_int(response, "BEAM_ELEM_LAST")
+    last_type = _parse_last_value(response, "BEAM_LAST_TYPE")
+    last_config = _parse_last_int(response, "BEAM_LAST_CONFIG")
+    visual = _parse_visualization_response(response)
+    ok = (
+        bool(result.get("success"))
+        and bool(elem_count and elem_count > 0)
+        and last_type == "BEAM"
+        and last_config == 60
+    )
+    return {
+        "success": ok,
+        "name": name,
+        "component": target_comp,
+        "node_count": node_count,
+        "element_count": elem_count,
+        "line_count": line_count,
+        "first_element_id": elem_first,
+        "last_element_id": elem_last,
+        "last_element_type": last_type,
+        "last_element_config": last_config,
+        "divisions": divisions,
+        **visual,
+        "response": response,
+        "error": None if ok else result.get("error") or "BEAM line creation did not report typename=BEAM and config=60.",
+    }
+
+
+def _build_structured_beam_line_tcl(
+    *,
+    comp_name: str,
+    length: float,
+    origin_x: float,
+    origin_y: float,
+    origin_z: float,
+    direction_x: float,
+    direction_y: float,
+    direction_z: float,
+    divisions: int,
+) -> str:
+    """Build Tcl that creates a straight structured BAR2/BEAM line."""
+    route = require_verified_route("create_beam_line")
+    element_config = int(route.get("element_config", 60))
+    divisions = max(1, int(divisions))
+    x_end = origin_x + direction_x * length
+    y_end = origin_y + direction_y * length
+    z_end = origin_z + direction_z * length
+
+    lines = [
+        _build_count_entities_tcl("lines", "_hdm_beam_lines_before"),
+        f'catch {{*collectorcreateonly comps "{comp_name}" "" 7}}',
+        f'*currentcollector comps "{comp_name}"',
+        f"*linecreatestraight {origin_x:.12g} {origin_y:.12g} {origin_z:.12g} {x_end:.12g} {y_end:.12g} {z_end:.12g}",
+        _build_count_entities_tcl("lines", "_hdm_beam_lines_after"),
+        "set _hdm_beam_nodes {}",
+    ]
+
+    for i in range(divisions + 1):
+        t = i / divisions
+        x = origin_x + (x_end - origin_x) * t
+        y = origin_y + (y_end - origin_y) * t
+        z = origin_z + (z_end - origin_z) * t
+        lines.extend([
+            f"*createnode {x:.12g} {y:.12g} {z:.12g} 0 0 0",
+            "lappend _hdm_beam_nodes [hm_latestentityid nodes]",
+        ])
+
+    lines.extend([
+        "set _hdm_beam_first_elem 0",
+        "set _hdm_beam_last_elem 0",
+        "set _hdm_beam_elem_count 0",
+    ])
+    for i in range(divisions):
+        lines.extend([
+            f"*createlist nodes 1 [lindex $_hdm_beam_nodes {i}] [lindex $_hdm_beam_nodes {i + 1}]",
+            f"*createelement {element_config} 1 1 1",
+            "set _hdm_beam_last_elem [hm_latestentityid elements]",
+            "if {$_hdm_beam_first_elem == 0} { set _hdm_beam_first_elem $_hdm_beam_last_elem }",
+            "incr _hdm_beam_elem_count",
+        ])
+
+    lines.extend([
+        "set _hdm_beam_last_type unknown",
+        "set _hdm_beam_last_config -1",
+        "catch {set _hdm_beam_last_type [hm_getvalue elements id=$_hdm_beam_last_elem dataname=typename]}",
+        "catch {set _hdm_beam_last_config [hm_getvalue elements id=$_hdm_beam_last_elem dataname=config]}",
+        'puts "BEAM_NODE_COUNT=[llength $_hdm_beam_nodes]"',
+        'puts "BEAM_ELEM_COUNT=$_hdm_beam_elem_count"',
+        'puts "BEAM_LINE_COUNT=[expr {$_hdm_beam_lines_after - $_hdm_beam_lines_before}]"',
+        'puts "BEAM_ELEM_FIRST=$_hdm_beam_first_elem"',
+        'puts "BEAM_ELEM_LAST=$_hdm_beam_last_elem"',
+        'puts "BEAM_LAST_TYPE=$_hdm_beam_last_type"',
+        'puts "BEAM_LAST_CONFIG=$_hdm_beam_last_config"',
+        _build_visualization_refresh_tcl(),
+    ])
+    return "\n".join(lines)
+
+
+def _structured_beam_line_limit_error(divisions: int) -> str | None:
+    """Return a clear error if the requested beam line is too large."""
+    divisions = max(1, int(divisions))
+    limits = get_route_limits("create_beam_line")
+    element_count = divisions
+    node_count = divisions + 1
+    if element_count > limits["max_elements"]:
+        return (
+            f"Requested structured BEAM line has {element_count} elements, "
+            f"which exceeds the verified route limit of {limits['max_elements']}."
+        )
+    if node_count > limits["max_nodes"]:
+        return (
+            f"Requested structured BEAM line has {node_count} nodes, "
+            f"which exceeds the verified route limit of {limits['max_nodes']}."
+        )
+    return None
+
+
+def create_discrete_spring(
+    name: str,
+    *,
+    node_a: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    node_b: tuple[float, float, float] = (100.0, 0.0, 0.0),
+    comp_name: str | None = None,
+    timeout: int = 60,
+) -> dict:
+    """Create a two-node DISCRETE spring element in the current GUI session."""
+    if len(node_a) != 3 or len(node_b) != 3:
+        return {"success": False, "error": "node_a and node_b must each contain 3 coordinates.", "error_type": "invalid_node_coordinates"}
+    if all(float(node_a[i]) == float(node_b[i]) for i in range(3)):
+        return {"success": False, "error": "node_a and node_b must not be coincident.", "error_type": "invalid_node_coordinates"}
+
+    discrete = _execute_discrete_spring(
+        name=name,
+        node_a=tuple(float(value) for value in node_a),
+        node_b=tuple(float(value) for value in node_b),
+        comp_name=comp_name or name,
+        timeout=timeout,
+    )
+    if not discrete.get("success"):
+        return {
+            "success": False,
+            "stage": "create_discrete_spring",
+            "discrete": discrete,
+            "next_steps": ["Ensure HyperMesh listener is sourced, then retry hm_create_discrete_spring."],
+        }
+
+    return {
+        "success": True,
+        "stage": "complete",
+        "name": name,
+        "component": discrete.get("component"),
+        "entity_kind": "fe_discrete_element",
+        "discrete_semantics": "two_node_discrete_spring_config_21",
+        "node_count": discrete.get("node_count"),
+        "element_count": discrete.get("element_count"),
+        "element_id": discrete.get("element_id"),
+        "element_type": discrete.get("element_type"),
+        "element_config": discrete.get("element_config"),
+        "node_a": list(node_a),
+        "node_b": list(node_b),
+        "visual_counts": discrete.get("visual_counts"),
+        "visual_displayed_counts": discrete.get("visual_displayed_counts"),
+        "visual_count_methods": discrete.get("visual_count_methods"),
+        "visual_display_count_methods": discrete.get("visual_display_count_methods"),
+        "visibility": discrete.get("visibility"),
+        "visual_steps": discrete.get("visual_steps"),
+        "visual_diagnostics": discrete.get("visual_diagnostics"),
+        "visual_refresh_ok": discrete.get("visual_refresh_ok"),
+        "visual_refresh_reason": discrete.get("visual_refresh_reason"),
+        "visual_failed_steps": discrete.get("visual_failed_steps"),
+        "visual_failed_step_count": discrete.get("visual_failed_step_count"),
+        "discrete": discrete,
+        "blocked_next_capabilities": {
+            "section_discrete_stiffness_damping": "unsupported until SECTION_DISCRETE datanames are execution-verified without catch",
+            "material_assignment": "not applicable/unsupported until a verified LS-DYNA property workflow exists",
+            "k_export": "outside the current GUI-only MCP tool surface",
+        },
+        "next_steps": [
+            "Call hm_check_model to verify entity counts.",
+            "Call hm_auto_save(step_name='discrete_spring_done') to save the HyperMesh model.",
+        ],
+    }
+
+
+def _execute_discrete_spring(
+    *,
+    name: str,
+    node_a: tuple[float, float, float],
+    node_b: tuple[float, float, float],
+    comp_name: str | None,
+    timeout: int,
+) -> dict:
+    target_comp = _safe_tcl_name(comp_name or name)
+    script = _build_discrete_spring_tcl(comp_name=target_comp, node_a=node_a, node_b=node_b)
+    result = execute_tcl_gui(script, timeout=timeout, mode="safe", enforce_rules=False)
+    response = result.get("response", "")
+    elem_count = _parse_last_int(response, "DISCRETE_ELEM_COUNT")
+    node_count = _parse_last_int(response, "DISCRETE_NODE_COUNT")
+    elem_id = _parse_last_int(response, "DISCRETE_ELEM_ID")
+    elem_type = _parse_last_value(response, "DISCRETE_LAST_TYPE")
+    elem_config = _parse_last_int(response, "DISCRETE_LAST_CONFIG")
+    visual = _parse_visualization_response(response)
+    ok = (
+        bool(result.get("success"))
+        and elem_count == 1
+        and node_count == 2
+        and bool(elem_id and elem_id > 0)
+        and elem_type == "DISCRETE"
+        and elem_config == 21
+    )
+    return {
+        "success": ok,
+        "name": name,
+        "component": target_comp,
+        "node_count": node_count,
+        "element_count": elem_count,
+        "element_id": elem_id,
+        "element_type": elem_type,
+        "element_config": elem_config,
+        **visual,
+        "response": response,
+        "error": None if ok else result.get("error") or "DISCRETE spring creation did not report typename=DISCRETE and config=21.",
+    }
+
+
+def _build_discrete_spring_tcl(
+    *,
+    comp_name: str,
+    node_a: tuple[float, float, float],
+    node_b: tuple[float, float, float],
+) -> str:
+    """Build Tcl that creates a two-node DISCRETE spring element."""
+    require_verified_route("create_discrete_element")
+    ax, ay, az = node_a
+    bx, by, bz = node_b
+    return "\n".join(
+        [
+            f'catch {{*collectorcreateonly comps "{comp_name}" "" 7}}',
+            f'*currentcollector comps "{comp_name}"',
+            f"*createnode {ax:.12g} {ay:.12g} {az:.12g} 0 0 0",
+            "set _hdm_discrete_node_a [hm_latestentityid nodes]",
+            f"*createnode {bx:.12g} {by:.12g} {bz:.12g} 0 0 0",
+            "set _hdm_discrete_node_b [hm_latestentityid nodes]",
+            "set _hdm_discrete_elem_id 0",
+            "set _hdm_discrete_err [catch {*spring $_hdm_discrete_node_a $_hdm_discrete_node_b 1 \"\" 0} _hdm_discrete_msg]",
+            "if {$_hdm_discrete_err == 0} { catch {set _hdm_discrete_elem_id [hm_latestentityid elements]} }",
+            "set _hdm_discrete_type unknown",
+            "set _hdm_discrete_config -1",
+            "if {$_hdm_discrete_elem_id > 0} {",
+            "    catch {set _hdm_discrete_type [hm_getvalue elements id=$_hdm_discrete_elem_id dataname=typename]}",
+            "    catch {set _hdm_discrete_config [hm_getvalue elements id=$_hdm_discrete_elem_id dataname=config]}",
+            "}",
+            'puts "DISCRETE_NODE_COUNT=2"',
+            'puts "DISCRETE_ELEM_COUNT=[expr {$_hdm_discrete_err == 0 && $_hdm_discrete_elem_id > 0 ? 1 : 0}]"',
+            'puts "DISCRETE_ELEM_ID=$_hdm_discrete_elem_id"',
+            'puts "DISCRETE_LAST_TYPE=$_hdm_discrete_type"',
+            'puts "DISCRETE_LAST_CONFIG=$_hdm_discrete_config"',
+            _build_visualization_refresh_tcl(),
+        ]
+    )
+
+
+def create_lumped_mass(
+    name: str,
+    mass: float,
+    *,
+    x: float = 0.0,
+    y: float = 0.0,
+    z: float = 0.0,
+    comp_name: str | None = None,
+    timeout: int = 60,
+) -> dict:
+    """Create a one-node MASS element in the current GUI session."""
+    if mass <= 0:
+        return {"success": False, "error": "mass must be > 0", "error_type": "invalid_mass"}
+
+    lumped = _execute_lumped_mass(
+        name=name,
+        mass=mass,
+        x=x,
+        y=y,
+        z=z,
+        comp_name=comp_name or name,
+        timeout=timeout,
+    )
+    if not lumped.get("success"):
+        return {
+            "success": False,
+            "stage": "create_lumped_mass",
+            "lumped_mass": lumped,
+            "next_steps": ["Ensure HyperMesh listener is sourced, then retry hm_create_lumped_mass."],
+        }
+
+    return {
+        "success": True,
+        "stage": "complete",
+        "name": name,
+        "component": lumped.get("component"),
+        "entity_kind": "fe_mass_element",
+        "mass_semantics": "one_node_mass_element_config_1",
+        "mass": mass,
+        "node_count": lumped.get("node_count"),
+        "element_count": lumped.get("element_count"),
+        "element_id": lumped.get("element_id"),
+        "element_type": lumped.get("element_type"),
+        "element_config": lumped.get("element_config"),
+        "origin": [x, y, z],
+        "visual_counts": lumped.get("visual_counts"),
+        "visual_displayed_counts": lumped.get("visual_displayed_counts"),
+        "visual_count_methods": lumped.get("visual_count_methods"),
+        "visual_display_count_methods": lumped.get("visual_display_count_methods"),
+        "visibility": lumped.get("visibility"),
+        "visual_steps": lumped.get("visual_steps"),
+        "visual_diagnostics": lumped.get("visual_diagnostics"),
+        "visual_refresh_ok": lumped.get("visual_refresh_ok"),
+        "visual_refresh_reason": lumped.get("visual_refresh_reason"),
+        "visual_failed_steps": lumped.get("visual_failed_steps"),
+        "visual_failed_step_count": lumped.get("visual_failed_step_count"),
+        "lumped_mass": lumped,
+        "blocked_next_capabilities": {
+            "element_mass_property_datanames": "unsupported until ELEMENT_MASS property/card datanames are execution-verified without catch",
+            "material_assignment": "not applicable/unsupported until a verified LS-DYNA property workflow exists",
+            "k_export": "outside the current GUI-only MCP tool surface",
+        },
+        "next_steps": [
+            "Call hm_check_model to verify entity counts.",
+            "Call hm_auto_save(step_name='lumped_mass_done') to save the HyperMesh model.",
+        ],
+    }
+
+
+def _execute_lumped_mass(
+    *,
+    name: str,
+    mass: float,
+    x: float,
+    y: float,
+    z: float,
+    comp_name: str | None,
+    timeout: int,
+) -> dict:
+    target_comp = _safe_tcl_name(comp_name or name)
+    script = _build_lumped_mass_tcl(comp_name=target_comp, mass=mass, x=x, y=y, z=z)
+    result = execute_tcl_gui(script, timeout=timeout, mode="safe", enforce_rules=False)
+    response = result.get("response", "")
+    elem_count = _parse_last_int(response, "MASS_ELEM_COUNT")
+    node_count = _parse_last_int(response, "MASS_NODE_COUNT")
+    elem_id = _parse_last_int(response, "MASS_ELEM_ID")
+    elem_type = _parse_last_value(response, "MASS_LAST_TYPE")
+    elem_config = _parse_last_int(response, "MASS_LAST_CONFIG")
+    visual = _parse_visualization_response(response)
+    ok = (
+        bool(result.get("success"))
+        and elem_count == 1
+        and node_count == 1
+        and bool(elem_id and elem_id > 0)
+        and elem_type == "MASS"
+        and elem_config == 1
+    )
+    return {
+        "success": ok,
+        "name": name,
+        "component": target_comp,
+        "node_count": node_count,
+        "element_count": elem_count,
+        "element_id": elem_id,
+        "element_type": elem_type,
+        "element_config": elem_config,
+        **visual,
+        "response": response,
+        "error": None if ok else result.get("error") or "MASS element creation did not report typename=MASS and config=1.",
+    }
+
+
+def _build_lumped_mass_tcl(
+    *,
+    comp_name: str,
+    mass: float,
+    x: float,
+    y: float,
+    z: float,
+) -> str:
+    """Build Tcl that creates a one-node MASS element."""
+    require_verified_route("create_lumped_mass")
+    return "\n".join(
+        [
+            f'catch {{*collectorcreateonly comps "{comp_name}" "" 7}}',
+            f'*currentcollector comps "{comp_name}"',
+            f"*createnode {x:.12g} {y:.12g} {z:.12g} 0 0 0",
+            "set _hdm_mass_node [hm_latestentityid nodes]",
+            "*createmark nodes 1 $_hdm_mass_node",
+            "set _hdm_mass_elem_id 0",
+            f"set _hdm_mass_err [catch {{*masselement 1 {mass:.12g} \"\" 0}} _hdm_mass_msg]",
+            "if {$_hdm_mass_err == 0} { catch {set _hdm_mass_elem_id [hm_latestentityid elements]} }",
+            "set _hdm_mass_type unknown",
+            "set _hdm_mass_config -1",
+            "if {$_hdm_mass_elem_id > 0} {",
+            "    catch {set _hdm_mass_type [hm_getvalue elements id=$_hdm_mass_elem_id dataname=typename]}",
+            "    catch {set _hdm_mass_config [hm_getvalue elements id=$_hdm_mass_elem_id dataname=config]}",
+            "}",
+            'puts "MASS_NODE_COUNT=1"',
+            'puts "MASS_ELEM_COUNT=[expr {$_hdm_mass_err == 0 && $_hdm_mass_elem_id > 0 ? 1 : 0}]"',
+            'puts "MASS_ELEM_ID=$_hdm_mass_elem_id"',
+            'puts "MASS_LAST_TYPE=$_hdm_mass_type"',
+            'puts "MASS_LAST_CONFIG=$_hdm_mass_config"',
+            _build_visualization_refresh_tcl(),
+        ]
+    )
+
+
 def _solid_box_dimension_error(
     x_min: float,
     y_min: float,
@@ -1711,9 +2665,11 @@ def mesh_box(
     element_size: float,
     timeout: int = 60,
 ) -> dict:
-    """Mesh the current solid with tetrahedral elements.
+    """Report that geometry-solid tetra meshing is not execution-ready.
 
-    Uses *tetmesh command to create tetrahedral mesh from surfaces.
+    The project currently has one verified meshing route:
+    create_structured_hex8_box, exposed through create_fe_cube. Tetra meshing
+    existing geometry requires a separate HyperMesh command-recording proof.
 
     Args:
         comp_name: Component name (for setting current collector).
@@ -1721,25 +2677,33 @@ def mesh_box(
         timeout: Socket timeout in seconds.
 
     Returns:
-        dict with success, element count.
+        dict explaining the unsupported route and required verification.
     """
-    lines = [
-        f'*currentcollector comps "{comp_name}"',
-        '*createmark solids 1 all',
-        '*tetmesh 1 1 %s' % element_size,
-    ]
-
-    script = wrap_generated_tcl("generate_plain_tetra_tcl", "\n".join(lines))
-    result = execute_tcl_gui(script, timeout=timeout)
+    unsupported = get_unsupported_route("tetmesh_geometry_solid") or {}
     return {
-        "success": result.get("success", False),
+        "success": False,
+        "supported": False,
+        "error_type": "unsupported_route",
+        "route_name": "tetmesh_geometry_solid",
+        "entity_kind": "geometry_mesh",
         "comp_name": comp_name,
         "element_size": element_size,
-        "response": result.get("response", ""),
-        "error": result.get("error"),
+        "timeout": timeout,
+        "error": unsupported.get(
+            "reason",
+            "Tetra meshing a geometry solid is not verified in the current HyperMesh profile.",
+        ),
+        "available_mesh_routes": ["create_structured_hex8_box"],
+        "required_verification": [
+            "Record the geometry-solid meshing workflow in HyperMesh command recording.",
+            "Verify the exact Tcl commands in the target HyperMesh profile.",
+            "Add a dedicated verified route to templates/hm_command_map.json.",
+            "Only then allow hm_mesh_box or a new meshing tool to send meshing Tcl.",
+        ],
         "next_steps": [
-            "Call hm_auto_save(step_name='mesh_done') to save",
-            "Use hm_set_keyword to assign materials, sections, contacts, etc.",
+            "Use hm_create_fe_cube for the currently verified structured HEX8 FE mesh route.",
+            "Use hm_create_solid_box only for geometry solid creation, not meshing.",
+            "Promote tetmesh_geometry_solid only after connected-GUI runtime validation.",
         ],
     }
 

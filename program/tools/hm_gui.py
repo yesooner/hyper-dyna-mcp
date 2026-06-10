@@ -46,7 +46,7 @@ _WHITELIST_PREFIXES = (
     '*currentcollector', '*collectorcreateonly', '*createmarkpanel',
     '*createlist', '*createelement',
     '*translatemark', '*duplicatemark', '*equivalence', '*findedges',
-    '*createnode', '*linecreatestraight', '*nodecreate', '*linecreate',
+    '*createnode', '*createdoublearray', '*linecreatestraight', '*nodecreate', '*linecreate',
     '*surfacecreate', '*solidblock', '*solidcreateruled', '*solidmap', '*surfacecreateruled',
     '*tetmesh', '*tet10mesh', '*boolean_merge_solids', '*trim_solids_by_surfaces',
     '*element', '*componentcreate', '*merge', '*renumber',

@@ -22,7 +22,12 @@ from program.tools.dyna_keyword_map import (
     query_dyna_keyword,
     validate_dyna_keyword_map,
 )
-from program.tools.hm_command_map import command_map_stats, get_verified_route, list_verified_routes
+from program.tools.hm_command_map import (
+    command_map_stats,
+    element_capability_matrix,
+    get_verified_route,
+    list_verified_routes,
+)
 from program.tools.hm_gui import (
     DEFAULT_GUI_HOST,
     DEFAULT_GUI_PORT,
@@ -43,7 +48,12 @@ from program.tools.hm_model_converter import convert_model_to_lsdyne
 from program.tools.hm_model_reader import read_all_components, read_all_materials
 from program.tools.hm_model_writer import (
     create_box,
+    create_beam_line,
+    create_discrete_spring,
     create_fe_cube,
+    create_lumped_mass,
+    create_shell_plate,
+    create_surface_plate,
     create_solid_box,
     mesh_box,
     refresh_visualization,
@@ -250,24 +260,110 @@ class HmCreateBoxInput(BaseModel):
 
 
 class HmMeshBoxInput(BaseModel):
-    """Input for meshing a box with tetrahedral elements."""
+    """Input for the unsupported geometry-solid tetmesh route."""
 
     comp_name: str = Field(..., description="Component name.", min_length=1)
-    element_size: float = Field(..., description="Target element size.", gt=0)
+    element_size: float = Field(..., description="Requested target element size for future verified meshing route.", gt=0)
     timeout: int = Field(default=60, description="Timeout in seconds.", ge=1)
 
 
 class HmCreateFeCubeInput(BaseModel):
-    """Input for creating and meshing a cube."""
+    """Input for creating a structured HEX8 FE cube."""
 
     name: str = Field(default="soil_explosive_cube", description="Model/component name.", min_length=1)
     size: float = Field(..., description="Cube side length in current HyperMesh model units.", gt=0)
-    element_size: float = Field(..., description="Target tetrahedral element size.", gt=0)
+    element_size: float = Field(..., description="Target structured HEX8 element edge length.", gt=0)
     origin_x: float = Field(default=0.0, description="Origin X coordinate.")
     origin_y: float = Field(default=0.0, description="Origin Y coordinate.")
     origin_z: float = Field(default=0.0, description="Origin Z coordinate.")
     comp_name: Optional[str] = Field(default=None, description="Optional component name.")
     timeout: int = Field(default=90, description="Timeout in seconds for each stage.", ge=1)
+
+
+class HmCreateSurfacePlateInput(BaseModel):
+    """Input for creating a rectangular geometry surface plate."""
+
+    name: str = Field(default="surface_plate", description="Model/component name.", min_length=1)
+    width: float = Field(..., description="Plate width along +X in current model units.", gt=0)
+    height: float = Field(..., description="Plate height along +Y in current model units.", gt=0)
+    origin_x: float = Field(default=0.0, description="Origin X coordinate.")
+    origin_y: float = Field(default=0.0, description="Origin Y coordinate.")
+    origin_z: float = Field(default=0.0, description="Origin Z coordinate.")
+    comp_name: Optional[str] = Field(default=None, description="Optional component name.")
+    timeout: int = Field(default=60, description="Timeout in seconds for the GUI operation.", ge=1, le=180)
+
+
+class HmCreateShellPlateInput(BaseModel):
+    """Input for creating a structured QUAD4 FE shell plate."""
+
+    name: str = Field(default="shell_plate", description="Model/component name.", min_length=1)
+    width: float = Field(..., description="Plate width along +X in current model units.", gt=0)
+    height: float = Field(..., description="Plate height along +Y in current model units.", gt=0)
+    element_size: float = Field(..., description="Target QUAD4 shell element edge length.", gt=0)
+    origin_x: float = Field(default=0.0, description="Origin X coordinate.")
+    origin_y: float = Field(default=0.0, description="Origin Y coordinate.")
+    origin_z: float = Field(default=0.0, description="Origin Z coordinate.")
+    comp_name: Optional[str] = Field(default=None, description="Optional component name.")
+    timeout: int = Field(default=90, description="Timeout in seconds for the GUI operation.", ge=1, le=180)
+
+
+class HmCreateBeamLineInput(BaseModel):
+    """Input for creating a structured BAR2/BEAM line."""
+
+    name: str = Field(default="beam_line", description="Model/component name.", min_length=1)
+    length: float = Field(..., description="Beam length in current model units.", gt=0)
+    element_size: float = Field(..., description="Target beam element length.", gt=0)
+    origin_x: float = Field(default=0.0, description="Origin X coordinate.")
+    origin_y: float = Field(default=0.0, description="Origin Y coordinate.")
+    origin_z: float = Field(default=0.0, description="Origin Z coordinate.")
+    direction_x: float = Field(default=1.0, description="Direction vector X component.")
+    direction_y: float = Field(default=0.0, description="Direction vector Y component.")
+    direction_z: float = Field(default=0.0, description="Direction vector Z component.")
+    comp_name: Optional[str] = Field(default=None, description="Optional component name.")
+    timeout: int = Field(default=90, description="Timeout in seconds for the GUI operation.", ge=1, le=180)
+
+    @model_validator(mode="after")
+    def validate_direction(self) -> "HmCreateBeamLineInput":
+        norm = (self.direction_x ** 2 + self.direction_y ** 2 + self.direction_z ** 2) ** 0.5
+        if norm <= 0:
+            raise ValueError("direction vector must be non-zero.")
+        return self
+
+
+class HmCreateDiscreteSpringInput(BaseModel):
+    """Input for creating a two-node DISCRETE spring element."""
+
+    name: str = Field(default="discrete_spring", description="Model/component name.", min_length=1)
+    node_a_x: float = Field(default=0.0, description="Node A X coordinate.")
+    node_a_y: float = Field(default=0.0, description="Node A Y coordinate.")
+    node_a_z: float = Field(default=0.0, description="Node A Z coordinate.")
+    node_b_x: float = Field(default=100.0, description="Node B X coordinate.")
+    node_b_y: float = Field(default=0.0, description="Node B Y coordinate.")
+    node_b_z: float = Field(default=0.0, description="Node B Z coordinate.")
+    comp_name: Optional[str] = Field(default=None, description="Optional component name.")
+    timeout: int = Field(default=60, description="Timeout in seconds for the GUI operation.", ge=1, le=180)
+
+    @model_validator(mode="after")
+    def validate_non_coincident_nodes(self) -> "HmCreateDiscreteSpringInput":
+        if (
+            self.node_a_x == self.node_b_x
+            and self.node_a_y == self.node_b_y
+            and self.node_a_z == self.node_b_z
+        ):
+            raise ValueError("node A and node B must not be coincident.")
+        return self
+
+
+class HmCreateLumpedMassInput(BaseModel):
+    """Input for creating a one-node MASS element."""
+
+    name: str = Field(default="lumped_mass", description="Model/component name.", min_length=1)
+    mass: float = Field(..., description="Mass value passed to the verified *masselement route.", gt=0)
+    x: float = Field(default=0.0, description="Node X coordinate.")
+    y: float = Field(default=0.0, description="Node Y coordinate.")
+    z: float = Field(default=0.0, description="Node Z coordinate.")
+    comp_name: Optional[str] = Field(default=None, description="Optional component name.")
+    timeout: int = Field(default=60, description="Timeout in seconds for the GUI operation.", ge=1, le=180)
 
 
 class HmSearchKeywordsInput(BaseModel):
@@ -293,6 +389,15 @@ class HmCommandRouteInput(BaseModel):
     """Input for querying verified HyperMesh Tcl command routes."""
 
     route_name: Optional[str] = Field(default=None, description="Optional route name, such as create_structured_hex8_box.")
+
+
+class HmElementCapabilityInput(BaseModel):
+    """Input for querying element creation/meshing/material capability."""
+
+    element_type: Optional[str] = Field(
+        default=None,
+        description="Optional element type such as HEX, TET, shell, quad, tria, line, beam, lumped, or discrete.",
+    )
 
 
 class HmVisualRefreshInput(BaseModel):
@@ -640,7 +745,12 @@ async def hm_create_box_tool(params: HmCreateBoxInput) -> str:
     annotations={"title": "Mesh Box", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
 )
 async def hm_mesh_box_tool(params: HmMeshBoxInput) -> str:
-    """Mesh the current box solid with tetrahedral elements."""
+    """Report that geometry-solid tetmesh is not verified yet.
+
+    Current executable mesh support is hm_create_fe_cube, which directly
+    creates structured HEX8 FE mesh. Geometry-solid meshing must first be
+    verified through HyperMesh command recording before this tool can send Tcl.
+    """
     return _safe_call(mesh_box, params.comp_name, params.element_size, params.timeout)
 
 
@@ -674,6 +784,101 @@ async def hm_create_fe_cube_tool(params: HmCreateFeCubeInput) -> str:
         origin_x=params.origin_x,
         origin_y=params.origin_y,
         origin_z=params.origin_z,
+        comp_name=params.comp_name,
+        timeout=params.timeout,
+    )
+
+
+@mcp.tool(
+    name="hm_create_surface_plate",
+    annotations={"title": "Create Geometry Surface Plate", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
+)
+async def hm_create_surface_plate_tool(params: HmCreateSurfacePlateInput) -> str:
+    """Create a rectangular HyperMesh geometry surface, not shell FE elements."""
+    return _safe_call(
+        create_surface_plate,
+        params.name,
+        params.width,
+        params.height,
+        origin_x=params.origin_x,
+        origin_y=params.origin_y,
+        origin_z=params.origin_z,
+        comp_name=params.comp_name,
+        timeout=params.timeout,
+    )
+
+
+@mcp.tool(
+    name="hm_create_shell_plate",
+    annotations={"title": "Create QUAD4 Shell FE Plate", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
+)
+async def hm_create_shell_plate_tool(params: HmCreateShellPlateInput) -> str:
+    """Create a structured QUAD4 shell FE plate, not a geometry surface."""
+    return _safe_call(
+        create_shell_plate,
+        params.name,
+        params.width,
+        params.height,
+        params.element_size,
+        origin_x=params.origin_x,
+        origin_y=params.origin_y,
+        origin_z=params.origin_z,
+        comp_name=params.comp_name,
+        timeout=params.timeout,
+    )
+
+
+@mcp.tool(
+    name="hm_create_beam_line",
+    annotations={"title": "Create BEAM Line", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
+)
+async def hm_create_beam_line_tool(params: HmCreateBeamLineInput) -> str:
+    """Create a straight structured BAR2/BEAM line using config 60."""
+    return _safe_call(
+        create_beam_line,
+        params.name,
+        params.length,
+        params.element_size,
+        origin_x=params.origin_x,
+        origin_y=params.origin_y,
+        origin_z=params.origin_z,
+        direction_x=params.direction_x,
+        direction_y=params.direction_y,
+        direction_z=params.direction_z,
+        comp_name=params.comp_name,
+        timeout=params.timeout,
+    )
+
+
+@mcp.tool(
+    name="hm_create_discrete_spring",
+    annotations={"title": "Create DISCRETE Spring", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
+)
+async def hm_create_discrete_spring_tool(params: HmCreateDiscreteSpringInput) -> str:
+    """Create a two-node DISCRETE spring element using the verified *spring route."""
+    return _safe_call(
+        create_discrete_spring,
+        params.name,
+        node_a=(params.node_a_x, params.node_a_y, params.node_a_z),
+        node_b=(params.node_b_x, params.node_b_y, params.node_b_z),
+        comp_name=params.comp_name,
+        timeout=params.timeout,
+    )
+
+
+@mcp.tool(
+    name="hm_create_lumped_mass",
+    annotations={"title": "Create Lumped MASS", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
+)
+async def hm_create_lumped_mass_tool(params: HmCreateLumpedMassInput) -> str:
+    """Create a one-node MASS element using the verified *masselement route."""
+    return _safe_call(
+        create_lumped_mass,
+        params.name,
+        params.mass,
+        x=params.x,
+        y=params.y,
+        z=params.z,
         comp_name=params.comp_name,
         timeout=params.timeout,
     )
@@ -743,6 +948,20 @@ async def hm_command_map_tool(params: HmCommandRouteInput) -> str:
         return _success({"route_name": params.route_name, "route": route})
     routes = list_verified_routes()
     return _success({"stats": command_map_stats(), "routes": routes})
+
+
+@mcp.tool(
+    name="hm_element_capability_matrix",
+    annotations={"title": "Element Capability Matrix", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+)
+async def hm_element_capability_matrix_tool(params: HmElementCapabilityInput) -> str:
+    """Report element creation, meshing, and material-assignment support.
+
+    This is a planning/guardrail tool. It does not execute Tcl. It prevents
+    agents from assuming unsupported element families can already be created,
+    meshed, or assigned materials through MCP.
+    """
+    return _success(element_capability_matrix(params.element_type))
 
 
 @mcp.tool(

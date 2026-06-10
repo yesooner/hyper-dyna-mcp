@@ -115,6 +115,7 @@ batch/
 scripts/
 view/
 archive/
+logs/
 
 # Temporary and backup files
 temp_*.py

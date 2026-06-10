@@ -15,6 +15,228 @@ from typing import Any
 _MAP_PATH = Path(__file__).resolve().parents[2] / "templates" / "hm_command_map.json"
 _ALLOWED_ROUTE_STATUSES = {"verified"}
 
+_ELEMENT_CAPABILITY_ALIASES = {
+    "solid": "solid_hex",
+    "solid element": "solid_hex",
+    "hex": "solid_hex",
+    "hex8": "solid_hex",
+    "brick": "solid_hex",
+    "tet": "solid_tet",
+    "tetra": "solid_tet",
+    "tet4": "solid_tet",
+    "shell": "shell_quad",
+    "shell element": "shell_quad",
+    "quad": "shell_quad",
+    "quad4": "shell_quad",
+    "tria": "shell_tria",
+    "tri": "shell_tria",
+    "tria3": "shell_tria",
+    "line": "line_beam",
+    "beam": "line_beam",
+    "beam element": "line_beam",
+    "lumped": "lumped_mass",
+    "mass": "lumped_mass",
+    "lumped element": "lumped_mass",
+    "discrete": "discrete",
+    "discrete element": "discrete",
+}
+
+_ELEMENT_CAPABILITY_MATRIX = {
+    "solid_hex": {
+        "labels": ["solid element", "HEX", "HEX8"],
+        "element_family": "solid",
+        "creation": {
+            "supported": True,
+            "tool": "hm_create_fe_cube",
+            "route_name": "create_structured_hex8_box",
+            "entity_kind": "fe_mesh",
+            "notes": "Creates structured HEX8 FE nodes/elements directly. This is not CAD geometry solid creation.",
+        },
+        "meshing": {
+            "supported": True,
+            "tool": "hm_create_fe_cube",
+            "route_name": "create_structured_hex8_box",
+            "method": "structured direct FE generation",
+            "limits_source": "templates/hm_command_map.json routes.create_structured_hex8_box.limits",
+        },
+        "material_assignment": {
+            "supported": False,
+            "route_name": "assign_material_to_hex_part",
+            "reason": "Part/property/material datanames for LS-DYNA solid sections are not execution-verified.",
+        },
+        "k_file_generation": {
+            "supported": True,
+            "module": "program.tools.k_writer",
+            "keywords": ["*NODE", "*ELEMENT_SOLID", "*SECTION_SOLID", "*MAT_ELASTIC", "*PART"],
+            "notes": "Offline fixture/validation only. Agents must not use this to bypass HyperMesh GUI Tcl execution.",
+        },
+    },
+    "solid_tet": {
+        "labels": ["TET", "TET4", "tetra solid"],
+        "element_family": "solid",
+        "creation": {
+            "supported": False,
+            "route_name": "create_tet_element",
+            "reason": "Direct TET element creation command/card route is not runtime-verified.",
+        },
+        "meshing": {
+            "supported": False,
+            "route_name": "tetmesh_geometry_solid",
+            "reason": "Geometry-solid tetmesh is unsupported until HyperMesh command recording verifies *tetmesh workflow.",
+        },
+        "material_assignment": {
+            "supported": False,
+            "route_name": "assign_material_to_tet_part",
+            "reason": "Requires verified part/property/material route after TET creation/meshing route exists.",
+        },
+        "k_file_generation": {
+            "supported": False,
+            "reason": "Dedicated TET4 writer semantics are not separated from generic ELEMENT_SOLID yet.",
+        },
+    },
+    "shell_quad": {
+        "labels": ["shell element", "quad", "QUAD4"],
+        "element_family": "shell",
+        "creation": {
+            "supported": True,
+            "tool": "hm_create_shell_plate",
+            "route_name": "create_structured_quad4_shell_plate",
+            "entity_kind": "fe_shell_mesh",
+            "notes": "Creates structured QUAD4 shell FE nodes/elements directly. This is not geometry surface creation or surface automesh.",
+        },
+        "geometry_surface_creation": {
+            "supported": True,
+            "tool": "hm_create_surface_plate",
+            "route_name": "create_geometry_surface_rect_nurbs",
+            "entity_kind": "geometry_surface",
+            "notes": "Creates a rectangular HyperMesh geometry surface only; this is not QUAD4 shell FE element creation.",
+        },
+        "meshing": {
+            "supported": False,
+            "route_name": "surface_automesh",
+            "reason": "Surface automesh is not verified for the GUI-only MCP execution path.",
+        },
+        "material_assignment": {
+            "supported": False,
+            "route_name": "assign_material_to_shell_part",
+            "reason": "Shell section/property thickness and material datanames require command recording.",
+        },
+        "k_file_generation": {
+            "supported": True,
+            "module": "program.tools.k_writer.build_shell_plate_model",
+            "keywords": [
+                "*NODE",
+                "*ELEMENT_SHELL",
+                "*ELEMENT_SHELL_THICKNESS",
+                "*SECTION_SHELL",
+                "*MAT_ELASTIC",
+                "*PART",
+            ],
+            "notes": "Offline fixture/validation only. This does not authorize shell creation or K export as an MCP workflow.",
+        },
+    },
+    "shell_tria": {
+        "labels": ["tria", "TRIA3", "tri shell"],
+        "element_family": "shell",
+        "creation": {
+            "supported": False,
+            "route_name": "create_shell_tria3",
+            "reason": "Direct shell TRIA3 creation route is not runtime-verified.",
+        },
+        "meshing": {
+            "supported": False,
+            "route_name": "surface_automesh",
+            "reason": "Triangular surface meshing controls are not verified for the GUI-only MCP execution path.",
+        },
+        "material_assignment": {
+            "supported": False,
+            "route_name": "assign_material_to_shell_part",
+            "reason": "Shell section/property thickness and material datanames require command recording.",
+        },
+        "k_file_generation": {
+            "supported": False,
+            "reason": "TRIA3-specific K writer route is not separated from QUAD4 shell generation yet.",
+        },
+    },
+    "line_beam": {
+        "labels": ["line", "beam element"],
+        "element_family": "beam",
+        "creation": {
+            "supported": True,
+            "tool": "hm_create_beam_line",
+            "route_name": "create_beam_line",
+            "entity_kind": "fe_beam_mesh",
+            "notes": "Creates structured BAR2/BEAM elements with *createelement 60. Does not verify beam section datanames or orientation cards.",
+        },
+        "meshing": {
+            "supported": False,
+            "route_name": "line_mesh_beam",
+            "reason": "Line-to-beam meshing command sequence is not verified.",
+        },
+        "material_assignment": {
+            "supported": False,
+            "route_name": "assign_material_to_beam_part",
+            "reason": "Beam section/property and orientation datanames require command recording.",
+        },
+        "k_file_generation": {
+            "supported": True,
+            "module": "program.tools.k_writer",
+            "keywords": ["*NODE", "*ELEMENT_BEAM", "*SECTION_BEAM", "*MAT_ELASTIC", "*PART"],
+            "notes": "Offline fixture/validation only. GUI beam creation and export remain blocked until Tcl routes are verified.",
+        },
+    },
+    "lumped_mass": {
+        "labels": ["lumped", "mass", "lumped mass"],
+        "element_family": "mass",
+        "creation": {
+            "supported": True,
+            "tool": "hm_create_lumped_mass",
+            "route_name": "create_lumped_mass",
+            "entity_kind": "fe_mass_element",
+            "notes": "Creates a one-node MASS element with *masselement. Property/card datanames remain unverified.",
+        },
+        "meshing": {
+            "supported": False,
+            "route_name": "mesh_lumped_mass",
+            "reason": "Lumped masses are assigned to nodes/sets rather than meshed as geometry; node/set route is unverified.",
+        },
+        "material_assignment": {
+            "supported": False,
+            "route_name": "assign_material_to_lumped_mass",
+            "reason": "Lumped mass generally needs mass/property definition, not ordinary material assignment; route is unverified.",
+        },
+        "k_file_generation": {
+            "supported": False,
+            "reason": "Lumped mass K keyword writer is not implemented as a structured route.",
+        },
+    },
+    "discrete": {
+        "labels": ["discrete element"],
+        "element_family": "discrete",
+        "creation": {
+            "supported": True,
+            "tool": "hm_create_discrete_spring",
+            "route_name": "create_discrete_element",
+            "entity_kind": "fe_discrete_element",
+            "notes": "Creates a two-node DISCRETE spring element with *spring. Stiffness/damping datanames remain unverified.",
+        },
+        "meshing": {
+            "supported": False,
+            "route_name": "mesh_discrete_element",
+            "reason": "Discrete elements connect existing nodes/sets rather than being generated by a mesh operation; route is unverified.",
+        },
+        "material_assignment": {
+            "supported": False,
+            "route_name": "assign_material_to_discrete_element",
+            "reason": "Discrete behavior normally comes from property/section cards; verified datanames are missing.",
+        },
+        "k_file_generation": {
+            "supported": False,
+            "reason": "Discrete element K keyword writer is not implemented as a structured route.",
+        },
+    },
+}
+
 
 @lru_cache(maxsize=1)
 def load_command_map() -> dict[str, Any]:
@@ -83,6 +305,106 @@ def command_map_stats() -> dict[str, Any]:
     }
 
 
+def element_capability_matrix(element_type: str | None = None) -> dict[str, Any]:
+    """Return executable capability status for requested FE element families."""
+    data = load_command_map()
+    routes = data.get("routes", {})
+    unsupported = data.get("unsupported_routes", {})
+
+    def enrich(name: str, item: dict[str, Any]) -> dict[str, Any]:
+        enriched = {"name": name, **item}
+        for area in ("creation", "geometry_surface_creation", "meshing", "material_assignment"):
+            route_name = enriched.get(area, {}).get("route_name")
+            if not route_name:
+                continue
+            if route_name in routes:
+                route = routes[route_name]
+                enriched[area]["route_status"] = route.get("status")
+                enriched[area]["runtime_validated"] = route.get("tested_in_session") is True
+                enriched[area]["verification_level"] = (
+                    "runtime_validated" if route.get("tested_in_session") is True else "source_verified_runtime_pending"
+                )
+            elif route_name in unsupported:
+                enriched[area]["route_status"] = "unsupported"
+                enriched[area]["required_verification"] = unsupported[route_name].get("required_verification", [])
+            else:
+                enriched[area]["route_status"] = "missing"
+                enriched[area]["required_verification"] = [
+                    "Add route evidence to templates/hm_command_map.json.",
+                    "Verify Tcl in a connected HyperMesh GUI session before execution.",
+                ]
+        k_file_generation = enriched.get("k_file_generation")
+        if isinstance(k_file_generation, dict):
+            k_file_generation.setdefault("role", "offline_fixture_validation_only")
+            k_file_generation.setdefault("execution_scope", "offline_ls_dyna_keyword_fixture_only")
+            k_file_generation.setdefault("agent_execution_allowed", False)
+            k_file_generation.setdefault("mcp_execution_allowed", False)
+            k_file_generation.setdefault("preferred_modeling_path", "HyperMesh GUI Tcl listener / Tcl Console")
+            k_file_generation.setdefault(
+                "guardrail",
+                "Do not use backend K writing to satisfy modeling or final K export requests in the GUI-only MCP.",
+            )
+        return enriched
+
+    if element_type:
+        key = _ELEMENT_CAPABILITY_ALIASES.get(element_type.strip().lower(), element_type.strip().lower())
+        item = _ELEMENT_CAPABILITY_MATRIX.get(key)
+        if item is None:
+            return {
+                "success": False,
+                "element_type": element_type,
+                "known": False,
+                "known_types": sorted(_ELEMENT_CAPABILITY_MATRIX),
+                "aliases": sorted(_ELEMENT_CAPABILITY_ALIASES),
+            }
+        return {
+            "success": True,
+            "element_type": element_type,
+            "canonical_type": key,
+            "capability": enrich(key, item),
+        }
+
+    capabilities = {name: enrich(name, item) for name, item in _ELEMENT_CAPABILITY_MATRIX.items()}
+    return {
+        "success": True,
+        "policy": "Only runtime-verified routes may execute Tcl. Missing/unsupported routes are planning-only.",
+        "summary": {
+            "types_checked": len(capabilities),
+            "creation_supported": sorted(
+                name for name, item in capabilities.items() if item["creation"].get("supported") is True
+            ),
+            "meshing_supported": sorted(
+                name for name, item in capabilities.items() if item["meshing"].get("supported") is True
+            ),
+            "material_assignment_supported": sorted(
+                name for name, item in capabilities.items() if item["material_assignment"].get("supported") is True
+            ),
+            "geometry_surface_creation_supported": sorted(
+                name
+                for name, item in capabilities.items()
+                if item.get("geometry_surface_creation", {}).get("supported") is True
+            ),
+            "k_file_generation_supported": sorted(
+                name for name, item in capabilities.items() if item.get("k_file_generation", {}).get("supported") is True
+            ),
+            "offline_k_file_generation_supported": sorted(
+                name for name, item in capabilities.items() if item.get("k_file_generation", {}).get("supported") is True
+            ),
+            "k_file_generation_agent_execution_allowed": sorted(
+                name
+                for name, item in capabilities.items()
+                if item.get("k_file_generation", {}).get("agent_execution_allowed") is True
+            ),
+            "k_file_generation_mcp_execution_allowed": sorted(
+                name
+                for name, item in capabilities.items()
+                if item.get("k_file_generation", {}).get("mcp_execution_allowed") is True
+            ),
+        },
+        "capabilities": capabilities,
+    }
+
+
 def get_route_limits(route_name: str) -> dict[str, int]:
     """Return integer route limits for a verified route."""
     route = require_verified_route(route_name)
@@ -129,8 +451,10 @@ def validate_command_map(data: dict[str, Any] | None = None) -> dict[str, Any]:
             _validate_fe_mesh_route(route_name, route, command_text, errors)
         elif entity_kind == "geometry_solid":
             _validate_geometry_solid_route(route_name, route, command_text, errors, warnings)
+        elif entity_kind == "geometry_surface":
+            _validate_geometry_surface_route(route_name, route, command_text, errors, warnings)
         else:
-            errors.append(f"{route_name}: entity_kind must be fe_mesh or geometry_solid.")
+            errors.append(f"{route_name}: entity_kind must be fe_mesh, geometry_solid, or geometry_surface.")
 
     if not isinstance(unsupported, dict):
         errors.append("unsupported_routes must be an object.")
@@ -158,13 +482,39 @@ def _validate_fe_mesh_route(route_name: str, route: dict[str, Any], command_text
         if not isinstance(value, int) or value <= 0:
             errors.append(f"{route_name}: limits.{limit_name} must be a positive integer.")
 
-    if route_name == "create_structured_hex8_box":
-        if route.get("element_config") != 208:
-            errors.append(f"{route_name}: element_config must remain 208 for HEX8 elements.")
-        for required in ("*createnode", "*createlist nodes", "*createelement 208"):
-            if required not in command_text:
-                errors.append(f"{route_name}: missing required command marker {required}.")
-        for forbidden in ("*solidblock", "*tetmesh"):
+        if route_name == "create_structured_hex8_box":
+            if route.get("element_config") != 208:
+                errors.append(f"{route_name}: element_config must remain 208 for HEX8 elements.")
+            for required in ("*createnode", "*createlist nodes", "*createelement 208"):
+                if required not in command_text:
+                    errors.append(f"{route_name}: missing required command marker {required}.")
+        if route_name == "create_structured_quad4_shell_plate":
+            if route.get("element_config") != 104:
+                errors.append(f"{route_name}: element_config must remain 104 for QUAD4 shell elements.")
+            for required in ("*createnode", "*createlist nodes", "*createelement 104"):
+                if required not in command_text:
+                    errors.append(f"{route_name}: missing required command marker {required}.")
+        if route_name == "create_beam_line":
+            if route.get("element_config") != 60:
+                errors.append(f"{route_name}: element_config must remain 60 for BAR2/BEAM elements.")
+            for required in ("*createnode", "*createlist nodes", "*createelement 60"):
+                if required not in command_text:
+                    errors.append(f"{route_name}: missing required command marker {required}.")
+            if "*createelement 2" in command_text:
+                errors.append(f"{route_name}: must not use *createelement 2 because it creates Plotel.")
+        if route_name == "create_discrete_element":
+            if route.get("element_config") != 21:
+                errors.append(f"{route_name}: element_config must remain 21 for DISCRETE elements.")
+            for required in ("*createnode", "*spring"):
+                if required not in command_text:
+                    errors.append(f"{route_name}: missing required command marker {required}.")
+        if route_name == "create_lumped_mass":
+            if route.get("element_config") != 1:
+                errors.append(f"{route_name}: element_config must remain 1 for MASS elements.")
+            for required in ("*createnode", "*createmark nodes", "*masselement"):
+                if required not in command_text:
+                    errors.append(f"{route_name}: missing required command marker {required}.")
+        for forbidden in ("*solidblock", "*tetmesh", "*surfacecreatenurbs"):
             if forbidden in command_text:
                 errors.append(f"{route_name}: FE route must not contain {forbidden}.")
 
@@ -184,6 +534,28 @@ def _validate_geometry_solid_route(
     runtime_validation = route.get("runtime_validation")
     if not isinstance(runtime_validation, list) or not runtime_validation:
         errors.append(f"{route_name}: geometry_solid route must document runtime_validation checks.")
+
+    if route.get("tested_in_session") is not True:
+        warnings.append(f"{route_name}: source verified, runtime validation still pending in target HyperMesh.")
+
+
+def _validate_geometry_surface_route(
+    route_name: str,
+    route: dict[str, Any],
+    command_text: str,
+    errors: list[str],
+    warnings: list[str],
+) -> None:
+    for required in ("*createdoublearray", "*surfacecreatenurbs"):
+        if required not in command_text:
+            errors.append(f"{route_name}: geometry_surface route must contain {required}.")
+    for forbidden in ("*createelement", "*createnode", "*solidblock", "*tetmesh"):
+        if forbidden in command_text:
+            errors.append(f"{route_name}: geometry_surface route must not contain {forbidden}.")
+
+    runtime_validation = route.get("runtime_validation")
+    if not isinstance(runtime_validation, list) or not runtime_validation:
+        errors.append(f"{route_name}: geometry_surface route must document runtime_validation checks.")
 
     if route.get("tested_in_session") is not True:
         warnings.append(f"{route_name}: source verified, runtime validation still pending in target HyperMesh.")

@@ -43,12 +43,18 @@ ALLOWED_TOOLS = {
     "hm_create_box",
     "hm_mesh_box",
     "hm_create_solid_box",
+    "hm_create_surface_plate",
+    "hm_create_shell_plate",
+    "hm_create_beam_line",
+    "hm_create_discrete_spring",
+    "hm_create_lumped_mass",
     "hm_create_fe_cube",
     "hm_visual_refresh",
     "hm_gui_modeling_smoke",
     "hm_search_keywords",
     "hm_keyword_map",
     "hm_command_map",
+    "hm_element_capability_matrix",
     "dyna_keyword_policy",
     "dyna_keyword_query",
     "dyna_keyword_map_validate",
@@ -63,9 +69,15 @@ REQUIRED_TOOLS = {
     "dyna_keyword_query",
     "hm_auto_save",
     "hm_command_map",
+    "hm_element_capability_matrix",
     "hm_create_fe_cube",
     "hm_gui_modeling_smoke",
     "hm_create_solid_box",
+    "hm_create_surface_plate",
+    "hm_create_shell_plate",
+    "hm_create_beam_line",
+    "hm_create_discrete_spring",
+    "hm_create_lumped_mass",
     "hm_visual_refresh",
     "hm_python_api_status",
     "execute_hm_python_api",
@@ -209,7 +221,12 @@ async def run_smoke(
                 "hm_command_map",
                 {"params": {"route_name": "create_geometry_solid_box"}},
             )
+            element_capability_matrix_result = await session.call_tool(
+                "hm_element_capability_matrix",
+                {"params": {}},
+            )
             solid_command_map_payload = _json_text_payload(solid_command_map)
+            element_capability_matrix_payload = _json_text_payload(element_capability_matrix_result)
             solid_route_runtime_status_ok = _solid_route_runtime_status_ok(solid_command_map_payload)
             set_port_result = None
             if port is not None:
@@ -287,6 +304,10 @@ async def run_smoke(
         guardrail_failures.append("hm_set_keyword must block unverified SECTION_SOLID execution before Tcl is sent.")
     if not solid_route_runtime_status_ok:
         guardrail_failures.append("hm_command_map create_geometry_solid_box must expose runtime validation status.")
+    if not _element_capability_guardrail_ok(element_capability_matrix_payload):
+        guardrail_failures.append(
+            "hm_element_capability_matrix must report only verified FE creation routes, keep surface automesh/material assignment blocked, and keep K writer execution disabled."
+        )
     gui_connected = True
     gui_version_status = None
     gui_listener_version_ok = True
@@ -416,6 +437,7 @@ async def run_smoke(
             "hm_set_keyword_section_solid_blocked": _first_text(blocked_section_set_keyword),
             "hm_command_map": _first_text(command_map),
             "hm_solid_command_map": _first_text(solid_command_map),
+            "hm_element_capability_matrix": _first_text(element_capability_matrix_result),
             "set_hypermesh_listener_port": _first_text(set_port_result) if set_port_result else None,
             "check_hypermesh_connection": _first_text(gui_result) if gui_result else None,
             "diagnose_hypermesh_listener": _first_text(gui_diagnostics) if gui_diagnostics else None,
@@ -528,6 +550,92 @@ def _solid_route_runtime_status_ok(payload: dict[str, Any] | None) -> bool:
         and isinstance(route.get("runtime_validated"), bool)
         and route.get("verification_level") in {"runtime_validated", "source_verified_runtime_pending"}
     )
+
+
+def _element_capability_guardrail_ok(payload: dict[str, Any] | None) -> bool:
+    if not isinstance(payload, dict) or payload.get("success") is not True:
+        return False
+    summary = payload.get("summary")
+    capabilities = payload.get("capabilities")
+    if not isinstance(summary, dict) or not isinstance(capabilities, dict):
+        return False
+    if summary.get("creation_supported") != ["discrete", "line_beam", "lumped_mass", "shell_quad", "solid_hex"]:
+        return False
+    if summary.get("meshing_supported") != ["solid_hex"]:
+        return False
+    if summary.get("material_assignment_supported") != []:
+        return False
+    if summary.get("k_file_generation_agent_execution_allowed") not in (None, []):
+        return False
+    if summary.get("k_file_generation_mcp_execution_allowed") not in (None, []):
+        return False
+    required = {"solid_hex", "solid_tet", "shell_quad", "shell_tria", "line_beam", "lumped_mass", "discrete"}
+    if not required.issubset(capabilities):
+        return False
+    if capabilities["solid_hex"]["creation"].get("route_status") != "verified":
+        return False
+    shell_quad = capabilities.get("shell_quad")
+    if not isinstance(shell_quad, dict):
+        return False
+    line_beam = capabilities.get("line_beam")
+    if not isinstance(line_beam, dict):
+        return False
+    if shell_quad.get("creation", {}).get("supported") is not True:
+        return False
+    if shell_quad.get("creation", {}).get("route_status") != "verified":
+        return False
+    if line_beam.get("creation", {}).get("supported") is not True:
+        return False
+    if line_beam.get("creation", {}).get("route_status") != "verified":
+        return False
+    lumped_mass = capabilities.get("lumped_mass")
+    if not isinstance(lumped_mass, dict):
+        return False
+    discrete = capabilities.get("discrete")
+    if not isinstance(discrete, dict):
+        return False
+    if lumped_mass.get("creation", {}).get("supported") is not True:
+        return False
+    if lumped_mass.get("creation", {}).get("route_status") != "verified":
+        return False
+    if discrete.get("creation", {}).get("supported") is not True:
+        return False
+    if discrete.get("creation", {}).get("route_status") != "verified":
+        return False
+    for name in required - {"solid_hex", "shell_quad", "line_beam", "lumped_mass", "discrete"}:
+        item = capabilities.get(name)
+        if not isinstance(item, dict):
+            return False
+        for area in ("creation", "meshing", "material_assignment"):
+            area_payload = item.get(area)
+            if not isinstance(area_payload, dict) or area_payload.get("supported") is not False:
+                return False
+    for area in ("meshing", "material_assignment"):
+        area_payload = shell_quad.get(area)
+        if not isinstance(area_payload, dict) or area_payload.get("supported") is not False:
+            return False
+    for area in ("meshing", "material_assignment"):
+        area_payload = line_beam.get(area)
+        if not isinstance(area_payload, dict) or area_payload.get("supported") is not False:
+            return False
+    for item in (lumped_mass, discrete):
+        for area in ("meshing", "material_assignment"):
+            area_payload = item.get(area)
+            if not isinstance(area_payload, dict) or area_payload.get("supported") is not False:
+                return False
+    for name in required:
+        item = capabilities.get(name)
+        if not isinstance(item, dict):
+            return False
+        k_file_generation = item.get("k_file_generation")
+        if isinstance(k_file_generation, dict):
+            if k_file_generation.get("agent_execution_allowed") is not False:
+                return False
+            if k_file_generation.get("mcp_execution_allowed") is not False:
+                return False
+            if k_file_generation.get("role") != "offline_fixture_validation_only":
+                return False
+    return capabilities["solid_hex"]["material_assignment"].get("supported") is False
 
 
 def _blocked_keyword_execution_ok(payload: dict[str, Any] | None) -> bool:
