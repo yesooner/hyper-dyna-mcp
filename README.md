@@ -1,10 +1,10 @@
 # Hyper-Dyna-MCP
 
-Hyper-Dyna-MCP is a local MCP server for driving a running HyperMesh GUI session from Claude Code or Codex. It keeps Python as the orchestration layer and sends verified Tcl routes into HyperMesh through a GUI listener.
+Hyper-Dyna-MCP is a local MCP server for driving a running HyperMesh GUI session from Claude Code or Codex. Python stays as the orchestration layer, while verified Tcl routes are sent into HyperMesh through the GUI listener.
 
-The current scope is HyperMesh GUI automation only. LS-DYNA solver execution, LS-PrePost execution, and K-file export are intentionally outside the active MCP tool surface.
+The current scope is HyperMesh GUI automation only. LS-DYNA solver execution, LS-PrePost execution, and K-file export are outside the active MCP tool surface.
 
-## ✨ Current Status
+## Current Status
 
 - MCP transport: `FastMCP + stdio`
 - Runtime target: local HyperMesh GUI listener
@@ -13,7 +13,11 @@ The current scope is HyperMesh GUI automation only. LS-DYNA solver execution, LS
 - Solid route: `*solidblock` route is source-verified and waits for target-GUI runtime validation
 - Dyna keyword policy: structured MAP first; manual notes and embeddings are retrieval/explanation only
 
-## 🚀 Start The MCP Server
+## HyperMesh 2021 Demo Flow
+
+This walkthrough is based on a HyperMesh 2021 demonstration. The old separate step that loads `hmcustom.tcl` has been removed from the README flow; keep the MCP server step and the listener/smoke step.
+
+### Step 1: Start The MCP Server
 
 Use the project conda environment:
 
@@ -37,13 +41,12 @@ Claude Code / Codex should register the server as a stdio MCP:
 
 Keep local MCP registration files outside Git. This repository ignores `.claude/`, `.codex/`, `claude_code_mcp*.json`, and other local configuration files.
 
-## 🧩 HyperMesh Listener
+### Step 2: Connect HyperMesh And Run Smoke
 
-Load the listener inside the HyperMesh Tcl Console:
+In the HyperMesh Tcl Console, source the generated listener directly:
 
 ```tcl
-catch {mcp_stop}
-if {[llength [info commands mcp_start_on_port]]} {mcp_start_on_port 47884} else {source "C:/path/to/hyper-dyna-mcp/runs/hm_gui_listener_47884.tcl"}
+source "C:/path/to/hyper-dyna-mcp/runs/hm_gui_listener.tcl"
 ```
 
 Expected listener metadata includes:
@@ -53,16 +56,19 @@ HYPERMESH_MCP_PONG
 LISTENER_VERSION=2024-compat-v3
 ```
 
-`hmcustom.tcl` provides:
+Then run the connected GUI smoke test:
 
-- `mcp_start_on_port <port>`
-- `mcp_stop`
-- `mcp_status`
-- `mcp_socket_ping`
+```powershell
+<python> -B -X utf8 -m program.claude_smoke --config claude_code_mcp.json --with-gui --port 47884 --modeling-smoke
+```
 
-`mcp_status` requires a real `HYPERMESH_MCP_PONG`; a TCP port that accepts connections but does not return the MCP pong is treated as an occupied non-MCP endpoint.
+If a stale listener or occupied port blocks the demo, use the generated port-specific listener:
 
-## 🛠️ Main Tools
+```tcl
+source "C:/path/to/hyper-dyna-mcp/runs/hm_gui_listener_47884.tcl"
+```
+
+## Main Tools
 
 Common MCP tools:
 
@@ -95,7 +101,7 @@ hm_python_api_current_model_info
 
 The active MCP surface is documented and smoke-tested in [CC_SMOKE_TEST.md](CC_SMOKE_TEST.md).
 
-## 🧱 FE Mesh vs Geometry Solid
+## FE Mesh vs Geometry Solid
 
 `hm_create_fe_cube` creates finite-element mesh entities, not HyperMesh CAD solids. It uses the verified route:
 
@@ -113,7 +119,7 @@ The active MCP surface is documented and smoke-tested in [CC_SMOKE_TEST.md](CC_S
 
 Do not replace the FE route with the solid route. They model different entity types and have different validation gates.
 
-## 📚 Dyna Keyword Policy
+## Dyna Keyword Policy
 
 Dyna keyword support uses structured maps:
 
@@ -133,7 +139,7 @@ templates/hm_dictionary.json
 templates/keyword_index.json
 ```
 
-## ✅ Validation
+## Validation
 
 Run tests with the project interpreter:
 
@@ -147,13 +153,7 @@ Run the Claude/Codex smoke test:
 <python> -B -X utf8 -m program.claude_smoke --config claude_code_mcp.json
 ```
 
-For connected GUI modeling validation:
-
-```powershell
-<python> -B -X utf8 -m program.claude_smoke --config claude_code_mcp.json --with-gui --port 47884 --modeling-smoke
-```
-
-## 📁 Key Paths
+## Key Paths
 
 ```text
 program/server.py                 MCP server entry
@@ -163,14 +163,14 @@ program/tools/hm_command_map.py   verified HyperMesh Tcl route map
 program/tools/dyna_keyword_map.py structured Dyna keyword policy
 program/claude_smoke.py           Claude/Codex MCP smoke test
 runs/hm_gui_listener.tcl          generated GUI listener
-hmcustom.tcl                      HyperMesh Tcl helper
+hmcustom.tcl                      optional HyperMesh Tcl helper
 templates/hm_command_map.json     HyperMesh route definitions
 templates/dyna_keyword_map.json   Dyna keyword route definitions
 ```
 
 Local machine paths belong in ignored `path/*.yaml` files or private MCP configs. Do not commit commercial software paths, user vault paths, tokens, proxy settings, or agent session state.
 
-## 🔒 Boundaries
+## Boundaries
 
 - Do not guess unverified HyperMesh Tcl commands.
 - Do not execute LS-DYNA or LS-PrePost from the active MCP surface.

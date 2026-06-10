@@ -64,10 +64,7 @@ path/*.yml
 !path/*.example.yml
 
 # Runtime data
-runs/*
-!runs/.gitkeep
-!runs/hm_gui_listener.tcl
-!runs/hm_gui_listener_*.tcl
+runs/
 logs/*
 !logs/.gitkeep
 !logs/handoff/
@@ -82,9 +79,12 @@ ipc/stop.flag
 *.log
 
 # Generated reports and output
+docs/
 reports/
 output/
 models/
+workflows/
+tests/
 *.hm
 
 # CAE solver outputs
