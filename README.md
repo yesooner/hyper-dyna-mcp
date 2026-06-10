@@ -6,7 +6,7 @@ Hyper-Dyna-MCP 是一个面向本机 HyperMesh GUI 的 MCP server。它通过 `F
 
 当前版本聚焦 HyperMesh GUI 自动化。LS-DYNA 求解器执行、LS-PrePost 执行和 K 文件导出不属于当前 MCP 工具面。
 
-## 当前状态
+## ✅ 当前状态
 
 - 版本：`1.0.0`
 - MCP 传输：`FastMCP + stdio`
@@ -16,7 +16,7 @@ Hyper-Dyna-MCP 是一个面向本机 HyperMesh GUI 的 MCP server。它通过 `F
 - Solid 路线：`*solidblock` 已有本机脚本证据，仍需要目标 HyperMesh GUI session 的 runtime validation
 - Dyna keyword：结构化 MAP 优先，manual notes / embedding 只用于解释和检索，不作为执行依据
 
-## HyperMesh 2021 演示流程
+## 🎬 HyperMesh 2021 演示流程
 
 以下流程基于 HyperMesh 2021 演示。README 中已删除单独 `source hmcustom.tcl` 的步骤，只保留 MCP server 启动和 HyperMesh listener/smoke 两步。
 
@@ -71,7 +71,26 @@ LISTENER_VERSION=2024-compat-v3
 source "C:/path/to/hyper-dyna-mcp/runs/hm_gui_listener_47884.tcl"
 ```
 
-## 主要工具
+## 🧭 架构流程
+
+```mermaid
+flowchart LR
+    U["用户 / Agent"] --> C["Claude Code / Codex"]
+    C --> M["FastMCP stdio<br/>program.server"]
+    M --> T["MCP Tools<br/>hm_create_fe_cube / hm_create_solid_box / dyna_keyword_query"]
+    T --> V["Verified Maps<br/>hm_command_map.json<br/>dyna_keyword_map.json"]
+    T --> S["Socket Client<br/>program.tools.hm_gui"]
+    S --> L["HyperMesh Tcl Listener<br/>runs/hm_gui_listener*.tcl"]
+    L --> H["HyperMesh GUI"]
+    H --> R["Model State<br/>FE elements / geometry solids / visibility"]
+    R --> M
+
+    V -. "只允许 verified route 执行" .-> T
+    T -. "FE mesh route" .-> FE["*createnode<br/>*createlist nodes<br/>*createelement 208"]
+    T -. "Geometry solid route" .-> SO["*solidblock<br/>runtime validation required"]
+```
+
+## 🛠️ 主要工具
 
 常用 MCP tools：
 
@@ -102,7 +121,7 @@ execute_hm_python_api
 hm_python_api_current_model_info
 ```
 
-## FE 网格与几何 Solid
+## 🧱 FE 网格与几何 Solid
 
 `hm_create_fe_cube` 创建的是有限元网格实体，不是 HyperMesh CAD solid。它使用已验证的 FE 路线：
 
@@ -120,7 +139,7 @@ hm_python_api_current_model_info
 
 不要把 FE 路线替换成 solid 路线。两者创建的实体类型不同，验证门槛也不同。
 
-## Dyna Keyword 策略
+## 📚 Dyna Keyword 策略
 
 Dyna keyword 支持采用结构化 MAP：
 
@@ -140,7 +159,7 @@ templates/hm_dictionary.json
 templates/keyword_index.json
 ```
 
-## 验证
+## ✅ 验证
 
 本地开发可运行：
 
@@ -154,7 +173,7 @@ MCP smoke：
 <python> -B -X utf8 -m program.claude_smoke --config claude_code_mcp.json
 ```
 
-## 关键路径
+## 📁 关键路径
 
 ```text
 program/server.py                 MCP server entry
@@ -170,7 +189,11 @@ templates/dyna_keyword_map.json   Dyna keyword route definitions
 
 本机路径应放在被忽略的 `path/*.yaml` 或私有 MCP config 中。不要提交商业软件路径、用户 vault 路径、token、proxy 或 agent session state。
 
-## 边界
+## ⚖️ 许可证
+
+本项目使用 GNU Affero General Public License v3.0，见 [LICENSE](LICENSE)。
+
+## 🔐 边界
 
 - 不猜测未验证的 HyperMesh Tcl 命令
 - 不从当前 MCP 工具面执行 LS-DYNA 或 LS-PrePost

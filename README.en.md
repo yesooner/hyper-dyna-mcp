@@ -6,7 +6,7 @@ Hyper-Dyna-MCP is a local MCP server for driving a running HyperMesh GUI session
 
 The current scope is HyperMesh GUI automation only. LS-DYNA solver execution, LS-PrePost execution, and K-file export are outside the active MCP tool surface.
 
-## Current Status
+## ✅ Current Status
 
 - Version: `1.0.0`
 - MCP transport: `FastMCP + stdio`
@@ -16,7 +16,7 @@ The current scope is HyperMesh GUI automation only. LS-DYNA solver execution, LS
 - Solid route: `*solidblock` has local script evidence and still needs runtime validation in the target HyperMesh GUI session
 - Dyna keyword policy: structured MAP first; manual notes and embeddings are retrieval/explanation only
 
-## HyperMesh 2021 Demo Flow
+## 🎬 HyperMesh 2021 Demo Flow
 
 This flow is based on a HyperMesh 2021 demonstration. The previous separate `source hmcustom.tcl` step has been removed from the README flow; keep the MCP server step and the HyperMesh listener/smoke step.
 
@@ -71,7 +71,26 @@ If a stale listener or occupied port blocks the demo, use the generated port-spe
 source "C:/path/to/hyper-dyna-mcp/runs/hm_gui_listener_47884.tcl"
 ```
 
-## Main Tools
+## 🧭 Architecture Flow
+
+```mermaid
+flowchart LR
+    U["User / Agent"] --> C["Claude Code / Codex"]
+    C --> M["FastMCP stdio<br/>program.server"]
+    M --> T["MCP Tools<br/>hm_create_fe_cube / hm_create_solid_box / dyna_keyword_query"]
+    T --> V["Verified Maps<br/>hm_command_map.json<br/>dyna_keyword_map.json"]
+    T --> S["Socket Client<br/>program.tools.hm_gui"]
+    S --> L["HyperMesh Tcl Listener<br/>runs/hm_gui_listener*.tcl"]
+    L --> H["HyperMesh GUI"]
+    H --> R["Model State<br/>FE elements / geometry solids / visibility"]
+    R --> M
+
+    V -. "verified routes only" .-> T
+    T -. "FE mesh route" .-> FE["*createnode<br/>*createlist nodes<br/>*createelement 208"]
+    T -. "Geometry solid route" .-> SO["*solidblock<br/>runtime validation required"]
+```
+
+## 🛠️ Main Tools
 
 Common MCP tools:
 
@@ -102,7 +121,7 @@ execute_hm_python_api
 hm_python_api_current_model_info
 ```
 
-## FE Mesh vs Geometry Solid
+## 🧱 FE Mesh vs Geometry Solid
 
 `hm_create_fe_cube` creates finite-element mesh entities, not HyperMesh CAD solids. It uses the verified FE route:
 
@@ -116,7 +135,7 @@ hm_python_api_current_model_info
 
 Do not replace the FE route with the solid route. They create different entity types and have different validation gates.
 
-## Dyna Keyword Policy
+## 📚 Dyna Keyword Policy
 
 Dyna keyword support uses structured maps:
 
@@ -126,7 +145,7 @@ keyword -> cardimage -> dataname -> fields -> examples -> manual_refs
 
 Manual notes and embeddings are not execution sources. They are used only for explanation, retrieval, and review. A keyword route becomes executable only after HyperMesh cardimages and datanames are verified through command recording or a trusted local dictionary source.
 
-## Validation
+## ✅ Validation
 
 For local development:
 
@@ -140,7 +159,11 @@ MCP smoke:
 <python> -B -X utf8 -m program.claude_smoke --config claude_code_mcp.json
 ```
 
-## Boundaries
+## ⚖️ License
+
+This project is licensed under the GNU Affero General Public License v3.0. See [LICENSE](LICENSE).
+
+## 🔐 Boundaries
 
 - Do not guess unverified HyperMesh Tcl commands.
 - Do not execute LS-DYNA or LS-PrePost from the active MCP surface.
