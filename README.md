@@ -1,31 +1,34 @@
 # Hyper-Dyna-MCP
 
-Hyper-Dyna-MCP is a local MCP server for driving a running HyperMesh GUI session from Claude Code or Codex. Python stays as the orchestration layer, while verified Tcl routes are sent into HyperMesh through the GUI listener.
+> 中文主页 | [English README](README.en.md)
 
-The current scope is HyperMesh GUI automation only. LS-DYNA solver execution, LS-PrePost execution, and K-file export are outside the active MCP tool surface.
+Hyper-Dyna-MCP 是一个面向本机 HyperMesh GUI 的 MCP server。它通过 `FastMCP + stdio` 接入 Claude Code / Codex，再由 Python 编排层把经过验证的 Tcl 路线发送到正在运行的 HyperMesh GUI listener。
 
-## Current Status
+当前版本聚焦 HyperMesh GUI 自动化。LS-DYNA 求解器执行、LS-PrePost 执行和 K 文件导出不属于当前 MCP 工具面。
 
-- MCP transport: `FastMCP + stdio`
-- Runtime target: local HyperMesh GUI listener
-- Tool surface: 32 HyperMesh-focused tools
-- Verified FE route: structured HEX8 cube through `*createnode`, `*createlist nodes`, and `*createelement 208`
-- Solid route: `*solidblock` route is source-verified and waits for target-GUI runtime validation
-- Dyna keyword policy: structured MAP first; manual notes and embeddings are retrieval/explanation only
+## 当前状态
 
-## HyperMesh 2021 Demo Flow
+- 版本：`1.0.0`
+- MCP 传输：`FastMCP + stdio`
+- 运行目标：本机 HyperMesh GUI listener
+- 工具数量：32 个 HyperMesh 相关 MCP tools
+- FE 路线：已验证的结构化 HEX8 网格路线，使用 `*createnode`、`*createlist nodes`、`*createelement 208`
+- Solid 路线：`*solidblock` 已有本机脚本证据，仍需要目标 HyperMesh GUI session 的 runtime validation
+- Dyna keyword：结构化 MAP 优先，manual notes / embedding 只用于解释和检索，不作为执行依据
 
-This walkthrough is based on a HyperMesh 2021 demonstration. The old separate step that loads `hmcustom.tcl` has been removed from the README flow; keep the MCP server step and the listener/smoke step.
+## HyperMesh 2021 演示流程
 
-### Step 1: Start The MCP Server
+以下流程基于 HyperMesh 2021 演示。README 中已删除单独 `source hmcustom.tcl` 的步骤，只保留 MCP server 启动和 HyperMesh listener/smoke 两步。
 
-Use the project conda environment:
+### Step 1: 启动 MCP Server
+
+使用项目 conda 环境：
 
 ```powershell
 <python> -B -X utf8 -m program.server
 ```
 
-Claude Code / Codex should register the server as a stdio MCP:
+Claude Code / Codex 以 stdio MCP 方式注册：
 
 ```json
 {
@@ -39,38 +42,38 @@ Claude Code / Codex should register the server as a stdio MCP:
 }
 ```
 
-Keep local MCP registration files outside Git. This repository ignores `.claude/`, `.codex/`, `claude_code_mcp*.json`, and other local configuration files.
+本机 MCP 注册文件不要提交到 Git。仓库已忽略 `.claude/`、`.codex/`、`claude_code_mcp*.json` 和本机路径配置。
 
-### Step 2: Connect HyperMesh And Run Smoke
+### Step 2: 连接 HyperMesh 并运行 Smoke
 
-In the HyperMesh Tcl Console, source the generated listener directly:
+在 HyperMesh Tcl Console 中直接 source 生成的 listener：
 
 ```tcl
 source "C:/path/to/hyper-dyna-mcp/runs/hm_gui_listener.tcl"
 ```
 
-Expected listener metadata includes:
+预期 listener metadata 包含：
 
 ```text
 HYPERMESH_MCP_PONG
 LISTENER_VERSION=2024-compat-v3
 ```
 
-Then run the connected GUI smoke test:
+然后运行连接 HyperMesh GUI 的 smoke test：
 
 ```powershell
 <python> -B -X utf8 -m program.claude_smoke --config claude_code_mcp.json --with-gui --port 47884 --modeling-smoke
 ```
 
-If a stale listener or occupied port blocks the demo, use the generated port-specific listener:
+如果旧 listener 或端口占用影响演示，可使用端口专用 listener：
 
 ```tcl
 source "C:/path/to/hyper-dyna-mcp/runs/hm_gui_listener_47884.tcl"
 ```
 
-## Main Tools
+## 主要工具
 
-Common MCP tools:
+常用 MCP tools：
 
 ```text
 ping
@@ -99,11 +102,9 @@ execute_hm_python_api
 hm_python_api_current_model_info
 ```
 
-The active MCP surface is documented and smoke-tested in [CC_SMOKE_TEST.md](CC_SMOKE_TEST.md).
+## FE 网格与几何 Solid
 
-## FE Mesh vs Geometry Solid
-
-`hm_create_fe_cube` creates finite-element mesh entities, not HyperMesh CAD solids. It uses the verified route:
+`hm_create_fe_cube` 创建的是有限元网格实体，不是 HyperMesh CAD solid。它使用已验证的 FE 路线：
 
 ```text
 *createnode
@@ -111,25 +112,25 @@ The active MCP surface is documented and smoke-tested in [CC_SMOKE_TEST.md](CC_S
 *createelement 208
 ```
 
-`hm_create_solid_box` is a separate geometry-solid route based on `*solidblock`. It must prove, in the target HyperMesh GUI session, that:
+`hm_create_solid_box` 是独立的 geometry solid 路线，基于 `*solidblock`。它必须在目标 HyperMesh GUI session 中证明：
 
-- `solids_count` increases
-- the solid is visible in the GUI
-- the listener returns a successful result
+- `solids_count` 增加
+- GUI 中 solid 可见
+- listener 返回成功结果
 
-Do not replace the FE route with the solid route. They model different entity types and have different validation gates.
+不要把 FE 路线替换成 solid 路线。两者创建的实体类型不同，验证门槛也不同。
 
-## Dyna Keyword Policy
+## Dyna Keyword 策略
 
-Dyna keyword support uses structured maps:
+Dyna keyword 支持采用结构化 MAP：
 
 ```text
 keyword -> cardimage -> dataname -> fields -> examples -> manual_refs
 ```
 
-Manual notes and embeddings are not execution sources. They are used only for explanation, retrieval, and review. A keyword route becomes executable only after HyperMesh cardimages and datanames are verified through command recording or a trusted local dictionary source.
+manual notes 和 embedding 只用于解释、检索和审查。只有当 HyperMesh cardimage 与 dataname 通过 command recording 或可信本地字典验证后，对应 keyword route 才能进入可执行状态。
 
-Relevant files:
+关键文件：
 
 ```text
 templates/dyna_keyword_map.json
@@ -139,21 +140,21 @@ templates/hm_dictionary.json
 templates/keyword_index.json
 ```
 
-## Validation
+## 验证
 
-Run tests with the project interpreter:
+本地开发可运行：
 
 ```powershell
 <python> -B -X utf8 -m pytest
 ```
 
-Run the Claude/Codex smoke test:
+MCP smoke：
 
 ```powershell
 <python> -B -X utf8 -m program.claude_smoke --config claude_code_mcp.json
 ```
 
-## Key Paths
+## 关键路径
 
 ```text
 program/server.py                 MCP server entry
@@ -162,17 +163,16 @@ program/tools/hm_model_writer.py  FE and solid modeling tools
 program/tools/hm_command_map.py   verified HyperMesh Tcl route map
 program/tools/dyna_keyword_map.py structured Dyna keyword policy
 program/claude_smoke.py           Claude/Codex MCP smoke test
-runs/hm_gui_listener.tcl          generated GUI listener
 hmcustom.tcl                      optional HyperMesh Tcl helper
 templates/hm_command_map.json     HyperMesh route definitions
 templates/dyna_keyword_map.json   Dyna keyword route definitions
 ```
 
-Local machine paths belong in ignored `path/*.yaml` files or private MCP configs. Do not commit commercial software paths, user vault paths, tokens, proxy settings, or agent session state.
+本机路径应放在被忽略的 `path/*.yaml` 或私有 MCP config 中。不要提交商业软件路径、用户 vault 路径、token、proxy 或 agent session state。
 
-## Boundaries
+## 边界
 
-- Do not guess unverified HyperMesh Tcl commands.
-- Do not execute LS-DYNA or LS-PrePost from the active MCP surface.
-- Do not use Dyna manual text or embeddings as execution authority.
-- Do not commit `.claude/`, `.codex/`, local MCP JSON files, or machine-specific path YAML.
+- 不猜测未验证的 HyperMesh Tcl 命令
+- 不从当前 MCP 工具面执行 LS-DYNA 或 LS-PrePost
+- 不把 Dyna manual 文本或 embedding 作为执行依据
+- 不提交 `.claude/`、`.codex/`、本机 MCP JSON 或机器专属 path YAML
