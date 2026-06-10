@@ -1,6 +1,10 @@
 # Hyper-Dyna-MCP
 
-> 中文主页 | [English README](README.en.md)
+<p align="center">
+  <a href="./README.md"><img alt="中文" src="https://img.shields.io/badge/%E8%AF%AD%E8%A8%80-%E4%B8%AD%E6%96%87-blue"></a>
+  <a href="./README.en.md"><img alt="English" src="https://img.shields.io/badge/Language-English-lightgrey"></a>
+  <a href="./LICENSE"><img alt="License" src="https://img.shields.io/badge/License-AGPL--3.0-orange"></a>
+</p>
 
 Hyper-Dyna-MCP 是一个面向本机 HyperMesh GUI 的 MCP server。它通过 `FastMCP + stdio` 接入 Claude Code / Codex，再由 Python 编排层把经过验证的 Tcl 路线发送到正在运行的 HyperMesh GUI listener。
 
@@ -20,15 +24,11 @@ Hyper-Dyna-MCP 是一个面向本机 HyperMesh GUI 的 MCP server。它通过 `F
 
 以下流程基于 HyperMesh 2021 演示。README 中已删除单独 `source hmcustom.tcl` 的步骤，只保留 MCP server 启动和 HyperMesh listener/smoke 两步。
 
-### Step 1: 启动 MCP Server
+### Step 1: 注册 MCP Server
 
-使用项目 conda 环境：
+推荐方式是让 Claude Code / Codex 通过 stdio MCP 配置自动启动 `program.server`。不要把 stdio MCP server 当成普通后台 HTTP 服务手动常驻运行。
 
-```powershell
-<python> -B -X utf8 -m program.server
-```
-
-Claude Code / Codex 以 stdio MCP 方式注册：
+本机 MCP 注册示例：
 
 ```json
 {
@@ -44,9 +44,15 @@ Claude Code / Codex 以 stdio MCP 方式注册：
 
 本机 MCP 注册文件不要提交到 Git。仓库已忽略 `.claude/`、`.codex/`、`claude_code_mcp*.json` 和本机路径配置。
 
+仅调试 server 入口时可手动运行：
+
+```powershell
+C:/path/to/conda/envs/hyper-dyna/python.exe -B -X utf8 -m program.server
+```
+
 ### Step 2: 连接 HyperMesh 并运行 Smoke
 
-在 HyperMesh Tcl Console 中直接 source 生成的 listener：
+在 MCP client 中先调用 `start_hypermesh_gui_listener`，生成当前机器可用的 Tcl listener 文件。然后在 HyperMesh Tcl Console 中 source 工具返回的 listener 路径，例如：
 
 ```tcl
 source "C:/path/to/hyper-dyna-mcp/runs/hm_gui_listener.tcl"
@@ -62,7 +68,7 @@ LISTENER_VERSION=2024-compat-v3
 然后运行连接 HyperMesh GUI 的 smoke test：
 
 ```powershell
-<python> -B -X utf8 -m program.claude_smoke --config claude_code_mcp.json --with-gui --port 47884 --modeling-smoke
+C:/path/to/conda/envs/hyper-dyna/python.exe -B -X utf8 -m program.claude_smoke --config C:/path/to/local-mcp-config.json --with-gui --port 47884 --modeling-smoke
 ```
 
 如果旧 listener 或端口占用影响演示，可使用端口专用 listener：
@@ -164,13 +170,13 @@ templates/keyword_index.json
 本地开发可运行：
 
 ```powershell
-<python> -B -X utf8 -m pytest
+C:/path/to/conda/envs/hyper-dyna/python.exe -B -X utf8 -m pytest
 ```
 
 MCP smoke：
 
 ```powershell
-<python> -B -X utf8 -m program.claude_smoke --config claude_code_mcp.json
+C:/path/to/conda/envs/hyper-dyna/python.exe -B -X utf8 -m program.claude_smoke --config C:/path/to/local-mcp-config.json
 ```
 
 ## 📁 关键路径

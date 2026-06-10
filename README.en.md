@@ -1,6 +1,10 @@
 # Hyper-Dyna-MCP
 
-> [中文主页](README.md) | English README
+<p align="center">
+  <a href="./README.md"><img alt="中文" src="https://img.shields.io/badge/%E8%AF%AD%E8%A8%80-%E4%B8%AD%E6%96%87-blue"></a>
+  <a href="./README.en.md"><img alt="English" src="https://img.shields.io/badge/Language-English-lightgrey"></a>
+  <a href="./LICENSE"><img alt="License" src="https://img.shields.io/badge/License-AGPL--3.0-orange"></a>
+</p>
 
 Hyper-Dyna-MCP is a local MCP server for driving a running HyperMesh GUI session from Claude Code or Codex. It uses `FastMCP + stdio` for agent integration, while Python orchestrates verified Tcl routes sent to the HyperMesh GUI listener.
 
@@ -20,15 +24,11 @@ The current scope is HyperMesh GUI automation only. LS-DYNA solver execution, LS
 
 This flow is based on a HyperMesh 2021 demonstration. The previous separate `source hmcustom.tcl` step has been removed from the README flow; keep the MCP server step and the HyperMesh listener/smoke step.
 
-### Step 1: Start The MCP Server
+### Step 1: Register The MCP Server
 
-Use the project conda environment:
+The recommended path is to let Claude Code / Codex start `program.server` from the stdio MCP configuration. Do not run the stdio MCP server as a normal long-lived HTTP background service.
 
-```powershell
-<python> -B -X utf8 -m program.server
-```
-
-Claude Code / Codex should register the server as a stdio MCP:
+Local MCP registration example:
 
 ```json
 {
@@ -44,9 +44,15 @@ Claude Code / Codex should register the server as a stdio MCP:
 
 Keep local MCP registration files outside Git. This repository ignores `.claude/`, `.codex/`, `claude_code_mcp*.json`, and machine-specific path configs.
 
+For entrypoint debugging only, run:
+
+```powershell
+C:/path/to/conda/envs/hyper-dyna/python.exe -B -X utf8 -m program.server
+```
+
 ### Step 2: Connect HyperMesh And Run Smoke
 
-In the HyperMesh Tcl Console, source the generated listener directly:
+First call `start_hypermesh_gui_listener` from the MCP client to generate a Tcl listener file for the current machine. Then source the returned listener path in the HyperMesh Tcl Console, for example:
 
 ```tcl
 source "C:/path/to/hyper-dyna-mcp/runs/hm_gui_listener.tcl"
@@ -62,7 +68,7 @@ LISTENER_VERSION=2024-compat-v3
 Then run the connected GUI smoke test:
 
 ```powershell
-<python> -B -X utf8 -m program.claude_smoke --config claude_code_mcp.json --with-gui --port 47884 --modeling-smoke
+C:/path/to/conda/envs/hyper-dyna/python.exe -B -X utf8 -m program.claude_smoke --config C:/path/to/local-mcp-config.json --with-gui --port 47884 --modeling-smoke
 ```
 
 If a stale listener or occupied port blocks the demo, use the generated port-specific listener:
@@ -150,13 +156,13 @@ Manual notes and embeddings are not execution sources. They are used only for ex
 For local development:
 
 ```powershell
-<python> -B -X utf8 -m pytest
+C:/path/to/conda/envs/hyper-dyna/python.exe -B -X utf8 -m pytest
 ```
 
 MCP smoke:
 
 ```powershell
-<python> -B -X utf8 -m program.claude_smoke --config claude_code_mcp.json
+C:/path/to/conda/envs/hyper-dyna/python.exe -B -X utf8 -m program.claude_smoke --config C:/path/to/local-mcp-config.json
 ```
 
 ## ⚖️ License

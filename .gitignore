@@ -47,6 +47,9 @@ $RECYCLE.BIN/
 # Claude Code and Codex local/private state
 .claude/
 .codex/
+AGENTS.md
+CLAUDE.md
+CC_SMOKE_TEST.md
 claude_code_mcp.json
 claude_code_mcp*.json
 codex*.json
