@@ -3,15 +3,16 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "dyna-mcp"
+name = "hyperdyna-mcp"
 version = "0.1.0"
-description = "MCP server for CAE workflow automation (HyperMesh, LS-DYNA, LS-PrePost)"
+description = "HyperMesh MCP server for LS-DYNA Tcl-based GUI automation"
 requires-python = ">=3.11"
 dependencies = [
     "mcp>=1.0.0",
     "pydantic>=2.0",
     "pyyaml>=6.0",
     "loguru>=0.7",
+    "rich>=13.0",
 ]
 
 [project.optional-dependencies]
@@ -19,6 +20,12 @@ dev = [
     "pytest>=7.0",
     "pytest-cov",
     "ruff",
+]
+ipc = [
+    "watchdog",
+]
+schema = [
+    "jsonschema",
 ]
 
 [tool.ruff]

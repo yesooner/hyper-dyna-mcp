@@ -1,0 +1,291 @@
+{
+  "version": 1,
+  "scope": "structured_dyna_keyword_execution_map",
+  "policy": {
+    "execution_source": "structured_map_only",
+    "embedding_role": "explanation_and_retrieval_only",
+    "notes": [
+      "Do not execute Tcl or K-language actions from embedding results.",
+      "Execution tools must resolve keyword, cardimage, and dataname through structured dictionaries first.",
+      "Manual notes can explain fields and usage but must not override verified maps."
+    ]
+  },
+  "sources": {
+    "keyword_index": "templates/keyword_index.json",
+    "hypermesh_dictionary": "templates/hm_dictionary.json",
+    "manual_notes": "templates/dyna_manual_notes.jsonl"
+  },
+  "lookup_flow": [
+    "keyword",
+    "cardimage",
+    "entity_type",
+    "datanames",
+    "fields",
+    "examples",
+    "manual_refs"
+  ],
+  "keyword_routes": {
+    "*MAT_3": {
+      "status": "cardimage_verified",
+      "keyword": "*MAT_3",
+      "aliases": [
+        "*MAT_003",
+        "*MAT_PLASTIC_KINEMATIC",
+        "*MAT_036"
+      ],
+      "entity_type": "mats",
+      "cardimage": "MATL3",
+      "hm_family": "ELASTIC-PLASTIC",
+      "fields": [
+        {"field": "E", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "MID", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "PR", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "RHO", "dataname": null, "status": "requires_hm_recording"}
+      ],
+      "examples": [
+        {
+          "purpose": "planning_only",
+          "keyword_block": [
+            "*MAT_PLASTIC_KINEMATIC",
+            "$#     mid        ro         e        pr      sigy      etan      beta",
+            "$# values must be supplied by the model author and verified against the target unit system"
+          ],
+          "execution_allowed": false
+        }
+      ],
+      "manual_refs": [
+        {
+          "ref_id": "manual_note:mat_3_plastic_kinematic",
+          "source": "templates/dyna_manual_notes.jsonl",
+          "role": "explanation_only"
+        }
+      ],
+      "execution_ready": false,
+      "notes": [
+        "Cardimage route is direct through hm_dictionary.mats MATL3.",
+        "Datanames are intentionally not executable until verified by HyperMesh card recording or a trusted local dictionary source.",
+        "Do not use cross-card lsd_fields candidates as execution datanames."
+      ]
+    },
+    "*SECTION_SOLID": {
+      "status": "keyword_index_only",
+      "keyword": "*SECTION_SOLID",
+      "entity_type": "props",
+      "cardimage": null,
+      "fields": [
+        {"field": "SECID", "dataname": null, "status": "requires_hm_recording"}
+      ],
+      "examples": [
+        {
+          "purpose": "planning_only",
+          "keyword_block": [
+            "*SECTION_SOLID",
+            "$#   secid    elform      aet"
+          ],
+          "execution_allowed": false
+        }
+      ],
+      "manual_refs": [
+        {
+          "ref_id": "manual_note:section_solid_overview",
+          "source": "templates/dyna_manual_notes.jsonl",
+          "role": "explanation_only"
+        }
+      ],
+      "execution_ready": false,
+      "notes": [
+        "Keyword and entity type are known from keyword_index.",
+        "Cardimage and datanames still require HyperMesh-side verification."
+      ]
+    },
+    "*CONTROL_TERMINATION": {
+      "status": "keyword_index_only",
+      "keyword": "*CONTROL_TERMINATION",
+      "entity_type": "cards",
+      "cardimage": null,
+      "fields": [
+        {"field": "DTMIN", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "ENDCYC", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "ENDENG", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "ENDMAS", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "ENDTIM", "dataname": null, "status": "requires_hm_recording"}
+      ],
+      "examples": [
+        {
+          "purpose": "planning_only",
+          "keyword_block": [
+            "*CONTROL_TERMINATION",
+            "$#  endtim    endcyc     dtmin    endeng    endmas"
+          ],
+          "execution_allowed": false
+        }
+      ],
+      "manual_refs": [
+        {
+          "ref_id": "manual_note:control_termination_overview",
+          "source": "templates/dyna_manual_notes.jsonl",
+          "role": "explanation_only"
+        }
+      ],
+      "execution_ready": false,
+      "notes": [
+        "Keyword and entity type are known from keyword_index.",
+        "This route is retrieval/planning-only until HyperMesh control-card cardimage and datanames are verified.",
+        "Do not use manual notes or embeddings to fill ENDTIM or other execution fields."
+      ]
+    },
+    "*CONTROL_TIMESTEP": {
+      "status": "cardimage_verified",
+      "keyword": "*CONTROL_TIMESTEP",
+      "entity_type": "cards",
+      "cardimage": "Timestep",
+      "hm_family": "CONTROL",
+      "fields": [
+        {"field": "DTINIT", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "TSSFAC", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "ISDO", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "TSLIMT", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "DT2MS", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "LCTM", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "ERODE", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "MS1ST", "dataname": null, "status": "requires_hm_recording"}
+      ],
+      "examples": [
+        {
+          "purpose": "planning_only",
+          "keyword_block": [
+            "*CONTROL_TIMESTEP",
+            "$#  dtinit    tssfac      isdo    tslimt     dt2ms      lctm     erode     ms1st",
+            "$# timestep controls affect stability and mass scaling; values require analyst review"
+          ],
+          "execution_allowed": false
+        }
+      ],
+      "manual_refs": [
+        {
+          "ref_id": "manual_note:control_timestep_overview",
+          "source": "templates/dyna_manual_notes.jsonl",
+          "role": "explanation_only"
+        }
+      ],
+      "execution_ready": false,
+      "notes": [
+        "Cardimage route is direct through hm_dictionary.cardmenuitem CONTROL_TIMESTEP -> TimeStep.",
+        "Local template templates/keyword/control/CONTROL_TIMESTEP.tcl contains candidate datanames, but execution still requires HyperMesh command recording in the target profile.",
+        "Do not let manual notes or embeddings choose timestep, mass scaling, or erosion controls."
+      ]
+    },
+    "*INITIAL_DETONATION": {
+      "status": "cardimage_verified",
+      "keyword": "*INITIAL_DETONATION",
+      "entity_type": "groups",
+      "cardimage": "INITIAL_DETONATION",
+      "hm_family": "INITIAL",
+      "fields": [
+        {"field": "SETID", "dataname": null, "status": "requires_hm_recording"}
+      ],
+      "examples": [
+        {
+          "purpose": "planning_only",
+          "keyword_block": [
+            "*INITIAL_DETONATION",
+            "$#   setid",
+            "$# detonation source and timing fields must be verified against the target model setup"
+          ],
+          "execution_allowed": false
+        }
+      ],
+      "manual_refs": [
+        {
+          "ref_id": "manual_note:initial_detonation_overview",
+          "source": "templates/dyna_manual_notes.jsonl",
+          "role": "explanation_only"
+        }
+      ],
+      "execution_ready": false,
+      "notes": [
+        "Cardimage route is present in templates/keyword/initial/INITIAL_DETONATION.tcl.",
+        "Explosion initiation semantics require model-specific review; this route is not executable until datanames and required fields are recorded in HyperMesh."
+      ]
+    },
+    "*LOAD_BLAST": {
+      "status": "cardimage_verified",
+      "keyword": "*LOAD_BLAST",
+      "entity_type": "groups",
+      "cardimage": "LOAD_BLAST",
+      "hm_family": "LOAD",
+      "fields": [
+        {"field": "SID", "dataname": null, "status": "requires_hm_recording"}
+      ],
+      "examples": [
+        {
+          "purpose": "planning_only",
+          "keyword_block": [
+            "*LOAD_BLAST",
+            "$#     sid",
+            "$# blast load parameters must be supplied by the analyst and checked against units"
+          ],
+          "execution_allowed": false
+        }
+      ],
+      "manual_refs": [
+        {
+          "ref_id": "manual_note:load_blast_overview",
+          "source": "templates/dyna_manual_notes.jsonl",
+          "role": "explanation_only"
+        }
+      ],
+      "execution_ready": false,
+      "notes": [
+        "Cardimage route is present in templates/keyword/load/LOAD_BLAST.tcl.",
+        "Blast load magnitude, source, and units must not be inferred from manual notes or embeddings."
+      ]
+    },
+    "*DATABASE_BINARY_D3PLOT": {
+      "status": "cardimage_verified",
+      "keyword": "*DATABASE_BINARY_D3PLOT",
+      "aliases": [
+        "*DATABASE_D3PLOT"
+      ],
+      "entity_type": "cards",
+      "cardimage": "DBplot",
+      "hm_family": "DATABASE",
+      "fields": [
+        {"field": "DT", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "TSTART", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "TTERM", "dataname": null, "status": "requires_hm_recording"},
+        {"field": "LCDT", "dataname": null, "status": "requires_hm_recording"}
+      ],
+      "examples": [
+        {
+          "purpose": "planning_only",
+          "keyword_block": [
+            "*DATABASE_BINARY_D3PLOT",
+            "$#      dt    tstart     tterm      lcdt",
+            "$# output cadence and time-window values must be chosen by the model author"
+          ],
+          "execution_allowed": false
+        }
+      ],
+      "manual_refs": [
+        {
+          "ref_id": "manual_note:database_binary_d3plot_overview",
+          "source": "templates/dyna_manual_notes.jsonl",
+          "role": "explanation_only"
+        }
+      ],
+      "execution_ready": false,
+      "notes": [
+        "Cardimage route is direct through hm_dictionary.cardmenuitem DATABASE_BINARY_D3PLOT -> DBplot.",
+        "Datanames are intentionally not executable until verified by HyperMesh command recording.",
+        "Do not use manual notes or embeddings to choose output timestep or write Tcl card fields."
+      ]
+    }
+  },
+  "execution_guardrails": {
+    "require_known_keyword": true,
+    "require_valid_cardimage": true,
+    "require_valid_dataname": true,
+    "allow_embedding_to_fill_execution_fields": false
+  }
+}

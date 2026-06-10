@@ -6,6 +6,7 @@ via Tcl templates sent to HyperMesh GUI.
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from typing import Any
 
@@ -17,6 +18,7 @@ except ImportError:
 
 from program.tools.hm_template_engine import HmTemplateEngine
 from program.tools.hm_gui import execute_tcl_gui
+from program.tools.dyna_keyword_map import query_dyna_keyword
 
 _engine = HmTemplateEngine()
 
@@ -41,6 +43,24 @@ def hm_set_keyword(
         dict with success status and details.
     """
     keyword = keyword.upper().lstrip("*")
+    policy = query_dyna_keyword(keyword)
+    if policy.get("execution_ready") is not True:
+        return {
+            "success": False,
+            "keyword": keyword,
+            "params": params,
+            "error_type": "dyna_keyword_execution_not_verified",
+            "error": (
+                "This LS-DYNA keyword route is not execution-ready. "
+                "Use dyna_keyword_query for cardimage/dataname evidence and promote the route only after "
+                "HyperMesh command recording verifies every required dataname."
+            ),
+            "execution_ready": policy.get("execution_ready"),
+            "execution_decision": policy.get("execution_decision"),
+            "execution_blockers": policy.get("execution_blockers"),
+            "advisory_only": policy.get("advisory_only"),
+            "required_verification": (policy.get("execution_decision") or {}).get("required_verification", []),
+        }
 
     if not _engine.has_template(keyword):
         return {
@@ -59,7 +79,6 @@ def hm_set_keyword(
         return {"success": False, "error": f"Template render error: {e}"}
 
     # Execute line by line with segfault protection
-    import time
     lines = [l.strip() for l in script.split("\n") if l.strip() and not l.strip().startswith("#")]
     last_result = {"success": True, "response": ""}
     count = 0
@@ -82,6 +101,11 @@ def hm_set_keyword(
         "params": params,
         "response": last_result.get("response", ""),
         "error": last_result.get("error"),
+        "next_steps": [
+            "Call hm_auto_save(step_name='...') to save the model",
+            "Use hm_set_keyword for next keyword (e.g., SECTION_SOLID, PART, CONTACT_...)",
+            "Use hm_keyword_map('category') to discover available keywords",
+        ],
     }
 
 

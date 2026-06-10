@@ -1,139 +1,220 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides Claude Code guidance for working in this repository.
 
-## Project Overview
+## Current Scope
 
-hyper-dyna-mcp is an MCP server for CAE (Computer-Aided Engineering) workflow automation, bridging natural language planning with HyperMesh pre-processing, LS-DYNA keyword file handling, LS-PrePost post-processing, and Obsidian logging.
+This repository is a HyperMesh GUI-only MCP server. Claude Code should use the
+repo-local MCP config `claude_code_mcp.json` to start `program.server` over
+stdio, then control an already running HyperMesh GUI through the Tcl socket
+listener.
 
-**Phase 1 scope:** Path management, environment checking, LS-DYNA .k file parsing/validation/generation, LS-DYNA solver command generation (dry_run only), Obsidian log backflow.
+In scope:
 
-## Session Startup
+- Start and check the HyperMesh Tcl GUI listener.
+- Execute validated Tcl through the listener.
+- Query current model counts.
+- Create verified FE HEX8 smoke-test meshes.
+- Keep the HyperMesh 2024+ Python API bridge available as a separate optional
+  framework.
 
-Any new session MUST read these files first:
+Out of scope:
 
-1. `CLAUDE.md` (this file)
-2. `workflows/workflow_selected.md`
-3. `workflows/workflow_execution.md`
-4. `path/local_paths.yaml`
-5. `path/obsidian_paths.yaml`
+- LS-DYNA solver execution.
+- LS-PrePost execution.
+- HyperMesh hmbatch execution as an MCP tool.
+- K-file export as a required MCP workflow.
+
+## Required Python
+
+Use the project conda interpreter for all commands in this repository:
+
+```powershell
+<python>
+```
+
+Do not use bare `python`, `pip`, or `pytest`.
+
+## Claude Code MCP Config
+
+Repo-local config:
+
+```text
+<repo>\claude_code_mcp.json
+```
+
+Expected server entry:
+
+```json
+{
+  "mcpServers": {
+    "hyper-dyna-mcp": {
+      "command": "C:/path/to/conda/envs/hyper-dyna/python.exe",
+      "args": ["-m", "program.server"],
+      "cwd": "C:\\path\\to\\hyper-dyna-mcp",
+      "env": {
+        "PYTHONPATH": "C:\\path\\to\\hyper-dyna-mcp"
+      }
+    }
+  }
+}
+```
+
+This file is a repo-local template/smoke config. Do not modify global Claude
+Code settings unless the user explicitly asks.
+
+## Smoke Test
+
+Run a Claude-compatible stdio smoke test without requiring HyperMesh GUI:
+
+```powershell
+<python> -B -X utf8 -m program.claude_smoke --config claude_code_mcp.json
+```
+
+If the HyperMesh Tcl listener is already sourced, include GUI connection check:
+
+```powershell
+<python> -B -X utf8 -m program.claude_smoke --config claude_code_mcp.json --with-gui
+```
+
+After confirming the listener is connected, run the optional modeling smoke:
+
+```powershell
+<python> -B -X utf8 -m program.claude_smoke --config claude_code_mcp.json --with-gui --modeling-smoke
+```
+
+This check only passes when `hm_gui_modeling_smoke.success=true` and the returned
+`visual_counts` report both `elements > 0` and `solids > 0`.
+If `hm_gui_modeling_smoke` returns `visual_counts_ok` or `visual_display_ok`,
+Claude smoke uses those tool-reported gates before falling back to inference
+from `visual_counts`, `visual_displayed_counts`, and `visibility`.
+The output also includes `visual_displayed_counts` and `visibility`; use those
+fields when entities exist but the HyperMesh GUI does not visibly show them.
+When visibility data is available, Claude smoke requires FE elements and solids
+to be displayed, not merely present.
+On failure, inspect `modeling_smoke_failure.reason`; common values are
+`gui_not_connected`, `tool_failed`, `visual_counts_missing`, and
+`visual_counts_insufficient`, `visual_display_hidden`.
+When GUI connection fails, `next_hypermesh_commands` lists the Tcl Console
+commands to try next. The same smoke output also exposes parsed
+`gui_connection`, `gui_diagnostics`, and `set_port_result` fields so Claude
+does not need to parse the raw `checked_tools` strings.
+Prefer top-level `gui_diagnosis.reason` and `.action` for recovery decisions
+instead of parsing raw tool strings. It mirrors `gui_diagnostics.diagnosis`:
+`listener_not_running` means source the generated listener,
+`port_occupied_without_pong` means stop the stale listener or switch ports,
+`listener_version_mismatch` means source the regenerated listener, and
+`listener_ready` means proceed to modeling smoke.
+
+## HyperMesh Tcl Listener
+
+In the HyperMesh Tcl Console:
+
+```tcl
+set ::mcp_hm_port 47883
+source "C:/path/to/hyper-dyna-mcp/runs/hm_gui_listener.tcl"
+```
+
+Expected output:
+
+```text
+Dyna-mcp GUI listener ready on 127.0.0.1:47883
+```
+
+The generated listener is compatible with older HyperMesh Tcl runtimes around
+2024. It avoids hard dependencies on newer Tcl `dict exists` behavior and uses
+fallback channel enumeration.
+`hmcustom.tcl` follows the same compatibility pattern for channel enumeration
+and socket `fconfigure` calls.
+
+If the default port is stuck, `hmcustom.tcl` provides:
+
+```tcl
+mcp_start_on_port 47884
+```
+
+It uses `runs/hm_gui_listener_47884.tcl` when that file exists.
+`mcp_status` reports listener active only after receiving
+`HYPERMESH_MCP_PONG`; a plain TCP connection without PONG is treated as an
+occupied/non-responsive port.
+`mcp_start_on_port` also verifies PONG after sourcing, so a successful source
+message alone is not enough evidence that the MCP endpoint is ready.
+Generated GUI listeners use nonblocking request reads so Tcl-side ping clients
+do not have to half-close the socket before the listener can respond.
+The expected generated listener version is `2024-compat-v3`; Claude smoke
+reports this under `gui_diagnostics.expected_listener_version`.
+Claude smoke also reports `gui_listener_version_ok`; it must be true before
+modeling smoke is allowed to run.
+`mcp_loop` clears stale `ipc/stop.flag` before starting, so a previous
+`mcp_stop` does not immediately stop a new IPC loop.
+
+## Architecture Boundaries
+
+```text
+program/server.py              FastMCP stdio server
+program/tools/hm_gui.py        Tcl socket listener generation and socket client
+program/tools/hm_model_writer.py verified FE mesh creation
+program/tools/hm_command_map.py verified Tcl route map loader
+program/tools/hm_python_api.py  separate HyperMesh 2024+ Python API framework
+program/claude_smoke.py         Claude-compatible MCP stdio smoke test
+runs/hm_gui_listener.tcl        generated Tcl listener
+```
+
+Do not merge the Tcl listener framework into the Python API framework. They are
+separate channels:
+
+- Tcl listener: controls the current visible GUI session through socket Tcl.
+- Python API: launches or queries HyperMesh Python API scripts when explicitly
+  requested.
+
+## Current Tool Surface
+
+Claude Code should expect these key tools:
+
+```text
+check_hypermesh_connection
+diagnose_hypermesh_listener
+set_hypermesh_listener_port
+dyna_keyword_policy
+dyna_keyword_map_validate
+dyna_keyword_query
+execute_hm_python_api
+execute_tcl_gui
+get_model_info
+hm_auto_save
+hm_command_map
+hm_create_fe_cube
+hm_gui_modeling_smoke
+hm_create_solid_box
+hm_python_api_current_model_info
+hm_python_api_status
+hm_visual_refresh
+```
+
+Tools that must not be exposed in the current HyperMesh GUI-only scope:
+
+```text
+execute_hmbatch
+execute_lsprepost
+generate_lsdyna_command
+hm_export_k
+parse_k_file
+parse_solver_log
+write_k_file
+```
 
 ## Hard Rules
 
-- **No hardcoded commercial software paths.** All paths come from `path/*.yaml` or `.env`.
-- **dry_run=True by default.** All execution tools (HyperMesh, LS-DYNA, LS-PrePost) must not launch real software unless explicitly overridden.
-- **Do not delete existing files.** Edit in-place or create new versions.
-- **Uncertain HyperMesh Tcl commands → TODO.** Do not fabricate HM commands from memory.
-- **No solver execution in Phase 1.** LS-DYNA runner only generates commands, never runs them.
-- **Python environments must be created and managed via conda only.** No venv, no system Python. All `pip install` must be in an activated conda env. Lock the conda env name in `path/local_paths.yaml`.
-- **This repository's fixed Python environment is `hyper-dyna`.** Use `E:\anaconda3\anzhuang\envs\hyper-dyna\python.exe` or `conda run -n hyper-dyna ...` for all Python, pip, pytest, MCP server, and helper commands. Do not use bare `python`, `pip`, or `pytest` in Claude Code sessions for this repository.
-- **K language / Tcl are the native automation languages for LS-DYNA / HyperMesh.** Python is only a thin orchestration layer (MCP server, file I/O, path management). Do not attempt to replace K or Tcl with Python logic.
+- Do not fabricate unverified HyperMesh Tcl commands.
+- `hm_create_fe_cube` creates FE nodes/elements, not geometry solids.
+- Geometry solid creation uses the source-verified `*solidblock` route and must
+  confirm that solids_count increases in the target GUI session.
+- Dyna manual embeddings are retrieval aids only; execution must use structured
+  maps and verified command routes.
+- `hm_set_keyword` is MAP-gated. A local Tcl template or dictionary hit is not
+  enough to execute a Dyna keyword; `dyna_keyword_query.execution_ready` must be true
+  before `hm_set_keyword` sends Tcl. Current unverified routes such as
+  `SECTION_SOLID` must return `error_type=dyna_keyword_execution_not_verified`.
+- Do not delete existing files; archive or edit in place.
 
-## Build & Run
 
-```powershell
-# Environment setup
-conda activate hyper-dyna
-
-# Run MCP server
-E:\anaconda3\anzhuang\envs\hyper-dyna\python.exe -m program.server
-
-# Run tests
-E:\anaconda3\anzhuang\envs\hyper-dyna\python.exe -m pytest
-
-# Lint
-conda run -n hyper-dyna ruff check program/ tests/
-```
-
-## Architecture
-
-```
-program/
-├── server.py              # MCP server entry point, registers all tools
-├── tools/
-│   ├── path_tools.py      # Load/validate YAML path configs
-│   ├── env_check.py       # Check conda env, Python version, installed packages
-│   ├── k_parser.py        # Parse LS-DYNA .k keyword files
-│   ├── k_writer.py        # Generate LS-DYNA .k keyword files
-│   ├── hm_tcl_generator.py # Generate HyperMesh Tcl scripts
-│   ├── hm_runner.py       # Execute HyperMesh hmbatch (dry_run)
-│   ├── lsdyna_runner.py   # Generate LS-DYNA solver commands (dry_run)
-│   ├── lsdyna_log_parser.py # Parse LS-DYNA output logs
-│   ├── lsprepost_runner.py  # LS-PrePost cfile execution (placeholder)
-│   └── obsidian_logger.py # Write execution logs to Obsidian vault
-└── prompts/
-    ├── planner.md         # Workflow planning prompt
-    ├── executor.md        # Task execution prompt
-    └── validator.md       # Validation prompt
-```
-
-### Tool flow
-
-```
-User request → planner prompt → workflow_selected.md
-  → executor prompt → program/tools/* → dry_run output
-  → validator prompt → reports/* + Obsidian log
-```
-
-### Key data paths
-
-All configured in `path/*.yaml`:
-- `local_paths.yaml` — project root, conda env name
-- `hypermesh_paths.yaml` — HM install dir, hmbatch exe
-- `lsdyna_paths.yaml` — solver exe, license
-- `lsprepost_paths.yaml` — LS-PrePost exe
-- `obsidian_paths.yaml` — vault root, log file paths
-
-## File Conventions
-
-- `.k` files: LS-DYNA keyword format, parsed by `k_parser.py`
-- `.tcl` files: HyperMesh Tcl scripts, generated by `hm_tcl_generator.py`
-- `.cfile` files: LS-PrePost command files
-- YAML configs in `path/`: paths to commercial software and Obsidian vault
-- Reports in `reports/`: markdown, numbered (00_, 01_, ...)
-- Runs in `runs/case_NNN/`: solver input/output per case
-
-## Three-Layer Session Model
-
-| Layer | File | Role |
-|-------|------|------|
-| Discussion | `workflows/workflow_discussion.md` | Compare approaches, decide architecture |
-| Execution | `workflows/workflow_execution.md` | Implement per plan in workflow_selected.md |
-| Validation | `workflows/workflow_validation.md` | Check paths, env, tests, results |
-
-Decision flow: discussion → `workflow_selected.md` → execution → validation → reports + Obsidian log.
-
-## Handoff Convention
-
-When user says **"handoff"**, output a structured summary and save to `logs/handoff/`:
-
-### Output format
-
-```markdown
-# Handoff — YYYY-MM-DD HH:MM:SS
-
-## Session Summary
-- 主要完成内容（3-5 条）
-- 遇到的问题和解决方案
-
-## Current State
-- 代码状态（哪些模块完成/进行中/待做）
-- 测试状态（通过数/失败数）
-- Git 状态（最近提交）
-
-## Pending Tasks
-- 下一步要做的事情（按优先级排列）
-
-## Key Files
-- 本次修改的关键文件列表
-
-## Notes
-- 需要下一个 session 注意的事
-```
-
-### Rules
-
-1. **不写全局 JSON** — 固定输出到 Obsidian vault 的 handoff 目录
-2. **自动记录时间** — 用 `datetime.now()` 生成时间戳
-3. **归纳而非罗列** — 总结关键信息，不重复代码细节
-4. **中文输出** — 摘要用中文，代码/路径用英文

@@ -46,8 +46,8 @@ def _resolve_hmbatch(override: str | Path | None = None) -> Path:
 
 def _altair_home_from_exe(exe: Path) -> Path:
     """Infer ALTAIR_HOME from hmbatch.exe location."""
-    # Typical: E:/HM2021/2021/hwdesktop/hw/bin/win64/hmbatch.exe
-    # ALTAIR_HOME = E:/HM2021/2021/hwdesktop
+    # Typical: C:/path/to/Altair/hwdesktop/hw/bin/win64/hmbatch.exe
+    # ALTAIR_HOME = C:/path/to/Altair/hwdesktop
     return exe.parent.parent.parent.parent
 
 

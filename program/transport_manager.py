@@ -13,7 +13,7 @@ import time
 from dataclasses import dataclass, field
 
 DEFAULT_HOST = "127.0.0.1"
-DEFAULT_PORT = 47882
+DEFAULT_PORT = 47883
 
 MAX_FAILURES = 3
 HEARTBEAT_INTERVAL = 5
@@ -59,6 +59,8 @@ class TransportState:
 
 _state = TransportState()
 _heartbeat_thread: threading.Thread | None = None
+_heartbeat_host = DEFAULT_HOST
+_heartbeat_port = DEFAULT_PORT
 
 
 def get_state() -> TransportState:
@@ -70,6 +72,13 @@ def reset_state() -> None:
     """Reset to default socket-first state (useful for testing)."""
     global _state
     _state = TransportState()
+
+
+def configure_endpoint(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
+    """Configure the socket endpoint used by heartbeat recovery."""
+    global _heartbeat_host, _heartbeat_port
+    _heartbeat_host = host
+    _heartbeat_port = int(port)
 
 
 # --- Socket health check ---
@@ -97,7 +106,7 @@ def heartbeat_loop(interval: float = HEARTBEAT_INTERVAL) -> None:
     global _state
     while True:
         if not _state.socket_active:
-            if check_socket_alive():
+            if check_socket_alive(_heartbeat_host, _heartbeat_port):
                 _state.recover_socket()
         _state.last_heartbeat = time.time()
         time.sleep(interval)

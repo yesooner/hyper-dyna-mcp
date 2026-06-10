@@ -4,7 +4,7 @@ Iterates all materials and properties in the current HyperMesh model
 and sets their card images to LS-DYNA types (MAT_ELASTIC, SECTION_SOLID).
 
 Requires:
-  - HyperMesh GUI running with listener on port 47882
+  - HyperMesh GUI running with listener on port 47883
   - LS-DYNA solver template already activated (call activate_lsdyne_template first)
 """
 
@@ -17,6 +17,7 @@ from program.tools.hm_gui import (
     activate_lsdyne_template,
     execute_tcl_gui,
     send_tcl_to_gui,
+    _candidate_lsdyna_templates,
 )
 
 
@@ -106,12 +107,9 @@ def find_lsdyna_template(host: str = DEFAULT_GUI_HOST, port: int = DEFAULT_GUI_P
     Returns:
         Template path if found, None otherwise
     """
-    # Common LS-DYNA template paths in HyperMesh 2021
-    template_paths = [
-        "E:/HM2021/2021/hwdesktop/hm/templates/feoutput/lsdyna/lsyna.key",
-        "E:/HM2021/2021/hwdesktop/hm/templates/feoutput/ls-dyna.key",
-        "E:/HM2021/2021/hwdesktop/hm/templates/feoutput/lsdyna.key",
-    ]
+    template_paths = _candidate_lsdyna_templates()
+    if not template_paths:
+        return None
 
     script = '''
     set found ""
@@ -386,10 +384,12 @@ def convert_model_to_lsdyne(
         dict with success, template, materials, properties, verification
     """
     # Step 0: Check connection
-    if not check_connection(host=host, port=port):
+    connection = check_connection(host=host, port=port)
+    if not connection.get("connected"):
         return {
             "success": False,
             "error": "HyperMesh GUI listener not connected. Please source the listener script in HyperMesh.",
+            "connection": connection,
         }
 
     # Step 1: Activate LS-DYNA template

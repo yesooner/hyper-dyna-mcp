@@ -88,15 +88,16 @@ def ping(command: dict[str, Any]) -> dict[str, Any]:
 
 
 def execute_tcl(command: dict[str, Any]) -> dict[str, Any]:
-    """Execute Tcl via HyperMesh GUI socket or batch mode."""
-    from program.tools.hm_gui import execute_tcl_gui
+    """Execute Tcl via the HyperMesh GUI socket listener."""
+    from program.tools.hm_gui import send_tcl_to_gui
 
     script = command.get("script", "")
     if not script:
         return {"type": "execute_tcl", "error": "Empty script"}
 
     timeout = command.get("timeout", 30)
-    result = execute_tcl_gui(script, timeout=timeout)
+    mode = command.get("mode", "safe")
+    result = send_tcl_to_gui(script, timeout=timeout, mode=mode)
     return {
         "type": "execute_tcl",
         "success": result.get("success", False),
@@ -105,35 +106,9 @@ def execute_tcl(command: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def execute_hmbatch(command: dict[str, Any]) -> dict[str, Any]:
-    """Execute Tcl via hmbatch.exe (batch mode)."""
-    from program.tools.hm_runner import run_hmbatch
-
-    script = command.get("script", "")
-    model_file = command.get("model_file")
-    timeout = command.get("timeout", 60)
-
-    if not script:
-        return {"type": "execute_hmbatch", "error": "Empty script"}
-
-    result = run_hmbatch(
-        tcl_script=script,
-        model_file=model_file,
-        dry_run=False,
-        timeout=timeout,
-    )
-    return {
-        "type": "execute_hmbatch",
-        "success": result.get("success", False),
-        "stdout": result.get("stdout", ""),
-        "stderr": result.get("stderr", ""),
-        "returncode": result.get("returncode"),
-    }
-
-
 def get_model_info(command: dict[str, Any]) -> dict[str, Any]:
     """Query current model info from HyperMesh GUI."""
-    from program.tools.hm_gui import execute_tcl_gui
+    from program.tools.hm_gui import send_tcl_to_gui
 
     script = '''
     set info {}
@@ -155,7 +130,7 @@ def get_model_info(command: dict[str, Any]) -> dict[str, Any]:
     puts "MODEL_INFO=$info"
     '''
 
-    result = execute_tcl_gui(script, timeout=15)
+    result = send_tcl_to_gui(script, timeout=15)
     return {
         "type": "get_model_info",
         "success": result.get("success", False),
@@ -165,12 +140,12 @@ def get_model_info(command: dict[str, Any]) -> dict[str, Any]:
 
 def export_keyword(command: dict[str, Any]) -> dict[str, Any]:
     """Export model as LS-DYNA keyword file via HyperMesh."""
-    from program.tools.hm_gui import execute_tcl_gui
+    from program.tools.hm_gui import send_tcl_to_gui
 
     output = command.get("output", "output/exported.k")
     script = f'*writefile "{output}" 1'
 
-    result = execute_tcl_gui(script, timeout=30)
+    result = send_tcl_to_gui(script, timeout=30)
     return {
         "type": "export_keyword",
         "success": result.get("success", False),
@@ -178,82 +153,13 @@ def export_keyword(command: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def parse_k_file(command: dict[str, Any]) -> dict[str, Any]:
-    """Parse a K file using k_parser."""
-    from program.tools.k_parser import parse_k_file as _parse
-
-    filepath = command.get("filepath", "")
-    if not filepath:
-        return {"type": "parse_k_file", "error": "No filepath"}
-
-    try:
-        kfile = _parse(filepath)
-        return {
-            "type": "parse_k_file",
-            "success": True,
-            "title": kfile.title,
-            "n_keywords": len(kfile.keywords),
-            "n_parts": len(kfile.get_parts()),
-            "n_materials": len(kfile.get_materials()),
-            "errors": kfile.validate(),
-        }
-    except Exception as exc:
-        return {"type": "parse_k_file", "success": False, "error": str(exc)}
-
-
-def write_k_file(command: dict[str, Any]) -> dict[str, Any]:
-    """Generate a K file from parameters."""
-    from program.tools.k_writer import (
-        KModel, Material, Section, Part, Node, SolidElement,
-        ShellElement, write_k_file as _write,
-    )
-
-    filepath = command.get("filepath", "output/generated.k")
-    title = command.get("title", "Generated Model")
-    materials_data = command.get("materials", [])
-    parts_data = command.get("parts", [])
-
-    model = KModel(title=title)
-
-    for md in materials_data:
-        model.materials.append(Material(
-            mid=md.get("mid", 1),
-            rho=md.get("rho", 7.85e-9),
-            e=md.get("e", 210000),
-            pr=md.get("pr", 0.3),
-            mat_type=md.get("mat_type", "ELASTIC"),
-        ))
-
-    for pd in parts_data:
-        model.parts.append(Part(
-            pid=pd.get("pid", 1),
-            secid=pd.get("secid", 1),
-            mid=pd.get("mid", 1),
-            title=pd.get("title", "Part"),
-        ))
-
-    try:
-        content = _write(model, filepath)
-        return {
-            "type": "write_k_file",
-            "success": True,
-            "filepath": filepath,
-            "n_bytes": len(content),
-        }
-    except Exception as exc:
-        return {"type": "write_k_file", "success": False, "error": str(exc)}
-
-
 # --- Dispatch table ---
 
 DISPATCH: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {
     "ping": ping,
     "execute_tcl": execute_tcl,
-    "execute_hmbatch": execute_hmbatch,
     "get_model_info": get_model_info,
     "export_keyword": export_keyword,
-    "parse_k_file": parse_k_file,
-    "write_k_file": write_k_file,
 }
 
 

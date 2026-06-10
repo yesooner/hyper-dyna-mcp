@@ -1,0 +1,9 @@
+project:
+  root: C:/path/to/hyper-dyna-mcp
+  conda_env: hyper-dyna
+  python_exe: C:/path/to/conda/envs/hyper-dyna/python.exe
+  python_version: "3.13"
+run:
+  default_dry_run: true
+  runs_dir: C:/path/to/hyper-dyna-mcp/runs
+  reports_dir: C:/path/to/hyper-dyna-mcp/reports

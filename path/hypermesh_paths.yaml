@@ -1,7 +1,0 @@
-hypermesh:
-  default_timeout: 300
-  gui_port: 47882
-  hmbatch_exe: E:/HM2021/2021/hwdesktop/hm/bin/win64/hmbatch.exe
-  hmopengl_exe: E:/HM2021/2021/hwdesktop/hm/bin/win64/hmopengl.exe
-  install_dir: E:/HM2021/2021/hwdesktop
-  version: '2021'

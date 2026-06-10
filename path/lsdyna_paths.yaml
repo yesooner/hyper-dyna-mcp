@@ -1,6 +1,0 @@
-lsdyna:
-  default_memory: 200m
-  default_ncpus: 4
-  default_timeout: 3600
-  solver_exe: E:/ANSYS2022/ANSYS Inc/v222/ansys/bin/winx64/lsdyna.exe
-  version: R13.1

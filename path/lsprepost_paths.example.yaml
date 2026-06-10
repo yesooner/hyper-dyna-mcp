@@ -1,0 +1,5 @@
+lsprepost:
+  version: "4.8"
+  exe_path: C:/path/to/lsprepost/lsprepost4.8_x64.exe
+  output_dir: C:/path/to/hyper-dyna-mcp/output
+  default_timeout: 600

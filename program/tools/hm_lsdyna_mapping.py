@@ -126,6 +126,197 @@ VERIFIED_MAPPINGS: dict[str, HmKeywordMapping] = {
             "IOOPT": "LSD_IOOPT",
         },
     ),
+
+    # --- Verified from dyna971_R93.key *cardmenuitem + *menufield ---
+
+    "CONTROL_TIMESTEP": HmKeywordMapping(
+        keyword="CONTROL_TIMESTEP",
+        entity_type="cards",
+        cardimage="TimeStep",
+        id_param=None,
+        name_template="CONTROL_TIMESTEP",
+        fields={
+            "DTINIT": "LSD_DT2OLD",
+            "TSSFAC": "LSD_TSSFAC",
+            "DT2MS": "LSD_DT2MS",
+        },
+        optional_fields={
+            "ISDO": "LSD_ISDO",
+            "TSLIMT": "LSD_TSLIMIT",
+            "LCTM": "LSD_LCID",
+            "ERODE": "LSD_DTMIN",
+            "MS1ST": "LSD_MASSSCL",
+        },
+    ),
+
+    "CONTROL_ENERGY": HmKeywordMapping(
+        keyword="CONTROL_ENERGY",
+        entity_type="cards",
+        cardimage="OutEner",
+        id_param=None,
+        name_template="CONTROL_ENERGY",
+        fields={
+            "HGEN": "LSD_IEHGC",
+            "RWEN": "LSD_NRWO",
+            "SLNTEN": "LSD_SLENGR",
+            "RYLEN": "LSD_RAYDAMP",
+        },
+    ),
+
+    "CONTROL_HOURGLASS": HmKeywordMapping(
+        keyword="CONTROL_HOURGLASS",
+        entity_type="cards",
+        cardimage="HourGlass",
+        id_param=None,
+        name_template="CONTROL_HOURGLASS",
+        fields={
+            "IHQ": "LSD_IHQ",
+            "QM": "LSD_QM",
+        },
+    ),
+
+    "CONTROL_CONTACT": HmKeywordMapping(
+        keyword="CONTROL_CONTACT",
+        entity_type="cards",
+        cardimage="Contact",
+        id_param=None,
+        name_template="CONTROL_CONTACT",
+        fields={
+            "SLSFAC": "LSD_SLSFAC",
+            "RWPNAL": "LSD_RWPNAL",
+            "ISLCHK": "LSD_ISLCHK",
+            "SHLTHK": "LSD_SHLTHK",
+            "PENOPT": "LSD_PENOPT",
+            "THKOPT": "LSD_THKOPT",
+            "ORIEN": "LSD_ORIEN",
+        },
+        optional_fields={
+            "IGAP": "LSD_IGAP",
+            "IGNORE": "LSD_IGNORE",
+        },
+    ),
+
+    "DATABASE_EXTENT_BINARY": HmKeywordMapping(
+        keyword="DATABASE_EXTENT_BINARY",
+        entity_type="cards",
+        cardimage="XtntBIN",
+        id_param=None,
+        name_template="DATABASE_EXTENT_BINARY",
+        fields={
+            "NEIPH": "LSD_NEIPH",
+            "NEIPS": "LSD_NEIPS",
+            "MAXINT": "LSD_MAXINT",
+            "STRFLG": "LSD_STRFLG",
+            "SIGFLG": "LSD_SIGFLG",
+            "EPSFLG": "LSD_EPSFLG",
+            "RLTFLG": "LSD_RLTFLG",
+            "ENGFLG": "LSD_ENGFLG",
+        },
+        optional_fields={
+            "CMPFLG": "LSD_CMPFLG",
+            "IEVERP": "LSD_IEVERP",
+            "BEAMIP": "LSD_BEAMIP",
+        },
+    ),
+
+    # --- Materials (from *assigndictionarytogroup) ---
+
+    "MAT_RIGID": HmKeywordMapping(
+        keyword="MAT_RIGID",
+        entity_type="mats",
+        cardimage="MATL20",
+        id_param="MID",
+        name_template="MAT_RIGID_{MID}",
+        fields={
+            "RHO": "Rho",
+            "E": "E",
+            "PR": "Nu",
+        },
+    ),
+
+    "MAT_PIECEWISE_LINEAR_PLASTICITY": HmKeywordMapping(
+        keyword="MAT_PIECEWISE_LINEAR_PLASTICITY",
+        entity_type="mats",
+        cardimage="MATL24",
+        id_param="MID",
+        name_template="MAT_PLASTIC_KINEMATIC_{MID}",
+        fields={
+            "RHO": "Rho",
+            "E": "E",
+            "PR": "Nu",
+            "SIGY": "Yield",
+            "ETAN": "Etan",
+        },
+        optional_fields={
+            "FAIL": "Fail",
+            "C": "Cowper",
+            "P": "Symonds",
+        },
+    ),
+
+    "MAT_NULL": HmKeywordMapping(
+        keyword="MAT_NULL",
+        entity_type="mats",
+        cardimage="MATL9",
+        id_param="MID",
+        name_template="MAT_NULL_{MID}",
+        fields={
+            "RHO": "Rho",
+        },
+        optional_fields={
+            "E": "E",
+            "PR": "Nu",
+        },
+    ),
+
+    # --- Sections (from *assigndictionarytogroup) ---
+
+    "SECTION_SHELL": HmKeywordMapping(
+        keyword="SECTION_SHELL",
+        entity_type="props",
+        cardimage="SectShll",
+        id_param="SECID",
+        name_template="SECTION_SHELL_{SECID}",
+        fields={
+            "T1": "thickness",
+        },
+        optional_fields={
+            "NIP": "NIP",
+        },
+        unsupported_fields=("ELFORM", "SHRF", "NLOC"),
+    ),
+
+    # --- Sets (from *cardmenuitem) ---
+
+    "SET_NODE_LIST": HmKeywordMapping(
+        keyword="SET_NODE_LIST",
+        entity_type="groups",
+        cardimage="SET_NODE_LIST",
+        id_param="SID",
+        name_template="SET_NODE_LIST_{SID}",
+        fields={},
+        unsupported_fields=("IDS",),
+    ),
+
+    "SET_SEGMENT": HmKeywordMapping(
+        keyword="SET_SEGMENT",
+        entity_type="groups",
+        cardimage="SET_SEGMENT",
+        id_param="SID",
+        name_template="SET_SEGMENT_{SID}",
+        fields={},
+        unsupported_fields=("IDS",),
+    ),
+
+    "SET_PART_LIST": HmKeywordMapping(
+        keyword="SET_PART_LIST",
+        entity_type="groups",
+        cardimage="SET_PART_LIST",
+        id_param="SID",
+        name_template="SET_PART_LIST_{SID}",
+        fields={},
+        unsupported_fields=("IDS",),
+    ),
 }
 
 

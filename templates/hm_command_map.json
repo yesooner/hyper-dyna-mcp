@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "scope": "verified_hypermesh_tcl_commands",
+  "routes": {
+    "create_structured_hex8_box": {
+      "status": "verified",
+      "description": "Create a structured HEX8 finite-element box using nodes and elements. This creates FE mesh entities, not CAD geometry solids.",
+      "entity_kind": "fe_mesh",
+      "element_config": 208,
+      "limits": {
+        "max_elements": 5000,
+        "max_nodes": 8000
+      },
+      "commands": [
+        "*collectorcreateonly comps",
+        "*currentcollector comps",
+        "*createnode",
+        "*createlist nodes",
+        "*createelement 208",
+        "hm_latestentityid"
+      ],
+      "source_evidence": [
+        {
+          "path": "Altair/hwdesktop/hm/scripts/HyperForge/HXForge/hxf_forging_wizard_func.tcl",
+          "evidence": "*createelement 208 1 1 1"
+        },
+        {
+          "path": "Altair/hwdesktop/hm/scripts/abaqus/Renumber_tool/cont_shell.tcl",
+          "evidence": "*createlist nodes 1 ...; *createelement $FaceConfig 1 1 0"
+        }
+      ],
+      "tested_in_session": true,
+      "notes": [
+        "Verified in HyperMesh 2021 through the GUI listener on port 47883.",
+        "For display, enable element display and fit/zoom extents in HyperMesh.",
+        "Do not use *solidblock or *tetmesh for this route."
+      ]
+    },
+    "create_geometry_solid_box": {
+      "status": "verified",
+      "description": "Create an axis-aligned HyperMesh geometry solid box using *solidblock. This creates CAD/geometry solid entities, not FE elements.",
+      "entity_kind": "geometry_solid",
+      "commands": [
+        "*collectorcreateonly comps",
+        "*currentcollector comps",
+        "*solidblock",
+        "hm_entitylist solids id",
+        "hm_marklength solids",
+        "hm_latestentityid solids"
+      ],
+      "source_evidence": [
+        {
+          "path": "Altair/hwdesktop/hm/scripts/context/src/moldflow/mdsmap.tcl",
+          "evidence": "*solidblock $Xmin $Ymin $Zmin $Xaxis 0 0 0 $Yaxis 0 0 0 $Zaxis"
+        },
+        {
+          "path": "Altair/hwdesktop/hm/scripts/context/src/nvh/nvhextcavmeshcreate.tcl",
+          "evidence": "*solidblock $x2 $y2 $z2 $x_mag 0 0 0 $y_mag 0 0 0 $z_mag"
+        },
+        {
+          "path": "Altair/hwdesktop/hm/scripts/nvh/assembler/seam/nvh_api_seamParameters.tcl",
+          "evidence": "#*solidblock 1498.957 -1009.175 -28.6187 300 0 0 0 300 0 0 0 300"
+        }
+      ],
+      "tested_in_session": false,
+      "runtime_validation": [
+        "Capture SOLIDS_BEFORE from hm_entitylist solids id, with *createmark/hm_marklength fallback for older HyperMesh Tcl.",
+        "Execute *solidblock with axis vectors.",
+        "Capture SOLIDS_AFTER and SOLID_ID; hm_latestentityid is wrapped in catch.",
+        "Treat the route as failed unless solids_count increases."
+      ],
+      "notes": [
+        "This route is source-verified from local Altair HM2025 scripts and still requires GUI runtime validation in the target HyperMesh 2024/older session.",
+        "Do not reuse this route for FE mesh creation."
+      ]
+    }
+  },
+  "unsupported_routes": {
+    "tetmesh_geometry_solid": {
+      "status": "unsupported",
+      "reason": "Tetra meshing a geometry solid was not verified in the current HyperMesh profile."
+    }
+  }
+}

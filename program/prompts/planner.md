@@ -11,10 +11,14 @@ A step-by-step plan that the executor can follow. Each step must specify:
 1. Which tool(s) to call
 2. Input parameters
 3. Expected output
-4. Whether this step requires user confirmation (e.g., real solver execution)
+4. Whether this step requires user confirmation or HyperMesh GUI interaction
 
 ## Rules
-- All execution steps default to dry_run=True
+- Current MCP scope is HyperMesh GUI-only over FastMCP stdio.
+- Do not plan LS-DYNA solver, LS-PrePost, hmbatch, K-file export, or local parser/writer execution as MCP tool calls.
+- Use `dyna_keyword_query` only for structured keyword/cardimage/dataname policy lookup; embeddings/manual notes are retrieval aids, not execution authority.
+- Use `hm_command_map` before modeling tools when route verification matters.
+- Use `check_hypermesh_connection` and `diagnose_hypermesh_listener` before any GUI modeling step.
 - Never plan to delete files
-- If a step involves commercial software, flag it for user review
-- Reference specific .k keywords or Tcl commands when relevant
+- If a step requires sourcing the HyperMesh Tcl listener, show the exact Tcl Console command.
+- Reference only verified Tcl routes or explicit TODO recording steps when commands are uncertain.

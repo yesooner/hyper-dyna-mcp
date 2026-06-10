@@ -23,6 +23,13 @@ from program.tools.hm_lsdyna_mapping import (
 )
 
 TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "templates" / "keyword"
+_INDEX_PATH = TEMPLATES_DIR.parent / "keyword_index.json"
+
+# Pre-built keyword index: keyword → {category, entity_type, placeholders, description}
+_KEYWORD_INDEX: dict[str, dict] = {}
+if _INDEX_PATH.exists():
+    import json
+    _KEYWORD_INDEX = json.loads(_INDEX_PATH.read_text(encoding="utf-8"))
 
 # --- Keyword category → subdirectory mapping ---
 CATEGORY_DIR = {
@@ -180,3 +187,51 @@ class HmTemplateEngine:
             "description": header_lines[1] if len(header_lines) > 1 else "",
             "parameters": header_lines[2] if len(header_lines) > 2 else "",
         }
+
+    # --- Index-based lookup (fast, no file I/O) ---
+
+    def search_keywords(self, query: str, category: str | None = None) -> list[dict]:
+        """Search keyword index by substring match.
+
+        Args:
+            query: Search string (matched against keyword name and description)
+            category: Optional category filter (e.g., "mat", "contact")
+
+        Returns:
+            List of matching keyword entries.
+        """
+        q = query.upper()
+        results = []
+        for kw, info in _KEYWORD_INDEX.items():
+            if category and info.get("category", "") != category.lower():
+                continue
+            if q in kw or q in info.get("description", "").upper():
+                results.append({"keyword": kw, **info})
+        return results
+
+    def get_keyword_map(self, category: str) -> list[dict]:
+        """Get all keywords in a category from the index.
+
+        Args:
+            category: Category name (e.g., "mat", "contact", "boundary")
+
+        Returns:
+            List of keyword entries in that category.
+        """
+        return [
+            {"keyword": kw, **info}
+            for kw, info in _KEYWORD_INDEX.items()
+            if info.get("category", "") == category.lower()
+        ]
+
+    def get_keyword_params(self, keyword: str) -> dict | None:
+        """Get required parameters for a keyword from the index.
+
+        Args:
+            keyword: LS-DYNA keyword name
+
+        Returns:
+            Dict with category, entity_type, placeholders, description or None.
+        """
+        kw = keyword.upper().lstrip("*")
+        return _KEYWORD_INDEX.get(kw)

@@ -15,6 +15,7 @@ except ImportError:
     logger = logging.getLogger(__name__)
 
 from program.tools.hm_gui import execute_tcl_gui
+from program.tools.hm_tcl_generator import quote_tcl_path
 
 _SAVES_DIR = Path(__file__).resolve().parents[2] / "output" / "saves"
 
@@ -40,12 +41,22 @@ def auto_save(
         ts = time.strftime("%Y%m%d_%H%M%S")
         model_path = str(_SAVES_DIR / f"autosave_{step_name}_{ts}.hm")
 
-    script = f'*writefile "{model_path}" 1'
+    save_path = Path(model_path)
+    script = f'*writefile "{quote_tcl_path(save_path)}" 1'
     result = execute_tcl_gui(script, timeout=timeout)
 
-    if result.get("success"):
+    if result.get("success") and save_path.exists():
         logger.info(f"Auto-saved after '{step_name}': {model_path}")
-        return {"success": True, "step": step_name, "path": model_path}
+        return {"success": True, "step": step_name, "path": str(save_path), "size": save_path.stat().st_size}
+    if result.get("success"):
+        logger.warning(f"Auto-save reported success but file was not created: {model_path}")
+        return {
+            "success": False,
+            "step": step_name,
+            "path": str(save_path),
+            "error": "HyperMesh reported success but the .hm file was not created.",
+            "response": result.get("response", ""),
+        }
     else:
         logger.warning(f"Auto-save failed after '{step_name}'")
         return {"success": False, "step": step_name, "error": result.get("error")}

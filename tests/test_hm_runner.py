@@ -2,6 +2,7 @@
 
 import pytest
 from pathlib import Path
+from program.tools import hm_runner
 from program.tools.hm_runner import (
     generate_hmbatch_command,
     run_hmbatch,
@@ -22,14 +23,19 @@ def test_generate_hmbatch_command_with_model():
     assert "model.hm" in cmd
 
 
-def test_run_hmbatch_dry_run():
+def test_run_hmbatch_dry_run(monkeypatch, tmp_path):
+    monkeypatch.setattr(hm_runner, "_RUNS_DIR", tmp_path)
+
     result = run_hmbatch(tcl_script="test.tcl", dry_run=True)
     assert result["dry_run"] is True
     assert result["executed"] is False
     assert "command" in result
+    assert Path(result["script_path"]).parent == tmp_path
 
 
-def test_run_hmbatch_inline_script():
+def test_run_hmbatch_inline_script(monkeypatch, tmp_path):
+    monkeypatch.setattr(hm_runner, "_RUNS_DIR", tmp_path)
+
     script = 'puts "hello"'
     result = run_hmbatch(tcl_script=script, dry_run=True)
     assert result["dry_run"] is True
@@ -37,10 +43,13 @@ def test_run_hmbatch_inline_script():
     # Script should have been written to runs/
     sp = Path(result["script_path"])
     assert sp.exists()
+    assert sp.parent == tmp_path
     assert "hello" in sp.read_text()
 
 
-def test_run_hmbatch_model_not_found():
+def test_run_hmbatch_model_not_found(monkeypatch, tmp_path):
+    monkeypatch.setattr(hm_runner, "_RUNS_DIR", tmp_path)
+
     result = run_hmbatch(tcl_script="test.tcl", model_file="/nonexistent/model.hm", dry_run=True)
     assert result["success"] is False
     assert "not found" in result["error"].lower()

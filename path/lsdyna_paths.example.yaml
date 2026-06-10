@@ -1,0 +1,6 @@
+lsdyna:
+  version: R13.1
+  solver_exe: C:/path/to/lsdyna.exe
+  default_ncpus: 4
+  default_memory: 200m
+  default_timeout: 3600

@@ -1,0 +1,15 @@
+hypermesh:
+  version: "2025"
+  install_dir: C:/path/to/Altair/hwdesktop
+  hw_exe: C:/path/to/Altair/hwdesktop/hw/bin/win64/hw.exe
+  hmbatch_exe: C:/path/to/Altair/hwdesktop/hm/bin/win64/hmbatch.exe
+  hmopengl_exe: C:/path/to/Altair/hwdesktop/hm/bin/win64/hmopengl.exe
+  python_exe: C:/path/to/Altair/common/python/python3.8/win64/python.exe
+  gui_port: 47883
+  default_timeout: 300
+  python_api:
+    enabled: true
+    client: HyperMesh
+    min_version: "2024"
+    script_arg: -python
+    default_dry_run: true

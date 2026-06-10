@@ -1,5 +1,0 @@
-lsprepost:
-  default_timeout: 600
-  exe_path: E:/ANSYS2022/ANSYS Inc/v222/ansys/bin/winx64/lsprepost48/lsprepost4.8_x64.exe
-  output_dir: F:/hyper-dyna-mcp/output
-  version: '4.8'

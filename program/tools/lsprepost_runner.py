@@ -32,7 +32,8 @@ def _resolve_lsprepost(override: str | Path | None = None) -> Path:
     if override:
         return Path(override)
     config = load_yaml("lsprepost_paths")
-    exe = config.get("lsprepost", {}).get("exe", "")
+    lsprepost_cfg = config.get("lsprepost", {})
+    exe = lsprepost_cfg.get("exe") or lsprepost_cfg.get("exe_path", "")
     if not exe:
         raise FileNotFoundError("LS-PrePost path not configured in path/lsprepost_paths.yaml")
     return Path(exe)

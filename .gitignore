@@ -1,49 +1,39 @@
-# ==================== Python 相关 ====================
+# Python
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
 *.pyd
+*.so
 .Python
 *.egg
 *.egg-info/
-dist/
-build/
-develop-eggs/
-downloads/
-eggs/
 .eggs/
-lib64/
-parts/
-sdist/
-var/
+build/
+dist/
 wheels/
-*.manifest
-*.spec
 
-# ==================== 虚拟环境 ====================
+# Environments and secrets
+.env
+.env.*
+!.env.example
 .venv/
 venv/
 ENV/
 env/
-.env
-.env.local
-.env.*.local
 
-# ==================== 测试相关 ====================
+# Test, lint, coverage
 .pytest_cache/
 .tox/
 .nox/
+.mypy_cache/
+.ruff_cache/
 .coverage
 .coverage.*
+coverage/
 htmlcov/
 *.cover
 .hypothesis/
 
-# ==================== 类型检查 ====================
-.mypy_cache/
-.pytype/
-
-# ==================== IDE ====================
+# Editors and OS
 .vscode/
 .idea/
 *.swp
@@ -51,62 +41,53 @@ htmlcov/
 *~
 .DS_Store
 Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 
-# ==================== Claude Code ====================
-.claude/sessions/
-.claude/cache/
-.claude/projects/
-.claude/todos/
-.claude/statsig/
-.claude/messages/
-.claude/conversations/
-.claude/fetches/
-.claude/temp/
-.claude/worktrees/
-.claude/hooks/.handoff-turn-count
-.claude/hooks/task-progress.md
-.claude/settings.json
-.claude/*.log
-.claude/**/*.log
+# Claude Code and Codex local/private state
+.claude/
+.codex/
+claude_code_mcp.json
+claude_code_mcp*.json
+codex*.json
+*.mcp.json
+*.mcp.local.json
+*.local.json
+*.local.toml
+*.local.yaml
+*.local.yml
 
-# ==================== 运行时生成的数据 ====================
+# Local runtime path configuration
+path/*.yaml
+path/*.yml
+!path/*.example.yaml
+!path/*.example.yml
+
+# Runtime data
 runs/*
 !runs/.gitkeep
+!runs/hm_gui_listener.tcl
+!runs/hm_gui_listener_*.tcl
 logs/*
 !logs/.gitkeep
-*.log
-
-# IPC 临时文件
+!logs/handoff/
+!logs/handoff/.gitkeep
+logs/handoff/*
+!logs/handoff/.gitkeep
 ipc/commands/*.json
 ipc/results/*.json
 ipc/archive/*.json
 ipc/status.json
 ipc/stop.flag
+*.log
 
-# ==================== Obsidian 相关（用户特定）====================
-path/obsidian_paths.yaml
-program/tools/obsidian_logger.py
-tests/test_obsidian_logger.py
-
-# ==================== 参考材料（可选）====================
-lsdyna-maunal/
-ref/
-*.db
-*.set
-*.msg
-*.bdf
-*.op2
-*.rst
-*.inp
-*.fem
-*.pkl
-*.tmp
-
-# ==================== HyperMesh 模型文件 ====================
-*.hm
+# Generated reports and output
+reports/
+output/
 models/
+*.hm
 
-# ==================== 求解器输出文件 ====================
+# CAE solver outputs
 *.d3plot
 *.d3thdt
 *.messag
@@ -115,63 +96,40 @@ models/
 *.elout
 *.rcforc
 *.secforc
-
-# ==================== LS-PrePost 生成的 cfile ====================
+*.op2
+*.rst
+*.bdf
+*.fem
+*.inp
 *.cfile
 !lib/cfile_templates/*.cfile
 
-# ==================== 临时输出文件 ====================
-output/
-temp_*.py
-temp_*.tcl
-temp_safe_execute.py
-*.bat.setup
-
-# ==================== 报告（运行时生成）====================
-reports/
-
-# ==================== 示例模型文件（可选，大文件）====================
+# Local references, large examples, and generated assets
+lsdyna-maunal/
+ref/
 lib/
-
-# ==================== 批处理安装系统 ====================
 batch/
-
-# ==================== 其他目录 ====================
 scripts/
 view/
-tests/
-docs/
-*.backup
+archive/
+
+# Temporary and backup files
+temp_*.py
+temp_*.tcl
+*.tmp
 *.bak
+*.backup
 *.old
 *.orig
-claude_code_mcp.json
+*.db
+*.pkl
+*.set
+*.msg
+*.bat.setup
 
-# ==================== OS 特定 ====================
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-
-# ==================== 文档构建 ====================
+# Documentation builds and notebooks
 docs/_build/
 docs/build/
 site/
-
-# ==================== Jupyter ====================
 .ipynb_checkpoints/
 *.ipynb
-
-# ==================== 覆盖率报告 ====================
-.coverage
-.coverage.*
-htmlcov/
-*.cover
-coverage/
-lcov/
-lcov.info
