@@ -17,9 +17,9 @@ Hyper-Dyna-MCP 是一个面向本机 HyperMesh GUI 的 MCP server。它通过 `F
 - 运行目标：本机 HyperMesh GUI listener
 - 默认端口：`47883`
 - 可用 FE 创建：HEX8、TET4、QUAD4 shell、TRIA3、BAR2/BEAM、DISCRETE spring、MASS element
-- 可用几何创建：surface plate
-- 可用 geometry solid box：verified `*solidblock` route
-- 默认阻断：`*tetmesh`、surface automesh、line mesh、mixed mesh、K export；基础材料/section/EOS/约束/LOAD 通过 GUI Tcl 模板开放
+- 可用几何创建：surface plate、geometry solid box（verified `*solidblock` route）
+- 可用建模 action：`assign_material`、`assign_property`、`assign_section`、`assign_eos`、`apply_constraint`、`apply_load`
+- 默认阻断：`*tetmesh`、surface automesh、line mesh、mixed mesh、K export；复杂卡片（如 `MAT_3`、`LOAD_BLAST`）仍需验证
 
 ## 工作流程
 
@@ -125,6 +125,7 @@ hm_create_tria3
 hm_create_beam_line
 hm_create_discrete_spring
 hm_create_lumped_mass
+hm_create_solid_box
 ```
 
 LS-DYNA keyword 查询只用于规划和校验：
@@ -135,6 +136,52 @@ dyna_keyword_map_validate
 dyna_keyword_query
 hm_set_keyword
 ```
+
+## 建模 Action
+
+`hm_modeling_action` 是 agent 建模的首选入口，支持以下 action：
+
+| Action | 功能 | 说明 |
+| --- | --- | --- |
+| `create_mesh` | 创建结构化 FE 网格 | verified route：HEX8、QUAD4 shell |
+| `create_element` | 创建直接 FE element | TET4、TRIA3、BAR2/BEAM、DISCRETE、MASS |
+| `assign_material` | 分配材料 | curated keywords：`MAT_ELASTIC` 等 |
+| `assign_property` | 分配属性 | curated keywords：`SECTION_SOLID`、`SECTION_SHELL`、`SECTION_BEAM`、`SECTION_DISCRETE` |
+| `assign_section` | 分配截面 | 同 assign_property |
+| `assign_eos` | 分配 EOS | curated keywords：`EOS_LINEAR_POLYNOMIAL` 等 |
+| `apply_constraint` | 施加约束 | curated keywords：`BOUNDARY_SPC`、`BOUNDARY_SPC_SET` |
+| `apply_load` | 施加载荷 | curated keywords：`LOAD_NODE`、`LOAD_SEGMENT`、`LOAD_SHELL` 及其 set 变体 |
+| `recording_requirements` | 查看录制要求 | 用于 blocked route 的下一步 |
+| `validate_recording` | 校验录制证据 | promotion 闭环 |
+
+材料分配能力矩阵支持所有元素类型：`solid_hex`、`solid_tet`、`shell_quad`、`shell_tria`、`line_beam`、`lumped_mass`、`discrete`。
+
+## Curated Keyword 列表
+
+当前通过 `hm_set_keyword` 可执行的 LS-DYNA keyword：
+
+**材料**
+- `MAT_ELASTIC`
+
+**截面/属性**
+- `SECTION_SOLID`
+- `SECTION_SHELL`
+- `SECTION_BEAM`
+- `SECTION_DISCRETE`
+
+**EOS**
+- `EOS_LINEAR_POLYNOMIAL`
+
+**约束**
+- `BOUNDARY_SPC`
+- `BOUNDARY_SPC_SET`
+
+**载荷**
+- `LOAD_NODE`、`LOAD_NODE_SET`
+- `LOAD_SEGMENT`、`LOAD_SEGMENT_SET`
+- `LOAD_SHELL`、`LOAD_SHELL_SET`
+
+未被 curated 的复杂卡片仍保持 blocked，例如 `MAT_3`、`LOAD_BLAST`。
 
 ## 功能范围
 
@@ -147,8 +194,8 @@ hm_set_keyword
 | DISCRETE / MASS | 可用，基础 FE element 创建 |
 | Geometry surface | 可用 |
 | Geometry solid box | 可用，走 verified `*solidblock` route |
+| 材料/property/section/EOS/约束/LOAD | 可用，走 `hm_set_keyword` GUI Tcl 模板；复杂卡片仍需验证 |
 | `*tetmesh` / surface automesh / line mesh / `mixed_mesh_workflow` | 未开放，需要 command recording |
-| 基础材料、property/section、EOS、约束、LOAD | 可用，走 `hm_set_keyword` GUI Tcl 模板；复杂卡片仍需验证 |
 | K export | 未开放，不能用后端 K writer 代替 GUI 导出 |
 
 FE 网格、几何实体和 K 文件是不同路线。Agent 必须优先走 HyperMesh GUI listener 和 verified route；`program.tools.k_writer`、`program.tools.k_parser`、`program.tools.hm_k_integration` 只能作为离线 fixture/test/review，不能绕过 GUI 建模或伪装成最终 `.k` 导出。

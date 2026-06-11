@@ -1,8 +1,8 @@
 # Hyper-Dyna-MCP
 
 <p align="center">
-  <a href="./README.md"><img alt="中文" src="https://img.shields.io/badge/语言-中文-blue"></a>
-  <a href="./README.en.md"><img alt="English" src="https://img.shields.io/badge/Language-English-lightgrey"></a>
+  <a href="./README.md"><img alt="中文" src="https://img.shields.io/badge/Language-中文-blue"></a>
+  <a href="./README.en.md"><img alt="English" src="https://img.shields.io/badge/语言-English-lightgrey"></a>
   <a href="./LICENSE"><img alt="License" src="https://img.shields.io/badge/License-AGPL--3.0-orange"></a>
 </p>
 
@@ -17,8 +17,9 @@ The current scope is HyperMesh GUI automation only. LS-DYNA solver execution, LS
 - Runtime target: local HyperMesh GUI listener
 - Default port: `47883`
 - Available FE creation: HEX8, TET4, QUAD4 shell, TRIA3, BAR2/BEAM, DISCRETE spring, MASS element
-- Available geometry creation: surface plate
-- Blocked by default: `*tetmesh`, surface automesh, line mesh, mixed mesh, K export; basic material/section/EOS/constraint/LOAD cards are open through GUI Tcl templates
+- Available geometry creation: surface plate, geometry solid box (verified `*solidblock` route)
+- Available modeling actions: `assign_material`, `assign_property`, `assign_section`, `assign_eos`, `apply_constraint`, `apply_load`
+- Blocked by default: `*tetmesh`, surface automesh, line mesh, mixed mesh, K export; complex cards (e.g. `MAT_3`, `LOAD_BLAST`) still require validation
 
 ## Workflow
 
@@ -124,6 +125,7 @@ hm_create_tria3
 hm_create_beam_line
 hm_create_discrete_spring
 hm_create_lumped_mass
+hm_create_solid_box
 ```
 
 LS-DYNA keyword tools are for verified template execution, planning, and validation:
@@ -134,6 +136,57 @@ dyna_keyword_map_validate
 dyna_keyword_query
 hm_set_keyword
 ```
+
+## Modeling Actions
+
+`hm_modeling_action` is the preferred agent modeling entry point. It supports the following actions:
+
+| Action | Function | Notes |
+| --- | --- | --- |
+| `create_mesh` | Create structured FE mesh | Verified routes: HEX8, QUAD4 shell |
+| `create_element` | Create direct FE element | TET4, TRIA3, BAR2/BEAM, DISCRETE, MASS |
+| `assign_material` | Assign material | Curated keywords: `MAT_ELASTIC`, etc. |
+| `assign_property` | Assign property | Curated keywords: `SECTION_SOLID`, `SECTION_SHELL`, `SECTION_BEAM`, `SECTION_DISCRETE` |
+| `assign_section` | Assign section | Same as assign_property |
+| `assign_eos` | Assign EOS | Curated keywords: `EOS_LINEAR_POLYNOMIAL`, etc. |
+| `apply_constraint` | Apply constraint | Curated keywords: `BOUNDARY_SPC`, `BOUNDARY_SPC_SET` |
+| `apply_load` | Apply load | Curated keywords: `LOAD_NODE`, `LOAD_SEGMENT`, `LOAD_SHELL` and their set variants |
+| `recording_requirements` | Inspect recording requirements | For blocked routes next step |
+| `validate_recording` | Validate recording evidence | Promotion loop |
+
+Material assignment capability matrix supports all element types: `solid_hex`, `solid_tet`, `shell_quad`, `shell_tria`, `line_beam`, `lumped_mass`, `discrete`.
+
+## Curated Keyword List
+
+LS-DYNA keywords currently executable through `hm_set_keyword`:
+
+**Materials**
+
+- `MAT_ELASTIC`
+
+**Sections / Properties**
+
+- `SECTION_SOLID`
+- `SECTION_SHELL`
+- `SECTION_BEAM`
+- `SECTION_DISCRETE`
+
+**EOS**
+
+- `EOS_LINEAR_POLYNOMIAL`
+
+**Constraints**
+
+- `BOUNDARY_SPC`
+- `BOUNDARY_SPC_SET`
+
+**Loads**
+
+- `LOAD_NODE`, `LOAD_NODE_SET`
+- `LOAD_SEGMENT`, `LOAD_SEGMENT_SET`
+- `LOAD_SHELL`, `LOAD_SHELL_SET`
+
+Complex cards that are not curated remain blocked, e.g. `MAT_3`, `LOAD_BLAST`.
 
 ## Capability Scope
 
@@ -146,8 +199,8 @@ hm_set_keyword
 | DISCRETE / MASS | Available, basic FE element creation |
 | Geometry surface | Available |
 | Geometry solid | Available through verified `*solidblock` route |
+| Material/property/section/EOS/constraints/LOAD | Available through `hm_set_keyword` GUI Tcl templates; complex cards still require validation |
 | `*tetmesh` / surface automesh / line mesh / `mixed_mesh_workflow` | Not open, requires command recording |
-| Basic material, property/section, EOS, constraints, LOAD | Available through `hm_set_keyword` GUI Tcl templates; complex cards still require validation |
 | K export | Not open; backend K writer cannot replace GUI export |
 
 FE mesh, geometry entities, and K files are separate routes. Agents must prefer the HyperMesh GUI listener and verified routes. `program.tools.k_writer`, `program.tools.k_parser`, and `program.tools.hm_k_integration` are offline fixture/test/review helpers only and must not bypass GUI modeling or pretend to be final `.k` export.
