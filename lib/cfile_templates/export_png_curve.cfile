@@ -1,8 +1,0 @@
-# LS-PrePost cfile: Export curve as PNG
-# Template for post-processing curve export
-# TODO: Verify cfile commands against your LS-PrePost version
-
-open d3plot "{{d3plot_path}}"
-xyplot 1
-plot
-print png "{{output_png}}"
