@@ -1,4 +1,4 @@
-# Python
+# ===== Python =====
 __pycache__/
 *.py[cod]
 *.pyd
@@ -11,7 +11,7 @@ build/
 dist/
 wheels/
 
-# Environments and secrets
+# ===== Environments =====
 .env
 .env.*
 !.env.example
@@ -20,7 +20,7 @@ venv/
 ENV/
 env/
 
-# Test, lint, coverage
+# ===== Test, lint, coverage =====
 .pytest_cache/
 .tox/
 .nox/
@@ -33,7 +33,7 @@ htmlcov/
 *.cover
 .hypothesis/
 
-# Editors and OS
+# ===== Editors and OS =====
 .vscode/
 .idea/
 *.swp
@@ -44,7 +44,7 @@ Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
-# Claude Code and Codex local/private state
+# ===== Claude Code / Codex local state =====
 .claude/
 .codex/
 AGENTS.md
@@ -60,34 +60,29 @@ codex*.json
 *.local.yaml
 *.local.yml
 
-# Tests (CI runs separately, not needed in repo)
+# ===== Tests (local only) =====
 tests/
 
-# Local runtime path configuration (machine-specific)
+# ===== Runtime data (程序运行时创建) =====
+runs/
+logs/
+ipc/
+*.log
+
+# ===== Local path config (机器特定) =====
 path/*.yaml
 path/*.yml
 !path/*.example.yaml
 !path/*.example.yml
 
-# Runtime data
-runs/
-logs/
-ipc/commands/*.json
-ipc/results/*.json
-ipc/archive/*.json
-ipc/status.json
-ipc/stop.flag
-*.log
-
-# Generated reports and output
-docs/
-reports/
+# ===== Generated / non-source =====
 output/
 models/
 workflows/
+reports/
 *.hm
 
-# CAE solver outputs
+# ===== CAE solver outputs =====
 *.d3plot
 *.d3thdt
 *.messag
@@ -104,7 +99,7 @@ workflows/
 *.cfile
 !lib/cfile_templates/*.cfile
 
-# Local references, large examples, and generated assets
+# ===== Local references / large files =====
 lsdyna-maunal/
 ref/
 lib/
@@ -113,7 +108,7 @@ scripts/
 view/
 archive/
 
-# Temporary and backup files
+# ===== Temporary / backup =====
 temp_*.py
 temp_*.tcl
 *.tmp
@@ -127,7 +122,7 @@ temp_*.tcl
 *.msg
 *.bat.setup
 
-# Documentation builds and notebooks
+# ===== Doc builds =====
 docs/_build/
 docs/build/
 site/
