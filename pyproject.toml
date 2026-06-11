@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hyperdyna-mcp"
-version = "1.0.0"
-description = "HyperMesh MCP server for LS-DYNA Tcl-based GUI automation"
+version = "2.0.0"
+description = "HyperMesh GUI-only MCP server with verified Tcl modeling routes"
 requires-python = ">=3.11"
 license = { text = "AGPL-3.0-only" }
 dependencies = [

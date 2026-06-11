@@ -12,6 +12,7 @@ Hyper-Dyna-MCP 是一个面向本机 HyperMesh GUI 的 MCP server。它通过 `F
 
 ## 当前状态
 
+- 版本：`2.0.0`
 - MCP 传输：`FastMCP + stdio`
 - 运行目标：本机 HyperMesh GUI listener
 - 默认端口：`47883`

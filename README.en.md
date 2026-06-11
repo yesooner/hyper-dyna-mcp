@@ -12,6 +12,7 @@ The current scope is HyperMesh GUI automation only. LS-DYNA solver execution, LS
 
 ## Current Status
 
+- Version: `2.0.0`
 - MCP transport: `FastMCP + stdio`
 - Runtime target: local HyperMesh GUI listener
 - Default port: `47883`
