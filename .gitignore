@@ -60,7 +60,10 @@ codex*.json
 *.local.yaml
 *.local.yml
 
-# Local runtime path configuration
+# Tests (CI runs separately, not needed in repo)
+tests/
+
+# Local runtime path configuration (machine-specific)
 path/*.yaml
 path/*.yml
 !path/*.example.yaml
@@ -68,12 +71,7 @@ path/*.yml
 
 # Runtime data
 runs/
-logs/*
-!logs/.gitkeep
-!logs/handoff/
-!logs/handoff/.gitkeep
-logs/handoff/*
-!logs/handoff/.gitkeep
+logs/
 ipc/commands/*.json
 ipc/results/*.json
 ipc/archive/*.json
@@ -114,7 +112,6 @@ batch/
 scripts/
 view/
 archive/
-logs/
 
 # Temporary and backup files
 temp_*.py
