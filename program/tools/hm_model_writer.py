@@ -1,9 +1,9 @@
 """Write verified FE entities to the HyperMesh GUI.
 
-Legacy helpers for LS-DYNA materials, properties, contacts, boundary
-conditions, loads, control cards, and database cards are kept importable for
-compatibility, but they must return blocked results until their routes are
-promoted through command recording and verified MAP evidence.
+Legacy helpers for LS-DYNA materials, properties, boundary conditions, and
+loads are kept importable for compatibility and dispatch through the same GUI
+Tcl keyword templates used by hm_set_keyword. Solver/K-file export remains out
+of scope.
 """
 
 from __future__ import annotations
@@ -148,6 +148,12 @@ def _blocked_card_route(action: str, route_name: str, **requested: Any) -> dict[
     }
 
 
+def _execute_keyword_template(keyword: str, params: dict[str, Any], timeout: int) -> dict[str, Any]:
+    from program.tools.hm_keyword_skill import hm_set_keyword
+
+    return hm_set_keyword(keyword.upper().lstrip("*"), params, timeout=timeout)
+
+
 def _execute_verified_modeling_script(script: str, *, timeout: int, route_name: str) -> dict:
     """Execute an internally generated, verified modeling script.
 
@@ -214,15 +220,13 @@ def set_material(
     params: dict[str, Any],
     timeout: int = 15,
 ) -> dict:
-    """Blocked compatibility helper for unverified material card assignment."""
-    return _blocked_card_route(
-        "set_material",
-        "assign_material_to_hex_part",
-        mid=mid,
-        mat_type=mat_type,
-        params=dict(params),
-        timeout=timeout,
-    )
+    """Create/update a material card through the GUI Tcl keyword template."""
+    payload = dict(params)
+    payload.setdefault("MID", mid)
+    result = _execute_keyword_template(mat_type, payload, timeout)
+    result.update({"action": "set_material", "execution_allowed": result.get("success") is True})
+    result.setdefault("tcl_sent", result.get("success") is True)
+    return result
 
 
 def create_material(
@@ -231,15 +235,13 @@ def create_material(
     params: dict[str, Any],
     timeout: int = 15,
 ) -> dict:
-    """Blocked compatibility helper for unverified material card creation."""
-    return _blocked_card_route(
-        "create_material",
-        "assign_material_to_hex_part",
-        name=name,
-        mat_type=mat_type,
-        params=dict(params),
-        timeout=timeout,
-    )
+    """Create a material card through the GUI Tcl keyword template."""
+    payload = dict(params)
+    payload.setdefault("MID", payload.get("mid", 1))
+    result = _execute_keyword_template(mat_type, payload, timeout)
+    result.update({"action": "create_material", "name": name, "execution_allowed": result.get("success") is True})
+    result.setdefault("tcl_sent", result.get("success") is True)
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -252,15 +254,13 @@ def set_property(
     params: dict[str, Any],
     timeout: int = 15,
 ) -> dict:
-    """Blocked compatibility helper for unverified property/section assignment."""
-    return _blocked_card_route(
-        "set_property",
-        "assign_material_to_hex_part",
-        pid=pid,
-        sec_type=sec_type,
-        params=dict(params),
-        timeout=timeout,
-    )
+    """Create/update a section/property card through the GUI Tcl keyword template."""
+    payload = dict(params)
+    payload.setdefault("SECID", pid)
+    result = _execute_keyword_template(sec_type, payload, timeout)
+    result.update({"action": "set_property", "execution_allowed": result.get("success") is True})
+    result.setdefault("tcl_sent", result.get("success") is True)
+    return result
 
 
 def create_property(
@@ -269,15 +269,13 @@ def create_property(
     params: dict[str, Any],
     timeout: int = 15,
 ) -> dict:
-    """Blocked compatibility helper for unverified property/section creation."""
-    return _blocked_card_route(
-        "create_property",
-        "assign_material_to_hex_part",
-        name=name,
-        sec_type=sec_type,
-        params=dict(params),
-        timeout=timeout,
-    )
+    """Create a section/property card through the GUI Tcl keyword template."""
+    payload = dict(params)
+    payload.setdefault("SECID", payload.get("pid", 1))
+    result = _execute_keyword_template(sec_type, payload, timeout)
+    result.update({"action": "create_property", "name": name, "execution_allowed": result.get("success") is True})
+    result.setdefault("tcl_sent", result.get("success") is True)
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -328,14 +326,12 @@ def set_boundary(
     params: dict[str, Any],
     timeout: int = 15,
 ) -> dict:
-    """Blocked compatibility helper for unverified boundary conditions."""
-    return _blocked_card_route(
-        "set_boundary",
-        "apply_constraint_spc",
-        bc_type=bc_type,
-        params=dict(params),
-        timeout=timeout,
-    )
+    """Create a boundary/constraint card through the GUI Tcl keyword template."""
+    keyword = BOUNDARY_CARD_MAP.get(bc_type.upper(), bc_type)
+    result = _execute_keyword_template(keyword, dict(params), timeout)
+    result.update({"action": "set_boundary", "execution_allowed": result.get("success") is True})
+    result.setdefault("tcl_sent", result.get("success") is True)
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -357,14 +353,12 @@ def set_load(
     params: dict[str, Any],
     timeout: int = 15,
 ) -> dict:
-    """Blocked compatibility helper for unverified loads."""
-    return _blocked_card_route(
-        "set_load",
-        "apply_load_nodal_or_pressure",
-        load_type=load_type,
-        params=dict(params),
-        timeout=timeout,
-    )
+    """Create a load card through the GUI Tcl keyword template."""
+    keyword = LOAD_CARD_MAP.get(load_type.upper(), load_type)
+    result = _execute_keyword_template(keyword, dict(params), timeout)
+    result.update({"action": "set_load", "execution_allowed": result.get("success") is True})
+    result.setdefault("tcl_sent", result.get("success") is True)
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -495,14 +489,22 @@ def assign_material_to_component(
     mid: int,
     timeout: int = 15,
 ) -> dict:
-    """Blocked compatibility helper for unverified material binding."""
-    return _blocked_card_route(
-        "assign_material_to_component",
-        "assign_material_to_hex_part",
-        comp_id=comp_id,
-        mid=mid,
-        timeout=timeout,
-    )
+    """Bind a material id to a component through GUI Tcl."""
+    require_executable_route("assign_material_to_hex_part")
+    script = f"""
+*setvalue comps id={int(comp_id)} materialid={int(mid)}
+puts "HM_COMPONENT_MATERIAL_ASSIGNED comp_id={int(comp_id)} material_id={int(mid)}"
+"""
+    result = _execute_verified_modeling_script(script, timeout=timeout, route_name="assign_material_to_hex_part")
+    result.update({
+        "action": "assign_material_to_component",
+        "route_name": "assign_material_to_hex_part",
+        "comp_id": comp_id,
+        "mid": mid,
+        "execution_allowed": result.get("success") is True,
+    })
+    result.setdefault("tcl_sent", result.get("success") is True)
+    return result
 
 
 def assign_property_to_component(
@@ -510,14 +512,22 @@ def assign_property_to_component(
     pid: int,
     timeout: int = 15,
 ) -> dict:
-    """Blocked compatibility helper for unverified property binding."""
-    return _blocked_card_route(
-        "assign_property_to_component",
-        "assign_material_to_hex_part",
-        comp_id=comp_id,
-        pid=pid,
-        timeout=timeout,
-    )
+    """Bind a property/section id to a component through GUI Tcl."""
+    require_executable_route("assign_material_to_hex_part")
+    script = f"""
+*setvalue comps id={int(comp_id)} propertyid={int(pid)}
+puts "HM_COMPONENT_PROPERTY_ASSIGNED comp_id={int(comp_id)} property_id={int(pid)}"
+"""
+    result = _execute_verified_modeling_script(script, timeout=timeout, route_name="assign_material_to_hex_part")
+    result.update({
+        "action": "assign_property_to_component",
+        "route_name": "assign_material_to_hex_part",
+        "comp_id": comp_id,
+        "pid": pid,
+        "execution_allowed": result.get("success") is True,
+    })
+    result.setdefault("tcl_sent", result.get("success") is True)
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -1113,10 +1123,17 @@ def run_gui_modeling_smoke(
         timeout=timeout,
     )
     stages["solid_box"] = solid_result
-    solid_blocked_experimental = (
-        solid_result.get("success") is False
-        and solid_result.get("error_type") == "experimental_route_not_executable"
-    )
+    if not solid_result.get("success"):
+        stages["visual_refresh"] = {"success": False, "stage": "not_run", "reason": "solid_box_failed"}
+        return {
+            "success": False,
+            "stage": "solid_box",
+            "entity_paths": ["fe_mesh", "geometry_solid"],
+            "stages": stages,
+            "solid_route_state": "failed",
+            "solid_route_required_for_success": True,
+            "error": solid_result.get("error") or "Geometry solid smoke stage failed.",
+        }
 
     refresh_result = refresh_visualization(timeout=timeout)
     stages["visual_refresh"] = refresh_result
@@ -1169,10 +1186,8 @@ def run_gui_modeling_smoke(
         "success": ok,
         "stage": "complete" if ok else "visual_refresh",
         "entity_paths": ["fe_mesh", "geometry_solid"],
-        "solid_route_state": "experimental_blocked" if solid_blocked_experimental else (
-            "created" if solid_result.get("success") else "failed"
-        ),
-        "solid_route_required_for_success": False,
+        "solid_route_state": "created",
+        "solid_route_required_for_success": True,
         "visual_counts": visual_counts,
         "visual_displayed_counts": visual_displayed_counts,
         "visual_count_methods": visual_count_methods,

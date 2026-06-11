@@ -18,7 +18,7 @@ The current scope is HyperMesh GUI automation only. LS-DYNA solver execution, LS
 - Default port: `47883`
 - Available FE creation: HEX8, TET4, QUAD4 shell, TRIA3, BAR2/BEAM, DISCRETE spring, MASS element
 - Available geometry creation: surface plate
-- Blocked by default: geometry solid box, `*tetmesh`, surface automesh, line mesh, material/property/section, EOS, constraints, LOAD, K export
+- Blocked by default: `*tetmesh`, surface automesh, line mesh, mixed mesh, K export; basic material/section/EOS/constraint/LOAD cards are open through GUI Tcl templates
 
 ## Workflow
 
@@ -126,7 +126,7 @@ hm_create_discrete_spring
 hm_create_lumped_mass
 ```
 
-LS-DYNA keyword tools are for planning and validation only:
+LS-DYNA keyword tools are for verified template execution, planning, and validation:
 
 ```text
 dyna_keyword_policy
@@ -145,9 +145,9 @@ hm_set_keyword
 | BAR2/BEAM line | Available, creates a new line and BEAM elements |
 | DISCRETE / MASS | Available, basic FE element creation |
 | Geometry surface | Available |
-| Geometry solid | Experimental, blocked by default |
+| Geometry solid | Available through verified `*solidblock` route |
 | `*tetmesh` / surface automesh / line mesh / `mixed_mesh_workflow` | Not open, requires command recording |
-| Material, property, section, EOS, constraints, LOAD | Not open, requires command recording |
+| Basic material, property/section, EOS, constraints, LOAD | Available through `hm_set_keyword` GUI Tcl templates; complex cards still require validation |
 | K export | Not open; backend K writer cannot replace GUI export |
 
 FE mesh, geometry entities, and K files are separate routes. Agents must prefer the HyperMesh GUI listener and verified routes. `program.tools.k_writer`, `program.tools.k_parser`, and `program.tools.hm_k_integration` are offline fixture/test/review helpers only and must not bypass GUI modeling or pretend to be final `.k` export.

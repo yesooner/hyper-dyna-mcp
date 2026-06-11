@@ -434,6 +434,10 @@ def element_capability_matrix(element_type: str | None = None) -> dict[str, Any]
                     "Add route evidence to templates/hm_command_map.json.",
                     "Verify Tcl in a connected HyperMesh GUI session before execution.",
                 ]
+            if area == "material_assignment" and route_name in routes and route_allows_mcp_execution(routes[route_name]):
+                enriched[area]["supported"] = True
+                enriched[area]["tool"] = "hm_set_keyword"
+                enriched[area]["method"] = "GUI Tcl keyword template / component binding"
         k_file_generation = enriched.get("k_file_generation")
         if isinstance(k_file_generation, dict):
             k_file_generation.setdefault("role", "offline_fixture_validation_only")
@@ -568,8 +572,10 @@ def validate_command_map(data: dict[str, Any] | None = None) -> dict[str, Any]:
             _validate_geometry_solid_route(route_name, route, command_text, errors, warnings)
         elif entity_kind == "geometry_surface":
             _validate_geometry_surface_route(route_name, route, command_text, errors, warnings)
+        elif entity_kind == "keyword_card":
+            _validate_keyword_card_route(route_name, route, command_text, errors)
         else:
-            errors.append(f"{route_name}: entity_kind must be fe_mesh, geometry_solid, or geometry_surface.")
+            errors.append(f"{route_name}: entity_kind must be fe_mesh, geometry_solid, geometry_surface, or keyword_card.")
 
     if not isinstance(unsupported, dict):
         errors.append("unsupported_routes must be an object.")
@@ -715,6 +721,16 @@ def _validate_geometry_surface_route(
 
     if route.get("tested_in_session") is not True:
         warnings.append(f"{route_name}: source verified, runtime validation still pending in target HyperMesh.")
+
+
+def _validate_keyword_card_route(route_name: str, route: dict[str, Any], command_text: str, errors: list[str]) -> None:
+    if not route.get("keyword_families"):
+        errors.append(f"{route_name}: keyword_card route must define keyword_families.")
+    runtime_validation = route.get("runtime_validation")
+    if not isinstance(runtime_validation, list) or not runtime_validation:
+        errors.append(f"{route_name}: keyword_card route must document runtime_validation checks.")
+    if "*writefile" in command_text or "*feoutput" in command_text:
+        errors.append(f"{route_name}: keyword_card route must not include file export commands.")
 
 
 def _route_with_validation_metadata(route: dict[str, Any]) -> dict[str, Any]:

@@ -460,14 +460,14 @@ class HmModelingActionInput(BaseModel):
     """Unified guarded modeling action input.
 
     This is the preferred agent-facing entry for deciding whether a modeling
-    action can execute. It dispatches only to verified routes and blocks
-    material/EOS/load/constraint actions until command recording verifies them.
+    action can execute. It dispatches only to verified command-map routes or
+    curated GUI Tcl keyword templates.
     """
 
     action: str = Field(
         ...,
-        description="Action: capability, create_mesh, create_element, recording_requirements, validate_recording, assign_material, assign_eos, apply_constraint, or apply_load.",
-        pattern=r"^(capability|create_mesh|create_element|recording_requirements|validate_recording|assign_material|assign_eos|apply_constraint|apply_load)$",
+        description="Action: capability, create_mesh, create_element, recording_requirements, validate_recording, assign_material, assign_property, assign_section, assign_eos, apply_constraint, or apply_load.",
+        pattern=r"^(capability|create_mesh|create_element|recording_requirements|validate_recording|assign_material|assign_property|assign_section|assign_eos|apply_constraint|apply_load)$",
     )
     element_type: Optional[str] = Field(
         default=None,
@@ -681,6 +681,90 @@ def _modeling_plan(
     }
 
 
+def _keyword_modeling_plan(
+    *,
+    action: str,
+    element_type: str | None,
+    keyword: str,
+    required_parameters: list[str],
+) -> dict[str, Any]:
+    return {
+        "success": True,
+        "action": action,
+        "element_type": element_type,
+        "tool": "hm_set_keyword",
+        "route_name": keyword.upper().lstrip("*"),
+        "keyword": keyword.upper().lstrip("*"),
+        "dry_run": True,
+        "execution_allowed": True,
+        "tcl_sent": False,
+        "required_parameters": required_parameters,
+        "policy": "Execution dispatches through structured GUI Tcl keyword templates, not backend K writing.",
+    }
+
+
+def _keyword_for_modeling_action(action: str, parameters: dict[str, Any]) -> str:
+    explicit = parameters.get("keyword")
+    if explicit:
+        return str(explicit).upper().lstrip("*")
+    if action == "assign_material":
+        return str(parameters.get("mat_type", "MAT_ELASTIC")).upper().lstrip("*")
+    if action in {"assign_property", "assign_section"}:
+        return str(parameters.get("section_type", parameters.get("sec_type", "SECTION_SOLID"))).upper().lstrip("*")
+    if action == "assign_eos":
+        return str(parameters.get("eos_type", "EOS_LINEAR_POLYNOMIAL")).upper().lstrip("*")
+    if action == "apply_constraint":
+        return str(parameters.get("constraint_type", parameters.get("bc_type", "BOUNDARY_SPC"))).upper().lstrip("*")
+    if action == "apply_load":
+        return str(parameters.get("load_type", "LOAD_NODE")).upper().lstrip("*")
+    return str(action).upper()
+
+
+def _params_for_keyword_action(action: str, parameters: dict[str, Any]) -> dict[str, Any]:
+    skip = {
+        "keyword",
+        "mat_type",
+        "section_type",
+        "sec_type",
+        "eos_type",
+        "constraint_type",
+        "bc_type",
+        "load_type",
+    }
+    return {key: value for key, value in parameters.items() if key not in skip}
+
+
+def _execute_keyword_modeling_action(
+    *,
+    action: str,
+    element_type: str | None,
+    parameters: dict[str, Any],
+    dry_run: bool,
+    timeout: int,
+) -> dict[str, Any]:
+    keyword = _keyword_for_modeling_action(action, parameters)
+    keyword_params = _params_for_keyword_action(action, parameters)
+    if dry_run:
+        return _keyword_modeling_plan(
+            action=action,
+            element_type=element_type,
+            keyword=keyword,
+            required_parameters=sorted(keyword_params),
+        )
+    result = hm_set_keyword(keyword, keyword_params, timeout=timeout)
+    result.update(
+        {
+            "action": action,
+            "element_type": element_type,
+            "tool": "hm_set_keyword",
+            "route_name": keyword,
+            "execution_allowed": result.get("success") is True,
+        }
+    )
+    result.setdefault("tcl_sent", result.get("success") is True)
+    return result
+
+
 def run_modeling_action(params: HmModelingActionInput) -> dict[str, Any]:
     """Run one guarded modeling action or return a blocked/planning result."""
     element_key = _modeling_element_key(params.element_type)
@@ -715,46 +799,13 @@ def run_modeling_action(params: HmModelingActionInput) -> dict[str, Any]:
             extra={"known_types": known_element_types()},
         )
 
-    if params.action in {"assign_material", "assign_eos", "apply_constraint", "apply_load"}:
-        verification_target = {
-            "assign_material": "material/property/part binding datanames",
-            "assign_eos": "EOS cardimage, datanames, and material/EOS binding",
-            "apply_constraint": "constraint collector/cardimage, entity marks, and datanames",
-            "apply_load": "load collector/cardimage, entity marks, load values, and datanames",
-        }[params.action]
-        blocked_route_name = _blocked_workflow_route_name(params.action, element_key)
-        unsupported_route = get_unsupported_route(blocked_route_name) if blocked_route_name else None
-        return _modeling_blocked(
+    if params.action in {"assign_material", "assign_property", "assign_section", "assign_eos", "apply_constraint", "apply_load"}:
+        return _execute_keyword_modeling_action(
             action=params.action,
             element_type=element_key,
-            error_type=f"{params.action}_not_verified",
-            reason=f"{params.action} is not executable until {verification_target} are command-recorded and runtime-verified.",
-            required_verification=(
-                unsupported_route.get("required_verification", [])
-                if unsupported_route
-                else [
-                    "Record the workflow in HyperMesh command recording for the target LS-DYNA profile.",
-                    f"Verify {verification_target}.",
-                    "Replay through the GUI listener and prove the model state changes as expected.",
-                    "Add a verified route to templates/hm_command_map.json before allowing MCP execution.",
-                ]
-            ),
-            next_supported_actions=(
-                _blocked_recording_actions(blocked_route_name, f"inspect evidence required before {params.action} can execute")
-                if blocked_route_name
-                else [
-                    {
-                        "action": "capability",
-                        "tool": "hm_element_capability_matrix",
-                        "scope": "choose a supported element_type before material assignment planning",
-                    }
-                ]
-            ),
-            extra={
-                "blocked_route_name": blocked_route_name,
-                "blocked_route_status": unsupported_route.get("status") if unsupported_route else "missing",
-                "blocked_route_entity_kind": unsupported_route.get("entity_kind") if unsupported_route else None,
-            },
+            parameters=p,
+            dry_run=params.dry_run,
+            timeout=params.timeout,
         )
 
     if element_key in {None, "mixed"}:

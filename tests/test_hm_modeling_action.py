@@ -274,70 +274,53 @@ def test_modeling_action_capability_reports_mixed_as_explicitly_blocked():
     assert result["capability"]["meshing"]["route_status"] == "unsupported"
 
 
-def test_modeling_action_blocks_material_eos_load_constraint_execution():
-    expected_routes = {
-        "assign_material": "assign_material_to_hex_part",
-        "assign_eos": "assign_eos_to_material",
-        "apply_constraint": "apply_constraint_spc",
-        "apply_load": "apply_load_nodal_or_pressure",
+def test_modeling_action_plans_material_eos_load_constraint_execution():
+    expected_keywords = {
+        "assign_material": "MAT_ELASTIC",
+        "assign_eos": "EOS_LINEAR_POLYNOMIAL",
+        "apply_constraint": "BOUNDARY_SPC",
+        "apply_load": "LOAD_NODE",
     }
-    for action, route_name in expected_routes.items():
+    for action, keyword in expected_keywords.items():
         result = run_modeling_action(
             HmModelingActionInput(
                 action=action,
                 element_type="solid_hex",
-                parameters={"name": "blocked"},
+                parameters={"MID": 1, "RHO": 7.85e-6, "E": 210000.0, "PR": 0.3}
+                if action == "assign_material"
+                else {"EOSID": 1}
+                if action == "assign_eos"
+                else {"NODEID": 1, "CID": 0, "DOFX": 1, "DOFY": 1, "DOFZ": 1, "DOFRX": 0, "DOFRY": 0, "DOFRZ": 0}
+                if action == "apply_constraint"
+                else {"NID": 1, "DOF": 3, "LCID": 1, "SF": 1.0, "CID": 0, "M1": 0.0, "M2": 0.0, "M3": -100.0},
+                dry_run=True,
             )
         )
 
-        assert result["success"] is False
-        assert result["error_type"] == f"{action}_not_verified"
-        assert result["execution_allowed"] is False
+        assert result["success"] is True
+        assert result["tool"] == "hm_set_keyword"
+        assert result["route_name"] == keyword
+        assert result["keyword"] == keyword
+        assert result["execution_allowed"] is True
         assert result["tcl_sent"] is False
-        assert result["blocked_route_name"] == route_name
-        assert result["blocked_route_status"] == "unsupported"
-        assert result["next_supported_actions"] == [
-            {
-                "action": "recording_requirements",
-                "route_name": route_name,
-                "scope": f"inspect evidence required before {action} can execute",
-            },
-            {
-                "action": "validate_recording",
-                "route_name": route_name,
-                "scope": "validate HyperMesh command recording text and runtime evidence before route promotion",
-            },
-        ]
-        assert "Record" in " ".join(result["required_verification"])
 
 
-def test_modeling_action_material_block_route_matches_element_family():
-    expected_routes = {
-        "HEX8": "assign_material_to_hex_part",
-        "TET4": "assign_material_to_tet_part",
-        "QUAD4": "assign_material_to_shell_part",
-        "TRIA3": "assign_material_to_shell_part",
-        "beam": "assign_material_to_beam_part",
-        "mass": "assign_material_to_lumped_mass",
-        "discrete": "assign_material_to_discrete_element",
-        "mixed": "mixed_material_assignment",
-    }
-
-    for element_type, route_name in expected_routes.items():
+def test_modeling_action_material_keyword_route_is_shared_across_element_families():
+    for element_type in ("HEX8", "TET4", "QUAD4", "TRIA3", "beam", "mass", "discrete"):
         result = run_modeling_action(
             HmModelingActionInput(
                 action="assign_material",
                 element_type=element_type,
-                parameters={"name": "blocked"},
+                parameters={"MID": 1, "RHO": 7.85e-6, "E": 210000.0, "PR": 0.3},
+                dry_run=True,
             )
         )
 
-        assert result["success"] is False
-        assert result["error_type"] == "assign_material_not_verified"
-        assert result["blocked_route_name"] == route_name
-        assert result["blocked_route_status"] == "unsupported"
-        assert result["next_supported_actions"][0]["route_name"] == route_name
-        assert result["next_supported_actions"][1]["route_name"] == route_name
+        assert result["success"] is True
+        assert result["tool"] == "hm_set_keyword"
+        assert result["route_name"] == "MAT_ELASTIC"
+        assert result["execution_allowed"] is True
+        assert result["tcl_sent"] is False
 
 
 def test_modeling_action_reports_recording_requirements_for_one_route():
@@ -359,12 +342,7 @@ def test_modeling_action_reports_recording_requirements_for_one_route():
     assert "datanames_verified" in route["required_evidence"]
     assert route["execution_allowed"] is False
     assert route["tcl_sent"] is False
-    assert result["promotion_queue"][0]["route_name"] == "assign_material_to_hex_part"
-    assert result["promotion_queue"][0]["ready_for_recording"] is True
-    assert result["promotion_queue"][0]["execution_allowed"] is False
-    assert result["promotion_queue"][0]["mcp_execution_allowed"] is False
-    assert result["promotion_queue"][0]["requires_verified_map_promotion"] is True
-    assert result["promotion_queue"][0]["tcl_sent"] is False
+    assert result["promotion_queue"] == []
 
 
 def test_modeling_action_filters_recording_requirements_by_element_type():
@@ -381,10 +359,7 @@ def test_modeling_action_filters_recording_requirements_by_element_type():
     assert "assign_eos_to_material" in route_names
     assert "apply_constraint_spc" in route_names
     assert "assign_material_to_shell_part" not in route_names
-    assert result["recommended_next_routes"][:2] == [
-        "assign_material_to_hex_part",
-        "apply_constraint_spc",
-    ]
+    assert result["recommended_next_routes"] == []
 
 
 def test_modeling_action_rejects_unknown_recording_requirement_route():
@@ -466,10 +441,7 @@ def test_recording_requirements_exposes_material_evidence_schema_and_steps():
 def test_recording_promotion_queue_prioritizes_independent_recordings():
     queue = recording_promotion_queue()
 
-    assert [item["route_name"] for item in queue[:5]] == [
-        "assign_material_to_hex_part",
-        "assign_material_to_shell_part",
-        "assign_material_to_beam_part",
+    assert [item["route_name"] for item in queue[:2]] == [
         "surface_automesh",
         "tetmesh_geometry_solid",
     ]
@@ -490,9 +462,8 @@ def test_recording_promotion_queue_marks_mixed_routes_dependency_blocked():
 
     assert queue["mixed_mesh_workflow"]["ready_for_recording"] is False
     assert "mixed_element_workflow" in queue["mixed_mesh_workflow"]["blocked_by"]
-    assert queue["assign_material_to_hex_part"]["ready_for_recording"] is True
-    assert queue["assign_material_to_tet_part"]["ready_for_recording"] is False
-    assert queue["assign_material_to_tet_part"]["blocked_by"] == ["tetmesh_geometry_solid"]
+    assert "assign_material_to_hex_part" not in queue
+    assert "assign_material_to_tet_part" not in queue
 
 
 def test_recording_promotion_queue_marks_dependency_ready_when_verified():

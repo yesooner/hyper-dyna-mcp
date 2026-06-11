@@ -59,7 +59,7 @@ def test_command_map_stats_and_listing():
     assert stats["runtime_validated_routes"] >= 1
     assert stats["runtime_validated_routes"] <= stats["verified_routes"]
     assert stats["unsupported_routes"] >= 1
-    assert stats["experimental_routes"] >= 1
+    assert stats["experimental_routes"] == 0
     assert stats["map_valid"] is True
     assert stats["map_errors"] == []
     assert any(route["name"] == "create_structured_hex8_box" for route in routes)
@@ -67,27 +67,26 @@ def test_command_map_stats_and_listing():
     assert any(route["name"] == "create_beam_line" for route in routes)
     assert any(route["name"] == "create_discrete_element" for route in routes)
     assert any(route["name"] == "create_lumped_mass" for route in routes)
-    assert not any(route["name"] == "create_geometry_solid_box" for route in routes)
+    assert any(route["name"] == "create_geometry_solid_box" for route in routes)
     assert any(route["name"] == "create_geometry_surface_rect_nurbs" for route in routes)
 
 
-def test_geometry_solid_route_is_experimental_not_verified():
+def test_geometry_solid_route_is_verified_and_executable():
     route = get_verified_route("create_geometry_solid_box")
     experimental = get_experimental_route("create_geometry_solid_box")
 
-    assert route is None
-    assert experimental is not None
-    assert experimental["status"] == "experimental"
-    assert experimental["entity_kind"] == "geometry_solid"
-    assert "*solidblock" in experimental["commands"]
-    assert "hm_entitylist solids id" in experimental["commands"]
-    assert "hm_marklength solids" in experimental["commands"]
-    assert experimental["tested_in_session"] is False
-    assert experimental["execution_stage"] == "experimental"
-    assert experimental["mcp_execution_allowed"] is False
-    assert experimental["agent_execution_allowed"] is False
-    assert "command recording" in experimental["execution_block_reason"]
-    assert experimental["promotion_required"]
+    assert experimental is None
+    assert route is not None
+    assert route["status"] == "verified"
+    assert route["entity_kind"] == "geometry_solid"
+    assert "*solidblock" in route["commands"]
+    assert "hm_entitylist solids id" in route["commands"]
+    assert "hm_marklength solids" in route["commands"]
+    assert route["tested_in_session"] is True
+    assert route["runtime_validated"] is True
+    assert route["mcp_execution_allowed"] is True
+    assert route["agent_execution_allowed"] is True
+    assert require_executable_route("create_geometry_solid_box")["status"] == "verified"
 
 
 def test_verified_quad4_shell_plate_route_is_available():
@@ -205,7 +204,7 @@ def test_command_map_validator_rejects_geometry_command_in_fe_route():
 def test_command_map_validator_requires_solid_runtime_validation():
     data = load_command_map()
     bad_route = {
-        **data["experimental_routes"]["create_geometry_solid_box"],
+        **data["routes"]["create_geometry_solid_box"],
         "status": "verified",
         "runtime_validation": [],
     }
@@ -217,13 +216,14 @@ def test_command_map_validator_requires_solid_runtime_validation():
     assert any("runtime_validation" in error for error in result["errors"])
 
 
-def test_command_map_validator_blocks_source_only_geometry_solid_execution():
+def test_command_map_validator_blocks_runtime_pending_geometry_solid_execution():
     data = load_command_map()
     bad_route = {
-        **data["experimental_routes"]["create_geometry_solid_box"],
+        **data["routes"]["create_geometry_solid_box"],
+        "tested_in_session": False,
         "mcp_execution_allowed": True,
     }
-    bad_data = {**data, "experimental_routes": {**data["experimental_routes"], "create_geometry_solid_box": bad_route}}
+    bad_data = {**data, "routes": {**data["routes"], "create_geometry_solid_box": bad_route}}
 
     result = validate_command_map(bad_data)
 
@@ -236,9 +236,8 @@ def test_unsupported_tetmesh_solid_route_is_rejected():
         require_verified_route("tetmesh_geometry_solid")
 
 
-def test_experimental_geometry_solid_route_is_not_executable():
-    with pytest.raises(ValueError, match="not executable"):
-        require_executable_route("create_geometry_solid_box")
+def test_verified_geometry_solid_route_is_executable():
+    assert require_executable_route("create_geometry_solid_box")["status"] == "verified"
 
 
 def test_element_capability_matrix_answers_requested_element_families():
@@ -257,7 +256,15 @@ def test_element_capability_matrix_answers_requested_element_families():
     ]
     assert result["summary"]["geometry_surface_creation_supported"] == ["shell_quad"]
     assert result["summary"]["meshing_supported"] == ["solid_hex"]
-    assert result["summary"]["material_assignment_supported"] == []
+    assert result["summary"]["material_assignment_supported"] == [
+        "discrete",
+        "line_beam",
+        "lumped_mass",
+        "shell_quad",
+        "shell_tria",
+        "solid_hex",
+        "solid_tet",
+    ]
     assert result["summary"]["k_file_generation_supported"] == ["line_beam", "shell_quad", "solid_hex"]
     assert result["summary"]["offline_k_file_generation_supported"] == ["line_beam", "shell_quad", "solid_hex"]
     assert result["summary"]["k_file_generation_agent_execution_allowed"] == []
@@ -269,7 +276,7 @@ def test_element_capability_matrix_answers_requested_element_families():
     assert caps["solid_hex"]["creation"]["supported"] is True
     assert caps["solid_hex"]["creation"]["tool"] == "hm_create_fe_cube"
     assert caps["solid_hex"]["meshing"]["route_name"] == "create_structured_hex8_box"
-    assert caps["solid_hex"]["material_assignment"]["supported"] is False
+    assert caps["solid_hex"]["material_assignment"]["supported"] is True
     assert caps["solid_tet"]["creation"]["supported"] is True
     assert caps["solid_tet"]["creation"]["tool"] == "hm_create_tet4"
     assert caps["solid_tet"]["creation"]["route_status"] == "verified"
@@ -313,13 +320,13 @@ def test_element_capability_matrix_answers_requested_element_families():
     assert caps["lumped_mass"]["creation"]["route_status"] == "verified"
     assert caps["lumped_mass"]["creation"]["runtime_validated"] is True
     assert caps["lumped_mass"]["meshing"]["route_status"] == "unsupported"
-    assert caps["lumped_mass"]["material_assignment"]["route_status"] == "unsupported"
+    assert caps["lumped_mass"]["material_assignment"]["route_status"] == "verified"
     assert caps["discrete"]["creation"]["supported"] is True
     assert caps["discrete"]["creation"]["tool"] == "hm_create_discrete_spring"
     assert caps["discrete"]["creation"]["route_status"] == "verified"
     assert caps["discrete"]["creation"]["runtime_validated"] is True
     assert caps["discrete"]["meshing"]["route_status"] == "unsupported"
-    assert caps["discrete"]["material_assignment"]["route_status"] == "unsupported"
+    assert caps["discrete"]["material_assignment"]["route_status"] == "verified"
     assert caps["mixed"]["creation"]["supported"] is False
     assert caps["mixed"]["creation"]["route_status"] == "unsupported"
     assert caps["mixed"]["meshing"]["supported"] is False

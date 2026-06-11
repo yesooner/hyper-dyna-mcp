@@ -246,9 +246,9 @@ async def run_smoke(
                 "dyna_keyword_query",
                 {"params": {"keyword": "LOAD_BLAS"}},
             )
-            blocked_section_set_keyword = await session.call_tool(
+            blocked_mat3_set_keyword = await session.call_tool(
                 "hm_set_keyword",
-                {"params": {"keyword": "SECTION_SOLID", "params": {"SECID": 1, "ELFORM": 1}}},
+                {"params": {"keyword": "MAT_3", "params": {"MID": 1, "RHO": 7.85e-6, "E": 210000.0, "PR": 0.3}}},
             )
             blocked_model_conversion = await session.call_tool("hm_convert_model", {})
             dyna_query_payload = _json_text_payload(dyna_query)
@@ -259,7 +259,7 @@ async def run_smoke(
             dyna_initial_detonation_query_payload = _json_text_payload(dyna_initial_detonation_query)
             dyna_load_blast_query_payload = _json_text_payload(dyna_load_blast_query)
             dyna_unknown_suggestion_query_payload = _json_text_payload(dyna_unknown_suggestion_query)
-            blocked_section_set_keyword_payload = _json_text_payload(blocked_section_set_keyword)
+            blocked_mat3_set_keyword_payload = _json_text_payload(blocked_mat3_set_keyword)
             blocked_model_conversion_payload = _json_text_payload(blocked_model_conversion)
             dyna_field_status_ok = _dyna_field_status_guardrail_ok(dyna_query_payload)
             dyna_control_status_ok = _dyna_control_status_guardrail_ok(dyna_control_query_payload)
@@ -276,7 +276,7 @@ async def run_smoke(
                 dyna_unknown_suggestion_query_payload,
                 expected_keyword="*LOAD_BLAST",
             )
-            blocked_section_set_keyword_ok = _blocked_keyword_execution_ok(blocked_section_set_keyword_payload)
+            blocked_mat3_set_keyword_ok = _blocked_keyword_execution_ok(blocked_mat3_set_keyword_payload)
             blocked_model_conversion_ok = _blocked_model_conversion_ok(blocked_model_conversion_payload)
             blocked_execute_tcl_file_io_payload = execute_tcl_gui(
                 '*writefile "smoke_file_io_should_not_execute.hm" 1',
@@ -426,7 +426,8 @@ async def run_smoke(
                 {"params": {
                     "action": "assign_material",
                     "element_type": "HEX8",
-                    "parameters": {"component": "SMOKE_HEX", "material": "SMOKE_STEEL"},
+                    "parameters": {"MID": 1, "RHO": 7.85e-6, "E": 210000.0, "PR": 0.3},
+                    "dry_run": True,
                 }},
             )
             recording_requirements = await session.call_tool(
@@ -586,7 +587,7 @@ async def run_smoke(
         )
     if not dyna_section_solid_status_ok:
         guardrail_failures.append(
-            "dyna_keyword_query field_execution_status marks unverified SECTION_SOLID fields executable."
+            "dyna_keyword_query must mark curated SECTION_SOLID as execution-ready."
         )
     if not dyna_d3plot_status_ok:
         guardrail_failures.append(
@@ -602,8 +603,8 @@ async def run_smoke(
         guardrail_failures.append("dyna_keyword_query field_execution_status marks unverified LOAD_BLAST fields executable.")
     if not dyna_unknown_suggestion_ok:
         guardrail_failures.append("dyna_keyword_query suggestions must stay non-executable for unknown/near-match keywords.")
-    if not blocked_section_set_keyword_ok:
-        guardrail_failures.append("hm_set_keyword must block unverified SECTION_SOLID execution before Tcl is sent.")
+    if not blocked_mat3_set_keyword_ok:
+        guardrail_failures.append("hm_set_keyword must block uncurated MAT_3 execution before Tcl is sent.")
     if not blocked_model_conversion_ok:
         guardrail_failures.append("hm_convert_model must stay blocked until LS-DYNA profile/card routes are verified.")
     if not blocked_k_integration_ok:
@@ -649,7 +650,7 @@ async def run_smoke(
             "LS-PrePost cfile helpers must return commented advisory text, not executable cfile commands."
         )
     if not solid_route_runtime_status_ok:
-        guardrail_failures.append("hm_command_map create_geometry_solid_box must expose experimental blocked status.")
+        guardrail_failures.append("hm_command_map create_geometry_solid_box must expose verified executable geometry-solid status.")
     if not _element_capability_guardrail_ok(element_capability_matrix_payload):
         guardrail_failures.append(
             "hm_element_capability_matrix must report only verified FE creation routes, keep surface automesh/material assignment blocked, and keep K writer execution disabled."
@@ -672,7 +673,7 @@ async def run_smoke(
         )
     if not material_modeling_action_guardrail_ok:
         guardrail_failures.append(
-            "hm_modeling_action must block material assignment with a concrete unsupported route and recording next steps."
+            "hm_modeling_action must plan curated material assignment through hm_set_keyword without sending Tcl in dry_run."
         )
     if not recording_requirements_guardrail_ok:
         guardrail_failures.append(
@@ -821,7 +822,7 @@ async def run_smoke(
             "dyna_initial_detonation_keyword_query": _first_text(dyna_initial_detonation_query),
             "dyna_load_blast_keyword_query": _first_text(dyna_load_blast_query),
             "dyna_unknown_suggestion_query": _first_text(dyna_unknown_suggestion_query),
-            "hm_set_keyword_section_solid_blocked": _first_text(blocked_section_set_keyword),
+            "hm_set_keyword_mat3_blocked": _first_text(blocked_mat3_set_keyword),
             "hm_convert_model_blocked": _first_text(blocked_model_conversion),
             "hm_k_integration_blocked": blocked_k_integration_payload,
             "hm_k_integration_advisory_script_non_executable": {
@@ -900,7 +901,16 @@ def _dyna_control_status_guardrail_ok(payload: dict[str, Any] | None) -> bool:
 
 
 def _dyna_section_solid_status_guardrail_ok(payload: dict[str, Any] | None) -> bool:
-    return _dyna_query_guardrail_ok(payload, required_fields=("SECID",))
+    if not isinstance(payload, dict):
+        return False
+    decision = payload.get("execution_decision")
+    if not isinstance(decision, dict):
+        return False
+    return (
+        payload.get("execution_ready") is True
+        and decision.get("state") == "executable"
+        and decision.get("allowed_execution_source") == "structured_gui_tcl_template"
+    )
 
 
 def _dyna_d3plot_status_guardrail_ok(payload: dict[str, Any] | None) -> bool:
@@ -964,12 +974,11 @@ def _solid_route_runtime_status_ok(payload: dict[str, Any] | None) -> bool:
     if not isinstance(route, dict):
         return False
     return (
-        route.get("status") == "experimental"
+        route.get("status") == "verified"
         and route.get("entity_kind") == "geometry_solid"
-        and route.get("execution_stage") == "experimental"
-        and route.get("mcp_execution_allowed") is False
-        and route.get("agent_execution_allowed") is False
-        and bool(route.get("promotion_required"))
+        and route.get("mcp_execution_allowed") is True
+        and route.get("agent_execution_allowed") is True
+        and route.get("runtime_validated") is True
     )
 
 
@@ -1139,36 +1148,16 @@ def _modeling_action_unknown_guardrail_ok(payload: dict[str, Any] | None) -> boo
 def _modeling_action_material_guardrail_ok(payload: dict[str, Any] | None) -> bool:
     if not isinstance(payload, dict):
         return False
-    next_supported_actions = payload.get("next_supported_actions")
-    has_recording_step = (
-        isinstance(next_supported_actions, list)
-        and any(
-            isinstance(action, dict)
-            and action.get("action") == "recording_requirements"
-            and action.get("route_name") == "assign_material_to_hex_part"
-            for action in next_supported_actions
-        )
-    )
-    has_validation_step = (
-        isinstance(next_supported_actions, list)
-        and any(
-            isinstance(action, dict)
-            and action.get("action") == "validate_recording"
-            and action.get("route_name") == "assign_material_to_hex_part"
-            for action in next_supported_actions
-        )
-    )
     return (
-        payload.get("success") is False
+        payload.get("success") is True
         and payload.get("action") == "assign_material"
         and payload.get("element_type") == "solid_hex"
-        and payload.get("error_type") == "assign_material_not_verified"
-        and payload.get("blocked_route_name") == "assign_material_to_hex_part"
-        and payload.get("blocked_route_status") == "unsupported"
-        and payload.get("execution_allowed") is False
+        and payload.get("tool") == "hm_set_keyword"
+        and payload.get("route_name") == "MAT_ELASTIC"
+        and payload.get("keyword") == "MAT_ELASTIC"
+        and payload.get("execution_allowed") is True
         and payload.get("tcl_sent") is False
-        and has_recording_step
-        and has_validation_step
+        and payload.get("dry_run") is True
     )
 
 
@@ -1239,12 +1228,10 @@ def _recording_requirements_guardrail_ok(payload: dict[str, Any] | None) -> bool
     queue_names = [item.get("route_name") for item in promotion_queue if isinstance(item, dict)]
     if not EXPECTED_RECORDING_REQUIREMENT_ROUTES.issubset(set(queue_names)):
         return False
-    if queue_names[:5] != [
-        "assign_material_to_hex_part",
-        "assign_material_to_shell_part",
-        "assign_material_to_beam_part",
+    if queue_names[:3] != [
         "surface_automesh",
         "tetmesh_geometry_solid",
+        "line_mesh_beam",
     ]:
         return False
     queue_by_name = {
@@ -1261,34 +1248,14 @@ def _recording_requirements_guardrail_ok(payload: dict[str, Any] | None) -> bool
             return False
         if item.get("requires_verified_map_promotion") is not True:
             return False
-    hex_material = queue_by_name.get("assign_material_to_hex_part", {})
-    hex_material_schema = hex_material.get("evidence_schema", {})
-    hex_material_checklist = hex_material.get("promotion_checklist", [])
-    if hex_material_schema.get("component_id", {}).get("kind") != "positive_integer_id":
-        return False
-    if hex_material_schema.get("property_id", {}).get("kind") != "positive_integer_id":
-        return False
-    if hex_material_schema.get("material_id", {}).get("kind") != "positive_integer_id":
-        return False
-    if not isinstance(hex_material_checklist, list) or not any(
-        isinstance(item, dict)
-        and item.get("target") == "templates/hm_command_map.json routes.assign_material_to_hex_part.mcp_execution_allowed"
-        and item.get("required_value") is True
-        for item in hex_material_checklist
-    ):
-        return False
-    if not isinstance(hex_material.get("recording_steps"), list) or not hex_material.get("recording_steps"):
-        return False
-    if queue_by_name.get("assign_material_to_hex_part", {}).get("ready_for_recording") is not True:
-        return False
     if queue_by_name.get("mixed_mesh_workflow", {}).get("ready_for_recording") is not False:
         return False
     if "mixed_element_workflow" not in queue_by_name.get("mixed_mesh_workflow", {}).get("blocked_by", []):
         return False
     if recommended_next_routes[:3] != [
-        "assign_material_to_hex_part",
-        "assign_material_to_shell_part",
-        "assign_material_to_beam_part",
+        "surface_automesh",
+        "tetmesh_geometry_solid",
+        "line_mesh_beam",
     ]:
         return False
     return (
@@ -1434,7 +1401,15 @@ def _element_capability_guardrail_ok(payload: dict[str, Any] | None) -> bool:
         return False
     if summary.get("meshing_supported") != ["solid_hex"]:
         return False
-    if summary.get("material_assignment_supported") != []:
+    if summary.get("material_assignment_supported") != [
+        "discrete",
+        "line_beam",
+        "lumped_mass",
+        "shell_quad",
+        "shell_tria",
+        "solid_hex",
+        "solid_tet",
+    ]:
         return False
     if summary.get("k_file_generation_agent_execution_allowed") not in (None, []):
         return False
@@ -1503,27 +1478,42 @@ def _element_capability_guardrail_ok(payload: dict[str, Any] | None) -> bool:
             if not isinstance(area_payload, dict) or area_payload.get("supported") is not False:
                 return False
     for item in (solid_tet, shell_tria):
-        for area in ("meshing", "material_assignment"):
-            area_payload = item.get(area)
-            if not isinstance(area_payload, dict) or area_payload.get("supported") is not False:
-                return False
-    for area in ("meshing", "material_assignment"):
+        area_payload = item.get("meshing")
+        if not isinstance(area_payload, dict) or area_payload.get("supported") is not False:
+            return False
+        material_payload = item.get("material_assignment")
+        if not isinstance(material_payload, dict) or material_payload.get("supported") is not True:
+            return False
+        if material_payload.get("route_status") != "verified":
+            return False
+    for area in ("meshing",):
         area_payload = shell_quad.get(area)
         if not isinstance(area_payload, dict) or area_payload.get("supported") is not False:
             return False
+    shell_quad_material = shell_quad.get("material_assignment")
+    if not isinstance(shell_quad_material, dict) or shell_quad_material.get("supported") is not True:
+        return False
+    if shell_quad_material.get("route_status") != "verified":
+        return False
     line_beam_meshing = line_beam.get("meshing")
     if not isinstance(line_beam_meshing, dict) or line_beam_meshing.get("supported") is not False:
         return False
     if line_beam_meshing.get("route_status") != "unsupported":
         return False
     line_beam_material = line_beam.get("material_assignment")
-    if not isinstance(line_beam_material, dict) or line_beam_material.get("supported") is not False:
+    if not isinstance(line_beam_material, dict) or line_beam_material.get("supported") is not True:
+        return False
+    if line_beam_material.get("route_status") != "verified":
         return False
     for item in (lumped_mass, discrete):
-        for area in ("meshing", "material_assignment"):
-            area_payload = item.get(area)
-            if not isinstance(area_payload, dict) or area_payload.get("supported") is not False:
-                return False
+        area_payload = item.get("meshing")
+        if not isinstance(area_payload, dict) or area_payload.get("supported") is not False:
+            return False
+        material_payload = item.get("material_assignment")
+        if not isinstance(material_payload, dict) or material_payload.get("supported") is not True:
+            return False
+        if material_payload.get("route_status") != "verified":
+            return False
     for area in ("creation", "meshing", "material_assignment"):
         area_payload = mixed.get(area)
         if not isinstance(area_payload, dict) or area_payload.get("supported") is not False:
@@ -1546,7 +1536,10 @@ def _element_capability_guardrail_ok(payload: dict[str, Any] | None) -> bool:
                 return False
             if k_file_generation.get("role") != "offline_fixture_validation_only":
                 return False
-    return capabilities["solid_hex"]["material_assignment"].get("supported") is False
+    return (
+        capabilities["solid_hex"]["material_assignment"].get("supported") is True
+        and capabilities["solid_hex"]["material_assignment"].get("route_status") == "verified"
+    )
 
 
 def _blocked_keyword_execution_ok(payload: dict[str, Any] | None) -> bool:

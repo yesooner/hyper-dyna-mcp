@@ -444,23 +444,18 @@ def test_dyna_control_status_guardrail_rejects_executable_control_field():
     assert _dyna_control_status_guardrail_ok(payload) is False
 
 
-def test_dyna_section_solid_guardrail_requires_section_field_not_executable():
+def test_dyna_section_solid_guardrail_requires_executable_curated_template():
     payload = {
-        "execution_ready": False,
-        "advisory_only": {"execution_allowed": False},
+        "execution_ready": True,
         "execution_decision": {
-            "state": "blocked",
-            "allowed_execution_source": "structured_verified_map",
-            "advisory_candidates_are_executable": False,
-        },
-        "field_execution_status": {
-            "SECID": {"executable": False},
+            "state": "executable",
+            "allowed_execution_source": "structured_gui_tcl_template",
         },
     }
 
     assert _dyna_section_solid_status_guardrail_ok(payload) is True
 
-    payload["field_execution_status"]["SECID"]["executable"] = True
+    payload["execution_ready"] = False
 
     assert _dyna_section_solid_status_guardrail_ok(payload) is False
 
@@ -605,19 +600,18 @@ def test_dyna_unknown_suggestion_guardrail_requires_non_executable_suggestions()
 def test_solid_route_runtime_status_guardrail_requires_explicit_runtime_metadata():
     payload = {
         "route": {
-            "status": "experimental",
+            "status": "verified",
             "entity_kind": "geometry_solid",
-            "execution_stage": "experimental",
-            "mcp_execution_allowed": False,
-            "agent_execution_allowed": False,
-            "promotion_required": ["command recording"],
+            "mcp_execution_allowed": True,
+            "agent_execution_allowed": True,
+            "runtime_validated": True,
         }
     }
 
     assert _solid_route_runtime_status_ok(payload) is True
-    payload["route"]["mcp_execution_allowed"] = True
+    payload["route"]["mcp_execution_allowed"] = False
     assert _solid_route_runtime_status_ok(payload) is False
-    assert _solid_route_runtime_status_ok({"route": {"status": "verified"}}) is False
+    assert _solid_route_runtime_status_ok({"route": {"status": "experimental"}}) is False
 
 
 def test_element_capability_guardrail_allows_only_verified_gui_creation():
@@ -634,7 +628,15 @@ def test_element_capability_guardrail_allows_only_verified_gui_creation():
                 "solid_tet",
             ],
             "meshing_supported": ["solid_hex"],
-            "material_assignment_supported": [],
+            "material_assignment_supported": [
+                "discrete",
+                "line_beam",
+                "lumped_mass",
+                "shell_quad",
+                "shell_tria",
+                "solid_hex",
+                "solid_tet",
+            ],
             "k_file_generation_agent_execution_allowed": [],
             "k_file_generation_mcp_execution_allowed": [],
             "final_k_export_supported": [],
@@ -644,7 +646,7 @@ def test_element_capability_guardrail_allows_only_verified_gui_creation():
             "solid_hex": {
                 "creation": {"supported": True, "route_status": "verified"},
                 "meshing": {"supported": True, "route_status": "verified"},
-                "material_assignment": {"supported": False, "route_status": "unsupported"},
+                "material_assignment": {"supported": True, "route_status": "verified"},
                 "k_file_generation": {
                     "supported": True,
                     "role": "offline_fixture_validation_only",
@@ -657,7 +659,7 @@ def test_element_capability_guardrail_allows_only_verified_gui_creation():
             "solid_tet": {
                 "creation": {"supported": True, "route_status": "verified"},
                 "meshing": {"supported": False},
-                "material_assignment": {"supported": False},
+                "material_assignment": {"supported": True, "route_status": "verified"},
                 "k_file_generation": {
                     "supported": False,
                     "role": "offline_fixture_validation_only",
@@ -670,7 +672,7 @@ def test_element_capability_guardrail_allows_only_verified_gui_creation():
             "shell_quad": {
                 "creation": {"supported": True, "route_status": "verified"},
                 "meshing": {"supported": False},
-                "material_assignment": {"supported": False},
+                "material_assignment": {"supported": True, "route_status": "verified"},
                 "k_file_generation": {
                     "supported": True,
                     "role": "offline_fixture_validation_only",
@@ -683,7 +685,7 @@ def test_element_capability_guardrail_allows_only_verified_gui_creation():
             "shell_tria": {
                 "creation": {"supported": True, "route_status": "verified"},
                 "meshing": {"supported": False},
-                "material_assignment": {"supported": False},
+                "material_assignment": {"supported": True, "route_status": "verified"},
                 "k_file_generation": {
                     "supported": False,
                     "role": "offline_fixture_validation_only",
@@ -696,7 +698,7 @@ def test_element_capability_guardrail_allows_only_verified_gui_creation():
             "line_beam": {
                 "creation": {"supported": True, "route_status": "verified"},
                 "meshing": {"supported": False, "route_status": "unsupported"},
-                "material_assignment": {"supported": False},
+                "material_assignment": {"supported": True, "route_status": "verified"},
                 "k_file_generation": {
                     "supported": True,
                     "role": "offline_fixture_validation_only",
@@ -709,7 +711,7 @@ def test_element_capability_guardrail_allows_only_verified_gui_creation():
             "lumped_mass": {
                 "creation": {"supported": True, "route_status": "verified"},
                 "meshing": {"supported": False},
-                "material_assignment": {"supported": False},
+                "material_assignment": {"supported": True, "route_status": "verified"},
                 "k_file_generation": {
                     "supported": False,
                     "role": "offline_fixture_validation_only",
@@ -722,7 +724,7 @@ def test_element_capability_guardrail_allows_only_verified_gui_creation():
             "discrete": {
                 "creation": {"supported": True, "route_status": "verified"},
                 "meshing": {"supported": False},
-                "material_assignment": {"supported": False},
+                "material_assignment": {"supported": True, "route_status": "verified"},
                 "k_file_generation": {
                     "supported": False,
                     "role": "offline_fixture_validation_only",
@@ -877,39 +879,34 @@ def test_modeling_action_guardrail_rejects_unknown_element_without_recording():
     assert _modeling_action_unknown_guardrail_ok(payload) is False
 
 
-def test_modeling_action_guardrail_blocks_material_with_recording_route():
+def test_modeling_action_guardrail_plans_material_keyword_route():
     payload = {
-        "success": False,
+        "success": True,
         "action": "assign_material",
         "element_type": "solid_hex",
-        "error_type": "assign_material_not_verified",
-        "blocked_route_name": "assign_material_to_hex_part",
-        "blocked_route_status": "unsupported",
-        "execution_allowed": False,
+        "tool": "hm_set_keyword",
+        "route_name": "MAT_ELASTIC",
+        "keyword": "MAT_ELASTIC",
+        "execution_allowed": True,
         "tcl_sent": False,
-        "next_supported_actions": [
-            {"action": "recording_requirements", "route_name": "assign_material_to_hex_part"},
-            {"action": "validate_recording", "route_name": "assign_material_to_hex_part"},
-        ],
+        "dry_run": True,
     }
 
     assert _modeling_action_material_guardrail_ok(payload) is True
 
-    payload["execution_allowed"] = True
+    payload["tcl_sent"] = True
     assert _modeling_action_material_guardrail_ok(payload) is False
 
-    payload["execution_allowed"] = False
-    payload["blocked_route_name"] = "assign_material_to_shell_part"
+    payload["tcl_sent"] = False
+    payload["route_name"] = "MAT_3"
     assert _modeling_action_material_guardrail_ok(payload) is False
 
 
 def _recording_queue_fixture():
     first_routes = [
-        "assign_material_to_hex_part",
-        "assign_material_to_shell_part",
-        "assign_material_to_beam_part",
         "surface_automesh",
         "tetmesh_geometry_solid",
+        "line_mesh_beam",
     ]
     remaining = sorted(EXPECTED_RECORDING_REQUIREMENT_ROUTES - set(first_routes))
     return [
@@ -921,15 +918,7 @@ def _recording_queue_fixture():
             "mcp_execution_allowed": False,
             "requires_verified_map_promotion": True,
             "tcl_sent": False,
-            "evidence_schema": (
-                {
-                    "component_id": {"kind": "positive_integer_id", "required": "true"},
-                    "property_id": {"kind": "positive_integer_id", "required": "true"},
-                    "material_id": {"kind": "positive_integer_id", "required": "true"},
-                }
-                if route_name == "assign_material_to_hex_part"
-                else {"datanames_verified": {"kind": "boolean_true", "required": "true"}}
-            ),
+            "evidence_schema": {"datanames_verified": {"kind": "boolean_true", "required": "true"}},
             "recording_steps": [
                 "Start HyperMesh command recording before the manual GUI operation.",
                 f"Call hm_modeling_action validate_recording with route_name={route_name}, recording_text, and runtime_evidence.",
@@ -1003,11 +992,9 @@ def test_recording_requirements_guardrail_requires_all_routes_blocked():
         "supported_route_names": sorted(EXPECTED_RECORDING_REQUIREMENT_ROUTES),
         "promotion_queue": _recording_queue_fixture(),
         "recommended_next_routes": [
-            "assign_material_to_hex_part",
-            "assign_material_to_shell_part",
-            "assign_material_to_beam_part",
             "surface_automesh",
             "tetmesh_geometry_solid",
+            "line_mesh_beam",
         ],
         "coverage": {
             "complete": True,

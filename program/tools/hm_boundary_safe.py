@@ -1,37 +1,27 @@
-"""Blocked compatibility helpers for HyperMesh boundary-condition routes.
-
-SPC/constraint Tcl routes are not execution-verified in the current
-HyperMesh GUI-only MCP scope. These helpers are kept for legacy imports, but
-must not send Tcl until ``apply_constraint_spc`` is promoted through command
-recording and verified MAP evidence.
-"""
+"""Compatibility helpers for HyperMesh boundary-condition routes."""
 
 from __future__ import annotations
 
 from typing import Any
 
-_BLOCKED_ROUTE = "apply_constraint_spc"
-
-
-def _blocked_constraint_result(target: str, **extra: Any) -> dict[str, Any]:
+def _spc_params(
+    *,
+    cid: int = 0,
+    dofx: int,
+    dofy: int,
+    dofz: int,
+    dofrx: int,
+    dofry: int,
+    dofrz: int,
+) -> dict[str, int]:
     return {
-        "success": False,
-        "error_type": "constraint_route_not_verified",
-        "blocked_route_name": _BLOCKED_ROUTE,
-        "blocked_route_status": "unsupported",
-        "execution_allowed": False,
-        "tcl_sent": False,
-        "target": target,
-        "required_tool": "hm_modeling_action",
-        "next_supported_actions": [
-            {"tool": "hm_modeling_action", "action": "recording_requirements", "route_name": _BLOCKED_ROUTE},
-            {"tool": "hm_modeling_action", "action": "validate_recording", "route_name": _BLOCKED_ROUTE},
-        ],
-        "error": (
-            "SPC/constraint creation is not verified for MCP execution. "
-            "Record and validate apply_constraint_spc before enabling this route."
-        ),
-        **extra,
+        "CID": cid,
+        "DOFX": dofx,
+        "DOFY": dofy,
+        "DOFZ": dofz,
+        "DOFRX": dofrx,
+        "DOFRY": dofry,
+        "DOFRZ": dofrz,
     }
 
 
@@ -46,17 +36,26 @@ def create_spc_on_nodes(
     collector_name: str = "SPC_BC",
     timeout: int = 30,
 ) -> dict:
-    """Return a blocked result for legacy SPC-on-nodes callers.
+    """Create SPC cards for explicit node ids through GUI Tcl templates."""
+    from program.tools.hm_keyword_skill import hm_set_keyword
 
-    Constraint creation must go through ``hm_modeling_action`` recording
-    requirements and verified route promotion before any Tcl is sent.
-    """
-    return _blocked_constraint_result(
-        "nodes",
-        node_ids=list(node_ids),
-        collector_name=collector_name,
-        dofs={"x": dofx, "y": dofy, "z": dofz, "rx": dofrx, "ry": dofry, "rz": dofrz},
-    )
+    results = []
+    base = _spc_params(dofx=dofx, dofy=dofy, dofz=dofz, dofrx=dofrx, dofry=dofry, dofrz=dofrz)
+    for node_id in node_ids:
+        params = {"NODEID": int(node_id), **base}
+        results.append(hm_set_keyword("BOUNDARY_SPC", params, timeout=timeout))
+    success = all(result.get("success") for result in results)
+    return {
+        "success": success,
+        "target": "nodes",
+        "node_ids": list(node_ids),
+        "collector_name": collector_name,
+        "execution_allowed": True,
+        "tcl_sent": success,
+        "route_name": "apply_constraint_spc",
+        "keyword": "BOUNDARY_SPC",
+        "results": results,
+    }
 
 
 def create_spc_on_node_set(
@@ -69,14 +68,22 @@ def create_spc_on_node_set(
     dofrz: int = 0,
     timeout: int = 30,
 ) -> dict:
-    """Return a blocked result for legacy SPC-on-node-set callers.
+    """Create an SPC card for a node set through GUI Tcl templates."""
+    from program.tools.hm_keyword_skill import hm_set_keyword
 
-    Constraint creation must go through ``hm_modeling_action`` recording
-    requirements and verified route promotion before any Tcl is sent.
-    """
-    return _blocked_constraint_result(
-        "node_set",
-        set_id=set_id,
-        collector_name=f"SPC_SET_{set_id}",
-        dofs={"x": dofx, "y": dofy, "z": dofz, "rx": dofrx, "ry": dofry, "rz": dofrz},
+    params = {
+        "NSID": int(set_id),
+        **_spc_params(dofx=dofx, dofy=dofy, dofz=dofz, dofrx=dofrx, dofry=dofry, dofrz=dofrz),
+    }
+    result = hm_set_keyword("BOUNDARY_SPC_SET", params, timeout=timeout)
+    result.update(
+        {
+            "target": "node_set",
+            "set_id": set_id,
+            "collector_name": f"SPC_SET_{set_id}",
+            "route_name": "apply_constraint_spc",
+            "execution_allowed": result.get("success") is True,
+        }
     )
+    result.setdefault("tcl_sent", result.get("success") is True)
+    return result

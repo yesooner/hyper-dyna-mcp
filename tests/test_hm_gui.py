@@ -933,13 +933,18 @@ def test_visual_diagnostics_explain_hidden_entities_and_optional_step_failures()
     assert refresh_diagnostic["failed_steps"]["hm_redraw"]["error"] == "bad redraw command"
 
 
-def test_create_solid_box_blocks_experimental_route_before_tcl(monkeypatch):
+def test_create_solid_box_executes_verified_route(monkeypatch):
     called = False
+    captured = {}
 
-    def fake_execute_tcl_gui(*args, **kwargs):
+    def fake_execute_tcl_gui(script, *args, **kwargs):
         nonlocal called
         called = True
-        return {"success": True, "response": ""}
+        captured["script"] = script
+        return {
+            "success": True,
+            "response": "OK\nSOLIDS_BEFORE=3\nSOLIDS_AFTER=4\nSOLID_ID=4\n",
+        }
 
     monkeypatch.setattr(hm_model_writer, "execute_tcl_gui", fake_execute_tcl_gui)
 
@@ -954,15 +959,13 @@ def test_create_solid_box_blocks_experimental_route_before_tcl(monkeypatch):
         comp_name="solid_component",
     )
 
-    assert result["success"] is False
-    assert result["supported"] is False
+    assert result["success"] is True
+    assert result["supported"] is True
     assert result["route_name"] == "create_geometry_solid_box"
     assert result["entity_kind"] == "geometry_solid"
-    assert result["error_type"] == "experimental_route_not_executable"
-    assert "source-evidence only" in result["error"]
-    assert "command recording" in result["error"]
-    assert "command recording" in " ".join(result["verification_required"])
-    assert called is False
+    assert result["solid_id"] == 4
+    assert "*solidblock" in captured["script"]
+    assert called is True
 
 
 def test_create_solid_box_fails_without_solids_count_increase(monkeypatch):
@@ -978,7 +981,8 @@ def test_create_solid_box_fails_without_solids_count_increase(monkeypatch):
     result = hm_model_writer.create_solid_box("solid_box", 0, 0, 0, 1, 1, 1)
 
     assert result["success"] is False
-    assert result["error_type"] == "experimental_route_not_executable"
+    assert result["created_count"] == 0
+    assert "did not increase solids_count" in result["error"]
 
 
 def test_create_solid_box_rejects_non_positive_dimensions_before_tcl(monkeypatch):
@@ -1450,7 +1454,7 @@ def test_gui_modeling_smoke_accepts_hidden_solid_display_for_fe_smoke(monkeypatc
     assert result["error"] is None
 
 
-def test_gui_modeling_smoke_accepts_experimental_solid_block_for_fe_smoke(monkeypatch):
+def test_gui_modeling_smoke_requires_solid_stage_after_route_unblocked(monkeypatch):
     def fake_create_fe_cube(*args, **kwargs):
         return {"success": True, "element_count": 1}
 
@@ -1479,10 +1483,10 @@ def test_gui_modeling_smoke_accepts_experimental_solid_block_for_fe_smoke(monkey
 
     result = hm_model_writer.run_gui_modeling_smoke()
 
-    assert result["success"] is True
-    assert result["solid_route_state"] == "experimental_blocked"
-    assert result["solid_route_required_for_success"] is False
-    assert result["runtime_validation_evidence"]["runtime_validated"] is False
+    assert result["success"] is False
+    assert result["stage"] == "solid_box"
+    assert result["solid_route_state"] == "failed"
+    assert result["solid_route_required_for_success"] is True
     assert result["stages"]["solid_box"]["error_type"] == "experimental_route_not_executable"
 
 

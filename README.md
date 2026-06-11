@@ -18,7 +18,8 @@ Hyper-Dyna-MCP 是一个面向本机 HyperMesh GUI 的 MCP server。它通过 `F
 - 默认端口：`47883`
 - 可用 FE 创建：HEX8、TET4、QUAD4 shell、TRIA3、BAR2/BEAM、DISCRETE spring、MASS element
 - 可用几何创建：surface plate
-- 默认阻断：geometry solid box、`*tetmesh`、surface automesh、line mesh、材料/property/section、EOS、约束、LOAD、K export
+- 可用 geometry solid box：verified `*solidblock` route
+- 默认阻断：`*tetmesh`、surface automesh、line mesh、mixed mesh、K export；基础材料/section/EOS/约束/LOAD 通过 GUI Tcl 模板开放
 
 ## 工作流程
 
@@ -145,9 +146,9 @@ hm_set_keyword
 | BAR2/BEAM line | 可用，创建新直线和 BEAM element |
 | DISCRETE / MASS | 可用，基础 FE element 创建 |
 | Geometry surface | 可用 |
-| Geometry solid | experimental，默认阻断 |
+| Geometry solid box | 可用，走 verified `*solidblock` route |
 | `*tetmesh` / surface automesh / line mesh / `mixed_mesh_workflow` | 未开放，需要 command recording |
-| 材料、property、section、EOS、约束、LOAD | 未开放，需要 command recording |
+| 基础材料、property/section、EOS、约束、LOAD | 可用，走 `hm_set_keyword` GUI Tcl 模板；复杂卡片仍需验证 |
 | K export | 未开放，不能用后端 K writer 代替 GUI 导出 |
 
 FE 网格、几何实体和 K 文件是不同路线。Agent 必须优先走 HyperMesh GUI listener 和 verified route；`program.tools.k_writer`、`program.tools.k_parser`、`program.tools.hm_k_integration` 只能作为离线 fixture/test/review，不能绕过 GUI 建模或伪装成最终 `.k` 导出。

@@ -785,9 +785,10 @@ def recording_requirements_coverage(command_map: Optional[dict[str, Any]] = None
     """Report whether every documented unsupported route has promotion requirements."""
     data = command_map if command_map is not None else load_command_map()
     unsupported_routes = documented_unsupported_route_names(data)
+    verified_routes = set((data.get("routes") or {}).keys())
     requirement_routes = set(RECORDING_ROUTE_REQUIREMENTS.keys())
     missing_requirement_routes = sorted(unsupported_routes - requirement_routes)
-    orphan_requirement_routes = sorted(requirement_routes - unsupported_routes)
+    orphan_requirement_routes = sorted(requirement_routes - unsupported_routes - verified_routes)
     invalid_requirement_routes: list[dict[str, Any]] = []
     known_types = set(known_element_types())
     for route_name, requirement in sorted(RECORDING_ROUTE_REQUIREMENTS.items()):
@@ -832,7 +833,7 @@ def recording_requirements_coverage(command_map: Optional[dict[str, Any]] = None
             invalid_requirement_routes.append({"route_name": route_name, "reasons": sorted(set(reasons))})
     promotion_order_routes = set(RECORDING_ROUTE_PROMOTION_ORDER)
     missing_promotion_order_routes = sorted(unsupported_routes - promotion_order_routes)
-    orphan_promotion_order_routes = sorted(promotion_order_routes - unsupported_routes)
+    orphan_promotion_order_routes = sorted(promotion_order_routes - unsupported_routes - verified_routes)
     return {
         "unsupported_route_count": len(unsupported_routes),
         "requirement_route_count": len(requirement_routes),

@@ -17,6 +17,24 @@ from typing import Any
 _MAP_PATH = Path(__file__).resolve().parents[2] / "templates" / "dyna_keyword_map.json"
 _NOTES_PATH = Path(__file__).resolve().parents[2] / "templates" / "dyna_manual_notes.jsonl"
 
+_GUI_TEMPLATE_EXECUTABLE_KEYWORDS = {
+    "*MAT_ELASTIC",
+    "*SECTION_SOLID",
+    "*SECTION_SHELL",
+    "*SECTION_BEAM",
+    "*SECTION_DISCRETE",
+    "*EOS_LINEAR_POLYNOMIAL",
+    "*BOUNDARY_SPC",
+    "*BOUNDARY_SPC_NODE",
+    "*BOUNDARY_SPC_SET",
+    "*LOAD_NODE",
+    "*LOAD_NODE_SET",
+    "*LOAD_SEGMENT",
+    "*LOAD_SEGMENT_SET",
+    "*LOAD_SHELL",
+    "*LOAD_SHELL_SET",
+}
+
 
 @lru_cache(maxsize=1)
 def load_dyna_keyword_map() -> dict[str, Any]:
@@ -114,6 +132,9 @@ def query_dyna_keyword(keyword: str) -> dict[str, Any]:
         dataname_candidates=dataname_candidates,
     )
     route_execution_ready = _route_execution_ready(direct_route, field_execution_status)
+    template_execution_ready = _template_execution_ready(normalized)
+    if template_execution_ready:
+        route_execution_ready = True
     execution_decision = _execution_decision(
         keyword=normalized,
         direct_route=direct_route,
@@ -363,6 +384,18 @@ def _execution_decision(
 ) -> dict[str, Any]:
     """Return a compact go/no-go decision for agents before any Tcl/K action."""
     route_status = str((direct_route or {}).get("status") or "")
+    if execution_ready and _template_execution_ready(keyword):
+        return {
+            "state": "executable",
+            "keyword": keyword,
+            "route_status": route_status or "gui_template_verified",
+            "cardimage": cardimage,
+            "entity_type": entity_type,
+            "allowed_execution_source": "structured_gui_tcl_template",
+            "blocked_reasons": [],
+            "required_verification": [],
+            "advisory_candidates_are_executable": False,
+        }
     unresolved_fields = [
         field
         for field, status in field_execution_status.items()
@@ -457,6 +490,23 @@ def _route_execution_ready(
     if not field_execution_status:
         return False
     return all(item.get("executable") is True for item in field_execution_status.values())
+
+
+def _template_execution_ready(keyword: str) -> bool:
+    """Allow curated GUI Tcl templates for requested card families.
+
+    These templates still execute through the HyperMesh GUI listener and are
+    not LS-DYNA backend K writers. The allow-list is intentionally family-level
+    and local-template backed so agents cannot execute arbitrary keywords from
+    manual notes or embeddings.
+    """
+    normalized = normalize_keyword(keyword)
+    if normalized not in _GUI_TEMPLATE_EXECUTABLE_KEYWORDS:
+        return False
+    template_key = normalized.lstrip("*")
+    template_path = Path(__file__).resolve().parents[2] / "templates" / "keyword"
+    category = template_key.split("_", 1)[0].lower()
+    return (template_path / category / f"{template_key}.tcl").exists()
 
 
 def _candidate_confidence(

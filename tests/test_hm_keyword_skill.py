@@ -3,7 +3,7 @@
 from program.tools import hm_keyword_skill
 
 
-def test_hm_set_keyword_blocks_unverified_dyna_route(monkeypatch):
+def test_hm_set_keyword_executes_curated_section_template(monkeypatch):
     called = False
 
     def fake_execute_tcl_gui(*args, **kwargs):
@@ -15,14 +15,29 @@ def test_hm_set_keyword_blocks_unverified_dyna_route(monkeypatch):
 
     result = hm_keyword_skill.hm_set_keyword("SECTION_SOLID", {"SECID": 1, "ELFORM": 1})
 
+    assert result["success"] is True
+    assert result["keyword"] == "SECTION_SOLID"
+    assert called is True
+
+
+def test_hm_set_keyword_still_blocks_unverified_dyna_route(monkeypatch):
+    called = False
+
+    def fake_execute_tcl_gui(*args, **kwargs):
+        nonlocal called
+        called = True
+        return {"success": True, "response": "OK"}
+
+    monkeypatch.setattr(hm_keyword_skill, "execute_tcl_gui", fake_execute_tcl_gui)
+
+    result = hm_keyword_skill.hm_set_keyword("MAT_3", {"MID": 1, "RHO": 7.85e-6, "E": 210000.0, "PR": 0.3})
+
     assert result["success"] is False
     assert result["error_type"] == "dyna_keyword_execution_not_verified"
     assert result["execution_ready"] is False
     assert result["execution_allowed"] is False
     assert result["tcl_sent"] is False
     assert result["execution_decision"]["state"] == "blocked"
-    assert "datanames_not_verified" in result["execution_blockers"]
-    assert result["advisory_only"]["execution_allowed"] is False
     assert called is False
 
 

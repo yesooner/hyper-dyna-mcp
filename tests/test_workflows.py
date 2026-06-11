@@ -55,11 +55,10 @@ def test_agent_workflow_docs_exist_and_match_current_scope():
         assert "TET4/TRIA3/BEAM/MASS/DISCRETE" in doc_text
         assert "existing-line mesh" in doc_text
         assert "program.tools.hm_boundary_safe" in doc_text
-        assert "constraint_route_not_verified" in doc_text
-        assert "blocked_route_name=apply_constraint_spc" in doc_text
-        assert "tcl_sent=false" in doc_text
+        assert "BOUNDARY_SPC" in doc_text
+        assert "GUI Tcl templates" in doc_text
         assert "program.tools.hm_model_writer" in doc_text
-        assert "dyna_card_route_not_verified" in doc_text
+        assert "curated material" in doc_text
         assert "set_material" in doc_text
         assert "set_property" in doc_text
         assert "set_contact" in doc_text
@@ -108,7 +107,7 @@ def test_agent_workflow_docs_exist_and_match_current_scope():
         assert "checked_tools.lsdyna_runner_dry_run_true_offline_only.offline_review_only = true" in smoke_doc_text
         assert "hm_element_capability_matrix.summary.final_k_export_supported = []" in smoke_doc_text
         assert "hm_element_capability_matrix.summary.hypermesh_gui_k_export_supported = []" in smoke_doc_text
-    assert '"error_type": "experimental_route_not_executable"' in api_text
+    assert "hm_create_solid_box" in api_text
     smoke_section = api_text.split("### `hm_gui_modeling_smoke`", 1)[1]
     assert "visual_counts.elements > 0" in smoke_section
     assert "visual_counts.solids > 0" not in smoke_section
@@ -133,7 +132,7 @@ def test_agent_workflow_docs_exist_and_match_current_scope():
     assert "hm_create_surface_plate" in readme_text
     assert "hm_create_shell_plate" in readme_text
     assert "hm_create_beam_line" in readme_text
-    assert "默认阻断" in readme_text
+    assert "基础材料" in readme_text
     assert "geometry solid box" in readme_text
     assert "`*tetmesh`、surface automesh" in readme_text
     assert "K export" in readme_text
