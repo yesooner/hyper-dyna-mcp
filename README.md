@@ -24,56 +24,22 @@ Hyper-Dyna-MCP 是一个面向本机 HyperMesh GUI 的 MCP server。它通过 `F
 ## 工作流程
 
 ```mermaid
-flowchart TD
-    subgraph agent["🤖 Agent Layer"]
-        A["Claude Code / Codex"]
-    end
-
-    subgraph mcp["⚙️ MCP Server"]
-        B["FastMCP stdio<br/>program.server"]
-        C["hm_modeling_action"]
-        D["hm_element_capability_matrix"]
-        R["hm_set_keyword<br/>(curated keywords)"]
-    end
-
-    subgraph decision["🔀 Route Decision"]
-        E{{"路线是否 verified?"}}
-    end
-
-    subgraph exec["✅ Verified Execution"]
-        F["execute_tcl_gui / send_tcl_to_gui"]
-        G["HyperMesh GUI<br/>创建 / 显示 / 保存 .hm"]
-    end
-
-    subgraph blocked["🚫 Recording Promotion Loop"]
-        H["recording_requirements"]
-        I["HyperMesh command recording"]
-        J["validate_recording"]
-        K{{"promotion_ready?"}}
-        L["加入 verified map"]
-    end
-
-    A -->|"MCP protocol"| B
-    B --> C
-    B --> R
-    C --> D
-    D --> E
-    E -- "verified" --> F
-    E -- "curated keyword" --> R
+flowchart LR
+    A["Claude Code / Codex"] -->|"MCP protocol"| B["FastMCP stdio\nprogram.server"]
+    B --> C["hm_modeling_action"]
+    B --> R["hm_set_keyword\n(curated keywords)"]
+    C --> D["hm_element_capability_matrix"]
+    D --> E{{"verified?"}}
+    E -->|"yes"| F["execute_tcl_gui"]
+    E -->|"curated"| R
     R --> F
-    F --> G
-    E -- "unsupported" --> H
-    H --> I
-    I --> J
-    J --> K
-    K -- "是" --> L
-    K -- "否" --> H
-
-    style agent fill:#e3f2fd,stroke:#1565c0
-    style mcp fill:#f3e5f5,stroke:#6a1b9a
-    style decision fill:#fff8e1,stroke:#f9a825
-    style exec fill:#e8f5e9,stroke:#2e7d32
-    style blocked fill:#fce4ec,stroke:#c62828
+    F --> G["HyperMesh GUI\ncreate / display / save"]
+    E -->|"no"| H["recording_requirements"]
+    H --> I["command recording"]
+    I --> J["validate_recording"]
+    J --> K{{"promotion_ready?"}}
+    K -->|"yes"| L["add to verified map"]
+    K -->|"no"| H
 ```
 
 ## 快速使用
