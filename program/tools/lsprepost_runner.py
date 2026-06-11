@@ -1,14 +1,12 @@
-"""LS-PrePost cfile execution.
+"""LS-PrePost cfile command planning.
 
-Supports batch mode (lsprepost cfile=path) with timeout.
-dry_run=True by default — does not launch real software.
+Current project scope is HyperMesh GUI-only MCP. This module may prepare
+dry-run command metadata for tests and future work, but it must not launch
+LS-PrePost.
 """
 
 from __future__ import annotations
 
-import os
-import subprocess
-import time
 from pathlib import Path
 
 try:
@@ -18,14 +16,6 @@ except ImportError:
     logger = logging.getLogger(__name__)
 
 from program.tools.path_tools import load_yaml
-
-_RUNS_DIR = Path(__file__).resolve().parents[2] / "runs"
-
-
-def _ensure_runs_dir() -> Path:
-    _RUNS_DIR.mkdir(parents=True, exist_ok=True)
-    return _RUNS_DIR
-
 
 def _resolve_lsprepost(override: str | Path | None = None) -> Path:
     """Resolve lsprepost.exe path from override or YAML config."""
@@ -54,17 +44,28 @@ def run_lsprepost(
     timeout: int = 600,
     lsprepost_exe: str | Path | None = None,
 ) -> dict:
-    """Execute an LS-PrePost cfile.
+    """Prepare an LS-PrePost command, but block real LS-PrePost execution.
 
     Args:
         cfile: Path to .cfile command file.
-        dry_run: If True, only return the command without executing.
+        dry_run: Must remain True in the current GUI-only MCP scope.
         timeout: Subprocess timeout in seconds.
         lsprepost_exe: Override path to lsprepost executable.
 
     Returns:
         dict with keys: success, command, stdout, stderr, etc.
     """
+    if not dry_run:
+        return {
+            "success": False,
+            "error_type": "lsprepost_execution_out_of_scope",
+            "error": "LS-PrePost execution is outside the current HyperMesh GUI-only MCP scope.",
+            "command": [],
+            "command_str": "",
+            "dry_run": dry_run,
+            "executed": False,
+        }
+
     exe = _resolve_lsprepost(lsprepost_exe)
     cmd = [str(exe), f"cfile={cfile}"]
 
@@ -75,37 +76,5 @@ def run_lsprepost(
         "executed": False,
     }
 
-    if dry_run:
-        logger.info("dry_run=True — skipping LS-PrePost execution")
-        return result
-
-    try:
-        completed = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=max(1, timeout),
-        )
-        result.update({
-            "success": completed.returncode == 0,
-            "returncode": completed.returncode,
-            "stdout": completed.stdout,
-            "stderr": completed.stderr,
-            "executed": True,
-        })
-    except subprocess.TimeoutExpired as exc:
-        result.update({
-            "success": False,
-            "timeout": True,
-            "stdout": exc.stdout or "",
-            "stderr": exc.stderr or "",
-            "message": f"LS-PrePost did not finish within {timeout} seconds.",
-            "executed": True,
-        })
-    except FileNotFoundError as exc:
-        result.update({
-            "success": False,
-            "error": str(exc),
-        })
-
+    logger.info("dry_run=True — skipping LS-PrePost execution")
     return result

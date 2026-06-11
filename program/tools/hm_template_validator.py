@@ -1,8 +1,9 @@
-"""Validate Tcl templates against a live HyperMesh GUI.
+"""Review Tcl templates without bypassing verified MAP gates.
 
 Reads each template from templates/keyword/, renders with dummy parameters,
-sends the first HyperMesh command (*createentity) to the GUI listener,
-and records success/failure.
+and extracts the first HyperMesh command for offline inspection. Live execution
+is disabled by default because keyword templates are not execution authority;
+routes must be promoted through dyna_keyword_query / hm_set_keyword policy.
 
 Usage:
     from program.tools.hm_template_validator import validate_category, validate_all
@@ -10,7 +11,7 @@ Usage:
     # Validate one category
     results = validate_category("control", timeout=5)
 
-    # Validate everything
+    # Review everything without sending Tcl
     report = validate_all(timeout=5)
 """
 
@@ -26,8 +27,6 @@ try:
 except ImportError:
     import logging
     logger = logging.getLogger(__name__)
-
-from program.tools.hm_gui import execute_tcl_gui
 
 TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "templates" / "keyword"
 
@@ -57,20 +56,22 @@ def _fill_dummy_params(template_content: str) -> str:
     return filled
 
 
-def validate_template(keyword: str, timeout: int = 5) -> dict[str, Any]:
-    """Validate a single template against HyperMesh GUI.
+def validate_template(keyword: str, timeout: int = 5, execute: bool = False) -> dict[str, Any]:
+    """Review a single template without executing Tcl.
 
     Steps:
         1. Load the .tcl template file
         2. Fill all placeholders with dummy values
         3. Extract the first command (*createentity or similar)
-        4. Send it to HyperMesh GUI via execute_tcl_gui
+        4. Stop before GUI execution and return blocked/offline status
         5. Return result dict
 
     Args:
         keyword: Template keyword name (e.g., "CONTROL_TERMINATION")
                  or category/name path (e.g., "control/CONTROL_TERMINATION")
-        timeout: Socket timeout in seconds.
+        timeout: Compatibility timeout in seconds.
+        execute: Compatibility flag accepted by legacy callers. It does not
+            enable Tcl execution in the current HyperMesh GUI-only MCP scope.
 
     Returns:
         dict with keys: keyword, status ("ok"/"fail"/"skip"/"missing"),
@@ -83,6 +84,10 @@ def validate_template(keyword: str, timeout: int = 5) -> dict[str, Any]:
         "response": None,
         "error": None,
         "elapsed_ms": 0,
+        "execution_allowed": False,
+        "tcl_sent": False,
+        "policy": "template_review_only_execution_blocked",
+        "requested_execute": bool(execute),
     }
 
     # Resolve template path
@@ -110,24 +115,16 @@ def validate_template(keyword: str, timeout: int = 5) -> dict[str, Any]:
 
     result["first_command"] = first_cmd
 
-    # Send to GUI
-    t0 = time.perf_counter()
-    try:
-        gui_result = execute_tcl_gui(first_cmd, timeout=timeout, enforce_rules=False)
-        elapsed = (time.perf_counter() - t0) * 1000
-        result["elapsed_ms"] = round(elapsed, 1)
-        result["response"] = gui_result.get("response", "")
-
-        if gui_result.get("success"):
-            result["status"] = "ok"
-        else:
-            result["status"] = "fail"
-            result["error"] = gui_result.get("error") or gui_result.get("response", "")
-    except Exception as e:
-        elapsed = (time.perf_counter() - t0) * 1000
-        result["elapsed_ms"] = round(elapsed, 1)
-        result["status"] = "fail"
-        result["error"] = str(e)
+    result["status"] = "blocked"
+    result["error_type"] = "template_execution_not_verified"
+    result["error"] = (
+        "Template validation is offline-only. The execute flag is accepted for "
+        "legacy compatibility but cannot enable Tcl execution. Use "
+        "dyna_keyword_query and hm_set_keyword policy gates; do not execute "
+        "keyword templates as a shortcut around verified dataname/cardimage routes."
+    )
+    result["execution_allowed"] = False
+    result["tcl_sent"] = False
 
     return result
 
@@ -192,8 +189,8 @@ def _resolve_template_path(keyword: str) -> Path | None:
     return None
 
 
-def validate_category(category: str, timeout: int = 5) -> list[dict[str, Any]]:
-    """Validate all templates in a category directory.
+def validate_category(category: str, timeout: int = 5, execute: bool = False) -> list[dict[str, Any]]:
+    """Review all templates in a category directory.
 
     Args:
         category: Subdirectory name under templates/keyword/ (e.g., "control")
@@ -210,7 +207,7 @@ def validate_category(category: str, timeout: int = 5) -> list[dict[str, Any]]:
     results = []
     for tpl_path in templates:
         keyword = f"{category.lower()}/{tpl_path.stem}"
-        result = validate_template(keyword, timeout=timeout)
+        result = validate_template(keyword, timeout=timeout, execute=execute)
         results.append(result)
 
     return results
@@ -219,8 +216,9 @@ def validate_category(category: str, timeout: int = 5) -> list[dict[str, Any]]:
 def validate_all(
     batch_size: int = 50,
     timeout: int = 5,
+    execute: bool = False,
 ) -> dict[str, Any]:
-    """Validate all templates across all categories.
+    """Review all templates across all categories.
 
     Args:
         batch_size: Number of templates to validate before logging progress.
@@ -231,6 +229,7 @@ def validate_all(
             - total: int
             - ok: list of keyword names
             - fail: list of {keyword, error, ...}
+            - blocked: list of keyword names reviewed without execution
             - skip: list of keyword names
             - missing: list of keyword names
             - categories: dict of category -> {ok, fail, skip, missing, total}
@@ -240,6 +239,7 @@ def validate_all(
         "total": 0,
         "ok": [],
         "fail": [],
+        "blocked": [],
         "skip": [],
         "missing": [],
         "categories": {},
@@ -257,11 +257,11 @@ def validate_all(
     for cat in categories:
         cat_dir = TEMPLATES_DIR / cat
         templates = sorted(cat_dir.glob("*.tcl"))
-        cat_stats = {"ok": 0, "fail": 0, "skip": 0, "missing": 0, "total": len(templates)}
+        cat_stats = {"ok": 0, "fail": 0, "blocked": 0, "skip": 0, "missing": 0, "total": len(templates)}
 
         for tpl_path in templates:
             keyword = f"{cat}/{tpl_path.stem}"
-            result = validate_template(keyword, timeout=timeout)
+            result = validate_template(keyword, timeout=timeout, execute=execute)
             status = result["status"]
 
             if status == "ok":
@@ -274,6 +274,9 @@ def validate_all(
                     "first_command": result.get("first_command", ""),
                 })
                 cat_stats["fail"] += 1
+            elif status == "blocked":
+                report["blocked"].append(keyword)
+                cat_stats["blocked"] += 1
             elif status == "skip":
                 report["skip"].append(keyword)
                 cat_stats["skip"] += 1
@@ -289,7 +292,8 @@ def validate_all(
                 logger.info(
                     f"Progress: {count} templates validated, "
                     f"elapsed={elapsed:.1f}s, "
-                    f"ok={len(report['ok'])}, fail={len(report['fail'])}"
+                    f"ok={len(report['ok'])}, blocked={len(report['blocked'])}, "
+                    f"fail={len(report['fail'])}"
                 )
 
         report["categories"][cat] = cat_stats

@@ -17,8 +17,9 @@ except ImportError:
     logger = logging.getLogger(__name__)
 
 from program.tools.hm_template_engine import HmTemplateEngine
-from program.tools.hm_gui import execute_tcl_gui
+from program.tools.hm_gui import execute_tcl_gui, _check_file_io
 from program.tools.dyna_keyword_map import query_dyna_keyword
+from program.tools.hm_policy import check_meshing_rules
 
 _engine = HmTemplateEngine()
 
@@ -56,6 +57,8 @@ def hm_set_keyword(
                 "HyperMesh command recording verifies every required dataname."
             ),
             "execution_ready": policy.get("execution_ready"),
+            "execution_allowed": False,
+            "tcl_sent": False,
             "execution_decision": policy.get("execution_decision"),
             "execution_blockers": policy.get("execution_blockers"),
             "advisory_only": policy.get("advisory_only"),
@@ -77,6 +80,36 @@ def hm_set_keyword(
         return {"success": False, "error": str(e)}
     except Exception as e:
         return {"success": False, "error": f"Template render error: {e}"}
+
+    violation = check_meshing_rules(script)
+    if violation:
+        message = violation.get("error", violation.get("message", "Rule violation"))
+        return {
+            "success": False,
+            "keyword": keyword,
+            "params": params,
+            "error_type": violation.get("error_type", "mesh_route_not_verified"),
+            "error": message,
+            "policy_violation": violation.get("policy_violation", True),
+            "blocked_command": violation.get("blocked_command"),
+            "blocked_route_name": violation.get("blocked_route_name"),
+            "execution_allowed": violation.get("execution_allowed", False),
+            "tcl_sent": violation.get("tcl_sent", False),
+            "required_tool": "hm_modeling_action",
+        }
+
+    file_io_error = _check_file_io(script)
+    if file_io_error:
+        return {
+            "success": False,
+            "keyword": keyword,
+            "params": params,
+            "error_type": "file_io_route_not_allowed",
+            "error": file_io_error,
+            "execution_allowed": False,
+            "tcl_sent": False,
+            "required_tool": "hm_auto_save",
+        }
 
     # Execute line by line with segfault protection
     lines = [l.strip() for l in script.split("\n") if l.strip() and not l.strip().startswith("#")]

@@ -21,24 +21,36 @@ _ELEMENT_CAPABILITY_ALIASES = {
     "hex": "solid_hex",
     "hex8": "solid_hex",
     "brick": "solid_hex",
+    "solid_hex": "solid_hex",
     "tet": "solid_tet",
     "tetra": "solid_tet",
     "tet4": "solid_tet",
+    "solid_tet": "solid_tet",
     "shell": "shell_quad",
     "shell element": "shell_quad",
     "quad": "shell_quad",
     "quad4": "shell_quad",
+    "shell_quad": "shell_quad",
     "tria": "shell_tria",
     "tri": "shell_tria",
     "tria3": "shell_tria",
+    "shell_tria": "shell_tria",
     "line": "line_beam",
     "beam": "line_beam",
     "beam element": "line_beam",
+    "bar2": "line_beam",
+    "line_beam": "line_beam",
     "lumped": "lumped_mass",
     "mass": "lumped_mass",
     "lumped element": "lumped_mass",
+    "lumped_mass": "lumped_mass",
     "discrete": "discrete",
     "discrete element": "discrete",
+    "district": "discrete",
+    "spring": "discrete",
+    "mixed": "mixed",
+    "hybrid": "mixed",
+    "mixed mesh": "mixed",
 }
 
 _ELEMENT_CAPABILITY_MATRIX = {
@@ -75,9 +87,11 @@ _ELEMENT_CAPABILITY_MATRIX = {
         "labels": ["TET", "TET4", "tetra solid"],
         "element_family": "solid",
         "creation": {
-            "supported": False,
+            "supported": True,
+            "tool": "hm_create_tet4",
             "route_name": "create_tet_element",
-            "reason": "Direct TET element creation command/card route is not runtime-verified.",
+            "entity_kind": "fe_tet_element",
+            "notes": "Creates one direct TET4 element with *createelement 204. This is not geometry *tetmesh.",
         },
         "meshing": {
             "supported": False,
@@ -139,9 +153,11 @@ _ELEMENT_CAPABILITY_MATRIX = {
         "labels": ["tria", "TRIA3", "tri shell"],
         "element_family": "shell",
         "creation": {
-            "supported": False,
+            "supported": True,
+            "tool": "hm_create_tria3",
             "route_name": "create_shell_tria3",
-            "reason": "Direct shell TRIA3 creation route is not runtime-verified.",
+            "entity_kind": "fe_shell_element",
+            "notes": "Creates one direct TRIA3 element with *createelement 103. This is not surface automesh.",
         },
         "meshing": {
             "supported": False,
@@ -171,7 +187,7 @@ _ELEMENT_CAPABILITY_MATRIX = {
         "meshing": {
             "supported": False,
             "route_name": "line_mesh_beam",
-            "reason": "Line-to-beam meshing command sequence is not verified.",
+            "reason": "Meshing an already-existing selected line is unsupported until HyperMesh command recording verifies the line mesh workflow. Use creation.create_beam_line only for generating a new straight visual line plus BAR2/BEAM elements.",
         },
         "material_assignment": {
             "supported": False,
@@ -235,6 +251,29 @@ _ELEMENT_CAPABILITY_MATRIX = {
             "reason": "Discrete element K keyword writer is not implemented as a structured route.",
         },
     },
+    "mixed": {
+        "labels": ["mixed mesh", "hybrid mesh", "solid + shell + beam"],
+        "element_family": "mixed",
+        "creation": {
+            "supported": False,
+            "route_name": "mixed_element_workflow",
+            "reason": "Mixed workflows are not a single verified MCP route.",
+        },
+        "meshing": {
+            "supported": False,
+            "route_name": "mixed_mesh_workflow",
+            "reason": "Mixed HEX/TET/SHELL/BEAM meshing requires a recorded workflow with transition/interface rules.",
+        },
+        "material_assignment": {
+            "supported": False,
+            "route_name": "mixed_material_assignment",
+            "reason": "Mixed model material/property/section assignment requires per-family verified datanames and binding rules.",
+        },
+        "k_file_generation": {
+            "supported": False,
+            "reason": "Mixed-model K generation is not an MCP execution route and must not bypass HyperMesh GUI verification.",
+        },
+    },
 }
 
 
@@ -262,6 +301,14 @@ def get_unsupported_route(route_name: str) -> dict[str, Any] | None:
     return route
 
 
+def get_experimental_route(route_name: str) -> dict[str, Any] | None:
+    """Return an experimental route record, if documented."""
+    route = load_command_map().get("experimental_routes", {}).get(route_name)
+    if not route:
+        return None
+    return route
+
+
 def require_verified_route(route_name: str) -> dict[str, Any]:
     """Return a verified route or raise a clear unsupported-route error."""
     route = get_verified_route(route_name)
@@ -272,7 +319,40 @@ def require_verified_route(route_name: str) -> dict[str, Any]:
     if unsupported:
         reason = unsupported.get("reason", "Route is not verified.")
         raise ValueError(f"HyperMesh Tcl route is unsupported: {route_name}. {reason}")
+    experimental = load_command_map().get("experimental_routes", {}).get(route_name)
+    if experimental:
+        reason = experimental.get("execution_block_reason", "Route is experimental.")
+        raise ValueError(f"HyperMesh Tcl route is experimental: {route_name}. {reason}")
     raise ValueError(f"HyperMesh Tcl route is not verified: {route_name}")
+
+
+def route_allows_mcp_execution(route: dict[str, Any]) -> bool:
+    """Return whether a verified route is allowed for MCP tool execution."""
+    if route.get("mcp_execution_allowed") is False:
+        return False
+    if route.get("agent_execution_allowed") is False:
+        return False
+    if route.get("execution_stage") == "experimental":
+        return False
+    return True
+
+
+def require_executable_route(route_name: str) -> dict[str, Any]:
+    """Return a verified route that is explicitly allowed for MCP execution."""
+    experimental = get_experimental_route(route_name)
+    if experimental:
+        reason = experimental.get("execution_block_reason") or (
+            "Route is experimental and must be promoted before MCP execution."
+        )
+        raise ValueError(f"HyperMesh Tcl route is not executable by MCP: {route_name}. {reason}")
+
+    route = require_verified_route(route_name)
+    if route_allows_mcp_execution(route):
+        return route
+    reason = route.get("execution_block_reason") or route.get("reason") or (
+        "Route is verified as source evidence but is not allowed for MCP execution."
+    )
+    raise ValueError(f"HyperMesh Tcl route is not executable by MCP: {route_name}. {reason}")
 
 
 def list_verified_routes() -> list[dict[str, Any]]:
@@ -290,6 +370,7 @@ def command_map_stats() -> dict[str, Any]:
     data = load_command_map()
     routes = data.get("routes", {})
     unsupported = data.get("unsupported_routes", {})
+    experimental = data.get("experimental_routes", {})
     validation = validate_command_map(data)
     return {
         "verified_routes": sum(1 for route in routes.values() if route.get("status") == "verified"),
@@ -299,10 +380,24 @@ def command_map_stats() -> dict[str, Any]:
             if route.get("status") == "verified" and route.get("tested_in_session") is True
         ),
         "unsupported_routes": len(unsupported),
+        "experimental_routes": len(experimental),
         "map_valid": validation["success"],
         "map_errors": validation["errors"],
         "map_warnings": validation["warnings"],
     }
+
+
+def canonical_element_type(element_type: str | None) -> str | None:
+    """Return the canonical element capability key for a user-facing label."""
+    if not element_type:
+        return None
+    normalized = element_type.strip().lower()
+    return _ELEMENT_CAPABILITY_ALIASES.get(normalized, normalized)
+
+
+def known_element_types() -> list[str]:
+    """Return canonical element types supported by the capability matrix."""
+    return sorted(_ELEMENT_CAPABILITY_MATRIX)
 
 
 def element_capability_matrix(element_type: str | None = None) -> dict[str, Any]:
@@ -324,6 +419,12 @@ def element_capability_matrix(element_type: str | None = None) -> dict[str, Any]
                 enriched[area]["verification_level"] = (
                     "runtime_validated" if route.get("tested_in_session") is True else "source_verified_runtime_pending"
                 )
+                enriched[area]["mcp_execution_allowed"] = route_allows_mcp_execution(route)
+                if not enriched[area]["mcp_execution_allowed"]:
+                    enriched[area]["execution_block_reason"] = route.get(
+                        "execution_block_reason",
+                        "Route is not allowed for default MCP/agent execution.",
+                    )
             elif route_name in unsupported:
                 enriched[area]["route_status"] = "unsupported"
                 enriched[area]["required_verification"] = unsupported[route_name].get("required_verification", [])
@@ -336,9 +437,12 @@ def element_capability_matrix(element_type: str | None = None) -> dict[str, Any]
         k_file_generation = enriched.get("k_file_generation")
         if isinstance(k_file_generation, dict):
             k_file_generation.setdefault("role", "offline_fixture_validation_only")
+            k_file_generation.setdefault("fixture_available", bool(k_file_generation.get("supported") is True))
             k_file_generation.setdefault("execution_scope", "offline_ls_dyna_keyword_fixture_only")
             k_file_generation.setdefault("agent_execution_allowed", False)
             k_file_generation.setdefault("mcp_execution_allowed", False)
+            k_file_generation.setdefault("final_k_export_allowed", False)
+            k_file_generation.setdefault("hypermesh_gui_export_route", False)
             k_file_generation.setdefault("preferred_modeling_path", "HyperMesh GUI Tcl listener / Tcl Console")
             k_file_generation.setdefault(
                 "guardrail",
@@ -347,7 +451,7 @@ def element_capability_matrix(element_type: str | None = None) -> dict[str, Any]
         return enriched
 
     if element_type:
-        key = _ELEMENT_CAPABILITY_ALIASES.get(element_type.strip().lower(), element_type.strip().lower())
+        key = canonical_element_type(element_type)
         item = _ELEMENT_CAPABILITY_MATRIX.get(key)
         if item is None:
             return {
@@ -400,6 +504,16 @@ def element_capability_matrix(element_type: str | None = None) -> dict[str, Any]
                 for name, item in capabilities.items()
                 if item.get("k_file_generation", {}).get("mcp_execution_allowed") is True
             ),
+            "final_k_export_supported": sorted(
+                name
+                for name, item in capabilities.items()
+                if item.get("k_file_generation", {}).get("final_k_export_allowed") is True
+            ),
+            "hypermesh_gui_k_export_supported": sorted(
+                name
+                for name, item in capabilities.items()
+                if item.get("k_file_generation", {}).get("hypermesh_gui_export_route") is True
+            ),
         },
         "capabilities": capabilities,
     }
@@ -420,6 +534,7 @@ def validate_command_map(data: dict[str, Any] | None = None) -> dict[str, Any]:
     command_map = data if data is not None else load_command_map()
     routes = command_map.get("routes", {})
     unsupported = command_map.get("unsupported_routes", {})
+    experimental = command_map.get("experimental_routes", {})
     errors: list[str] = []
     warnings: list[str] = []
 
@@ -462,6 +577,15 @@ def validate_command_map(data: dict[str, Any] | None = None) -> dict[str, Any]:
         for route_name, route in unsupported.items():
             if not isinstance(route, dict) or route.get("status") != "unsupported":
                 errors.append(f"{route_name}: unsupported route must have status=unsupported.")
+
+    if not isinstance(experimental, dict):
+        errors.append("experimental_routes must be an object.")
+    else:
+        for route_name, route in experimental.items():
+            if not isinstance(route, dict) or route.get("status") != "experimental":
+                errors.append(f"{route_name}: experimental route must have status=experimental.")
+                continue
+            _validate_experimental_route(route_name, route, errors)
 
     return {
         "success": not errors,
@@ -514,6 +638,18 @@ def _validate_fe_mesh_route(route_name: str, route: dict[str, Any], command_text
             for required in ("*createnode", "*createmark nodes", "*masselement"):
                 if required not in command_text:
                     errors.append(f"{route_name}: missing required command marker {required}.")
+        if route_name == "create_tet_element":
+            if route.get("element_config") != 204:
+                errors.append(f"{route_name}: element_config must remain 204 for TET4 elements.")
+            for required in ("*createnode", "*createlist nodes", "*createelement 204"):
+                if required not in command_text:
+                    errors.append(f"{route_name}: missing required command marker {required}.")
+        if route_name == "create_shell_tria3":
+            if route.get("element_config") != 103:
+                errors.append(f"{route_name}: element_config must remain 103 for TRIA3 elements.")
+            for required in ("*createnode", "*createlist nodes", "*createelement 103"):
+                if required not in command_text:
+                    errors.append(f"{route_name}: missing required command marker {required}.")
         for forbidden in ("*solidblock", "*tetmesh", "*surfacecreatenurbs"):
             if forbidden in command_text:
                 errors.append(f"{route_name}: FE route must not contain {forbidden}.")
@@ -537,6 +673,26 @@ def _validate_geometry_solid_route(
 
     if route.get("tested_in_session") is not True:
         warnings.append(f"{route_name}: source verified, runtime validation still pending in target HyperMesh.")
+        if route.get("mcp_execution_allowed") is not False:
+            errors.append(f"{route_name}: source-verified geometry_solid route must set mcp_execution_allowed=false.")
+        if route.get("agent_execution_allowed") is not False:
+            errors.append(f"{route_name}: source-verified geometry_solid route must set agent_execution_allowed=false.")
+        if route.get("execution_stage") != "experimental":
+            errors.append(f"{route_name}: source-verified geometry_solid route must set execution_stage=experimental.")
+
+
+def _validate_experimental_route(route_name: str, route: dict[str, Any], errors: list[str]) -> None:
+    if route.get("execution_stage") != "experimental":
+        errors.append(f"{route_name}: experimental route must set execution_stage=experimental.")
+    if route.get("mcp_execution_allowed") is not False:
+        errors.append(f"{route_name}: experimental route must set mcp_execution_allowed=false.")
+    if route.get("agent_execution_allowed") is not False:
+        errors.append(f"{route_name}: experimental route must set agent_execution_allowed=false.")
+    if not route.get("execution_block_reason"):
+        errors.append(f"{route_name}: experimental route must document execution_block_reason.")
+    promotion_required = route.get("promotion_required")
+    if not isinstance(promotion_required, list) or not promotion_required:
+        errors.append(f"{route_name}: experimental route must document promotion_required steps.")
 
 
 def _validate_geometry_surface_route(

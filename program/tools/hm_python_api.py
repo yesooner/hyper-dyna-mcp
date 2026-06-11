@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import os
 import re
-import subprocess
 import time
 from pathlib import Path
 from typing import Any
@@ -185,9 +184,13 @@ def run_python_api_script(
     mode: str = "safe",
     hw_exe: str | Path | None = None,
 ) -> dict[str, Any]:
-    """Write and optionally execute a HyperMesh Python API script."""
-    api_cfg = _python_api_cfg()
+    """Write a HyperMesh Python API script and optionally return its launch command.
+
+    Real external launch is blocked in the current GUI-only MCP scope even when
+    callers pass ``dry_run=False``.
+    """
     if dry_run is None:
+        api_cfg = _python_api_cfg()
         dry_run = bool(api_cfg.get("default_dry_run", True))
 
     policy_error = check_python_api_policy(script, mode=mode)
@@ -198,6 +201,23 @@ def run_python_api_script(
             "error_type": "policy_error",
             "dry_run": dry_run,
             "executed": False,
+        }
+
+    if not dry_run:
+        return {
+            "success": False,
+            "dry_run": False,
+            "executed": False,
+            "script_path": None,
+            "command": [],
+            "error": (
+                "HyperMesh Python API external launch is outside the current MCP execution scope. "
+                "Use dry_run=True to generate the script/command, or query the already-running GUI "
+                "through hm_python_api_current_model_info."
+            ),
+            "error_type": "hypermesh_python_api_launch_out_of_scope",
+            "result_file": _extract_trusted_result_file(script),
+            "result": None,
         }
 
     script_path = write_python_api_script(script)
@@ -212,47 +232,6 @@ def run_python_api_script(
             "command": command,
             "message": "dry_run=True; HyperMesh was not launched.",
         }
-
-    exe = Path(command[0])
-    if not exe.exists():
-        return {
-            "success": False,
-            "dry_run": False,
-            "executed": False,
-            "script_path": str(script_path),
-            "command": command,
-            "error": f"hw.exe not found: {exe}",
-            "error_type": "path_error",
-        }
-
-    env = os.environ.copy()
-    install_dir = _hm_cfg().get("install_dir")
-    if install_dir:
-        env["ALTAIR_HOME"] = str(install_dir)
-        env.setdefault("HW_ROOTDIR", str(install_dir))
-
-    logger.info("Launching HyperMesh Python API script: %s", script_path)
-    proc = subprocess.run(
-        command,
-        cwd=str(exe.parent),
-        env=env,
-        capture_output=True,
-        text=True,
-        timeout=timeout,
-        check=False,
-    )
-    return {
-        "success": proc.returncode == 0,
-        "dry_run": False,
-        "executed": True,
-        "script_path": str(script_path),
-        "command": command,
-        "returncode": proc.returncode,
-        "stdout": proc.stdout,
-        "stderr": proc.stderr,
-        "result_file": _extract_trusted_result_file(script),
-        "result": _read_trusted_result_file(script),
-    }
 
 
 def _extract_trusted_result_file(script: str) -> str | None:
@@ -302,7 +281,6 @@ def query_current_gui_model_info_via_python(timeout: int = 30) -> dict[str, Any]
         build_current_gui_model_info_tcl(),
         timeout=timeout,
         mode="raw",
-        enforce_rules=False,
     )
     response = result.get("response", "")
     info: dict[str, Any] = {}

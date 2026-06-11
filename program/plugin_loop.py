@@ -97,12 +97,24 @@ def execute_tcl(command: dict[str, Any]) -> dict[str, Any]:
 
     timeout = command.get("timeout", 30)
     mode = command.get("mode", "safe")
-    result = send_tcl_to_gui(script, timeout=timeout, mode=mode)
+    # IPC command files are an external boundary. Do not trust command payloads
+    # to enable file I/O; dedicated in-process helpers must use socket mode.
+    allow_file_io = False
+    result = send_tcl_to_gui(script, timeout=timeout, mode=mode, allow_file_io=allow_file_io)
     return {
         "type": "execute_tcl",
         "success": result.get("success", False),
         "response": result.get("response", ""),
         "error": result.get("error"),
+        "error_type": result.get("error_type"),
+        "policy_violation": result.get("policy_violation"),
+        "blocked_command": result.get("blocked_command"),
+        "blocked_route_name": result.get("blocked_route_name"),
+        "execution_allowed": result.get("execution_allowed"),
+        "tcl_sent": result.get("tcl_sent"),
+        "retry_allowed": result.get("retry_allowed"),
+        "required_tool": result.get("required_tool"),
+        "allow_file_io": allow_file_io,
     }
 
 
@@ -139,17 +151,16 @@ def get_model_info(command: dict[str, Any]) -> dict[str, Any]:
 
 
 def export_keyword(command: dict[str, Any]) -> dict[str, Any]:
-    """Export model as LS-DYNA keyword file via HyperMesh."""
-    from program.tools.hm_gui import send_tcl_to_gui
-
+    """Block LS-DYNA keyword export in the current GUI-only MCP scope."""
     output = command.get("output", "output/exported.k")
-    script = f'*writefile "{output}" 1'
-
-    result = send_tcl_to_gui(script, timeout=30)
     return {
         "type": "export_keyword",
-        "success": result.get("success", False),
+        "success": False,
+        "error_type": "k_export_not_verified",
+        "error": "K export is outside the current HyperMesh GUI-only MCP scope until a verified GUI export route exists.",
         "output": output,
+        "execution_allowed": False,
+        "tcl_sent": False,
     }
 
 

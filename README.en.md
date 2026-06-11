@@ -1,177 +1,194 @@
 # Hyper-Dyna-MCP
 
 <p align="center">
-  <a href="./README.md"><img alt="中文" src="https://img.shields.io/badge/%E8%AF%AD%E8%A8%80-%E4%B8%AD%E6%96%87-blue"></a>
+  <a href="./README.md"><img alt="中文" src="https://img.shields.io/badge/语言-中文-blue"></a>
   <a href="./README.en.md"><img alt="English" src="https://img.shields.io/badge/Language-English-lightgrey"></a>
   <a href="./LICENSE"><img alt="License" src="https://img.shields.io/badge/License-AGPL--3.0-orange"></a>
 </p>
 
-Hyper-Dyna-MCP is a local MCP server for driving a running HyperMesh GUI session from Claude Code or Codex. It uses `FastMCP + stdio` for agent integration, while Python orchestrates verified Tcl routes sent to the HyperMesh GUI listener.
+Hyper-Dyna-MCP is a local MCP server for driving a running HyperMesh GUI session. It integrates with Claude Code / Codex through `FastMCP + stdio` and sends verified Tcl routes to the HyperMesh GUI listener.
 
-The current scope is HyperMesh GUI automation only. LS-DYNA solver execution, LS-PrePost execution, and K-file export are outside the active MCP tool surface.
+The current scope is HyperMesh GUI automation only. LS-DYNA solver execution, LS-PrePost, hmbatch, backend K writing, and K-file export are not active MCP execution capabilities.
 
-## ✅ Current Status
+## Current Status
 
-- Version: `1.0.0`
 - MCP transport: `FastMCP + stdio`
 - Runtime target: local HyperMesh GUI listener
-- Tool surface: 32 HyperMesh-focused MCP tools
-- FE route: verified structured HEX8 mesh route using `*createnode`, `*createlist nodes`, and `*createelement 208`
-- Solid route: `*solidblock` has local script evidence and still needs runtime validation in the target HyperMesh GUI session
-- Dyna keyword policy: structured MAP first; manual notes and embeddings are retrieval/explanation only
+- Default port: `47883`
+- Available FE creation: HEX8, TET4, QUAD4 shell, TRIA3, BAR2/BEAM, DISCRETE spring, MASS element
+- Available geometry creation: surface plate
+- Blocked by default: geometry solid box, `*tetmesh`, surface automesh, line mesh, material/property/section, EOS, constraints, LOAD, K export
 
-## 🎬 HyperMesh 2021 Demo Flow
+## Workflow
 
-This flow is based on a HyperMesh 2021 demonstration. The previous separate `source hmcustom.tcl` step has been removed from the README flow; keep the MCP server step and the HyperMesh listener/smoke step.
+```mermaid
+flowchart TD
+    A["Claude Code / Codex"] --> B["FastMCP stdio<br/>program.server"]
+    B --> C["Preferred entry<br/>hm_modeling_action"]
+    C --> D["Capability query<br/>hm_element_capability_matrix"]
+    D --> E{"Is the route verified?"}
+    E -- "Yes" --> F["Send Tcl<br/>HyperMesh GUI listener"]
+    F --> G["HyperMesh GUI<br/>create/display/save .hm"]
+    E -- "No" --> H["Block execution<br/>recording_requirements"]
+    H --> I["HyperMesh command recording"]
+    I --> J["validate_recording"]
+    J --> K{"promotion_ready?"}
+    K -- "Yes" --> L["Add to verified map"]
+    K -- "No" --> H
+```
 
-### Step 1: Register The MCP Server
+## Quick Start
 
-The recommended path is to let Claude Code / Codex start `program.server` from the stdio MCP configuration. Do not run the stdio MCP server as a normal long-lived HTTP background service.
+### 1. Register MCP
 
-Local MCP registration example:
+Let Claude Code / Codex start the server through stdio:
 
 ```json
 {
   "mcpServers": {
     "hyper-dyna-mcp": {
-      "command": "C:/path/to/conda/envs/hyper-dyna/python.exe",
-      "args": ["-B", "-X", "utf8", "-m", "program.server"],
-      "cwd": "C:/path/to/hyper-dyna-mcp"
+      "command": "<python>",
+      "args": ["-m", "program.server"],
+      "cwd": "<repo-root>",
+      "env": {
+        "PYTHONPATH": "<repo-root>"
+      }
     }
   }
 }
 ```
 
-Keep local MCP registration files outside Git. This repository ignores `.claude/`, `.codex/`, `claude_code_mcp*.json`, and machine-specific path configs.
+This project is not a FastAPI/HTTP service. You do not need to keep a Web server running.
 
-For entrypoint debugging only, run:
+### 2. Start The HyperMesh Listener
 
-```powershell
-C:/path/to/conda/envs/hyper-dyna/python.exe -B -X utf8 -m program.server
-```
-
-### Step 2: Connect HyperMesh And Run Smoke
-
-First call `start_hypermesh_gui_listener` from the MCP client to generate a Tcl listener file for the current machine. Then source the returned listener path in the HyperMesh Tcl Console, for example:
+Run this in the HyperMesh Tcl Console:
 
 ```tcl
-source "C:/path/to/hyper-dyna-mcp/runs/hm_gui_listener.tcl"
+set ::mcp_hm_port 47883
+source "<repo-root>/runs/hm_gui_listener.tcl"
 ```
 
-Expected listener metadata includes:
+Success should return:
 
 ```text
 HYPERMESH_MCP_PONG
-LISTENER_VERSION=2024-compat-v3
 ```
 
-Then run the connected GUI smoke test:
-
-```powershell
-C:/path/to/conda/envs/hyper-dyna/python.exe -B -X utf8 -m program.claude_smoke --config C:/path/to/local-mcp-config.json --with-gui --port 47884 --modeling-smoke
-```
-
-If a stale listener or occupied port blocks the demo, use the generated port-specific listener:
+If the port is occupied, use the fixed recovery port `47884`:
 
 ```tcl
-source "C:/path/to/hyper-dyna-mcp/runs/hm_gui_listener_47884.tcl"
+catch {mcp_stop}
+if {[llength [info commands mcp_start_on_port]]} {mcp_start_on_port 47884} else {source "<repo-root>/runs/hm_gui_listener_47884.tcl"}
 ```
 
-## 🧭 Architecture Flow
+### 3. Verify
 
-```mermaid
-flowchart LR
-    U["User / Agent"] --> C["Claude Code / Codex"]
-    C --> M["FastMCP stdio<br/>program.server"]
-    M --> T["MCP Tools<br/>hm_create_fe_cube / hm_create_solid_box / dyna_keyword_query"]
-    T --> V["Verified Maps<br/>hm_command_map.json<br/>dyna_keyword_map.json"]
-    T --> S["Socket Client<br/>program.tools.hm_gui"]
-    S --> L["HyperMesh Tcl Listener<br/>runs/hm_gui_listener*.tcl"]
-    L --> H["HyperMesh GUI"]
-    H --> R["Model State<br/>FE elements / geometry solids / visibility"]
-    R --> M
+Connected HyperMesh smoke:
 
-    V -. "verified routes only" .-> T
-    T -. "FE mesh route" .-> FE["*createnode<br/>*createlist nodes<br/>*createelement 208"]
-    T -. "Geometry solid route" .-> SO["*solidblock<br/>runtime validation required"]
+```powershell
+<python> -B -X utf8 -m program.claude_smoke --config <mcp-config.json> --with-gui --port 47883 --modeling-smoke
 ```
 
-## 🛠️ Main Tools
+Local no-GUI check:
 
-Common MCP tools:
+```powershell
+<python> -B -X utf8 -m program.claude_smoke --config <mcp-config.json>
+```
+
+## Common Tools
+
+Prefer these tools:
 
 ```text
-ping
-check_environment
-start_hypermesh_gui_listener
+hm_modeling_action
+hm_element_capability_matrix
+hm_command_map
+hm_gui_modeling_smoke
+hm_visual_refresh
+hm_auto_save
 check_hypermesh_connection
 diagnose_hypermesh_listener
 set_hypermesh_listener_port
-get_model_info
-execute_tcl_gui
-hm_auto_save
-hm_check_model
-hm_read_materials
-hm_read_components
-hm_set_keyword
+```
+
+Direct creation tools:
+
+```text
 hm_create_fe_cube
-hm_create_solid_box
-hm_visual_refresh
-hm_gui_modeling_smoke
-hm_command_map
+hm_create_surface_plate
+hm_create_shell_plate
+hm_create_tet4
+hm_create_tria3
+hm_create_beam_line
+hm_create_discrete_spring
+hm_create_lumped_mass
+```
+
+LS-DYNA keyword tools are for planning and validation only:
+
+```text
 dyna_keyword_policy
 dyna_keyword_map_validate
 dyna_keyword_query
-hm_python_api_status
-execute_hm_python_api
-hm_python_api_current_model_info
+hm_set_keyword
 ```
 
-## 🧱 FE Mesh vs Geometry Solid
+## Capability Scope
 
-`hm_create_fe_cube` creates finite-element mesh entities, not HyperMesh CAD solids. It uses the verified FE route:
+| Type | Current status |
+| --- | --- |
+| HEX8 structured FE | Available through a verified Tcl route |
+| TET4 / TRIA3 direct element | Available, direct FE element only, not automesh |
+| QUAD4 shell plate | Available, structured FE shell, no surface automesh |
+| BAR2/BEAM line | Available, creates a new line and BEAM elements |
+| DISCRETE / MASS | Available, basic FE element creation |
+| Geometry surface | Available |
+| Geometry solid | Experimental, blocked by default |
+| `*tetmesh` / surface automesh / line mesh / `mixed_mesh_workflow` | Not open, requires command recording |
+| Material, property, section, EOS, constraints, LOAD | Not open, requires command recording |
+| K export | Not open; backend K writer cannot replace GUI export |
 
-```text
-*createnode
-*createlist nodes
-*createelement 208
-```
+FE mesh, geometry entities, and K files are separate routes. Agents must prefer the HyperMesh GUI listener and verified routes. `program.tools.k_writer`, `program.tools.k_parser`, and `program.tools.hm_k_integration` are offline fixture/test/review helpers only and must not bypass GUI modeling or pretend to be final `.k` export.
 
-`hm_create_solid_box` is a separate geometry-solid route based on `*solidblock`. It must prove, in the target HyperMesh GUI session, that `solids_count` increases, the solid is visible in the GUI, and the listener returns a successful result.
+## Recording Validation
 
-Do not replace the FE route with the solid route. They create different entity types and have different validation gates.
+Unopened routes must not be implemented by guessing Tcl. Use this flow:
 
-## 📚 Dyna Keyword Policy
+1. Call `hm_modeling_action(action="recording_requirements")` to inspect required evidence.
+2. Record real Tcl in HyperMesh command recording.
+3. Call `hm_modeling_action(action="validate_recording")` to validate recording and runtime evidence.
+4. Add the route to the verified map only after `promotion_ready=true`.
 
-Dyna keyword support uses structured maps:
-
-```text
-keyword -> cardimage -> dataname -> fields -> examples -> manual_refs
-```
-
-Manual notes and embeddings are not execution sources. They are used only for explanation, retrieval, and review. A keyword route becomes executable only after HyperMesh cardimages and datanames are verified through command recording or a trusted local dictionary source.
-
-## ✅ Validation
-
-For local development:
+## Local Validation
 
 ```powershell
-C:/path/to/conda/envs/hyper-dyna/python.exe -B -X utf8 -m pytest
+<python> -B -X utf8 -m pytest
+<python> -B -X utf8 -m program.claude_smoke --config <mcp-config.json>
 ```
 
-MCP smoke:
+## Key Files
 
-```powershell
-C:/path/to/conda/envs/hyper-dyna/python.exe -B -X utf8 -m program.claude_smoke --config C:/path/to/local-mcp-config.json
+```text
+program/server.py                 MCP server entry
+program/tools/hm_gui.py           GUI listener client and diagnostics
+program/tools/hm_model_writer.py  FE modeling helpers
+program/tools/hm_command_map.py   verified HyperMesh Tcl route map
+program/tools/dyna_keyword_map.py structured LS-DYNA keyword policy
+program/claude_smoke.py           MCP smoke test
+runs/hm_gui_listener.tcl          HyperMesh Tcl listener
+templates/hm_command_map.json     HyperMesh route definitions
+templates/dyna_keyword_map.json   LS-DYNA keyword route definitions
 ```
 
-## ⚖️ License
-
-This project is licensed under the GNU Affero General Public License v3.0. See [LICENSE](LICENSE).
-
-## 🔐 Boundaries
+## Boundaries
 
 - Do not guess unverified HyperMesh Tcl commands.
-- Do not execute LS-DYNA or LS-PrePost from the active MCP surface.
+- Do not execute LS-DYNA, LS-PrePost, or hmbatch from the current MCP surface.
 - Do not use Dyna manual text or embeddings as execution authority.
-- Do not commit `.claude/`, `.codex/`, local MCP JSON files, or machine-specific path YAML.
+- Do not use K writer/parser/integration to bypass HyperMesh GUI.
+- Do not commit `.claude/`, `.codex/`, local MCP JSON, commercial software paths, tokens, proxies, or local path YAML.
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0. See [LICENSE](LICENSE).

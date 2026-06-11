@@ -1,7 +1,8 @@
-"""K file keyword integration for HyperMesh.
+"""Offline K-file planning helpers for HyperMesh.
 
-Maps LS-DYNA K file keywords to HyperMesh Tcl commands.
-Creates HyperMesh objects that correspond to K file keywords.
+This module may parse LS-DYNA K files and generate advisory Tcl text for
+offline review. It must not execute generated K-derived Tcl in HyperMesh,
+because K-to-HyperMesh mapping bypasses verified command routes.
 """
 
 from __future__ import annotations
@@ -17,13 +18,21 @@ except ImportError:
     logger = logging.getLogger(__name__)
 
 from program.tools.k_parser import parse_k_file, KFile, KKeyword
-from program.tools.hm_gui import execute_tcl_gui
+
+_ADVISORY_HEADER = [
+    "# HYPERMESH MCP K-INTEGRATION ADVISORY ONLY",
+    "# These K-derived Tcl lines are intentionally commented out.",
+    "# Do not execute this text in HyperMesh; promote verified GUI routes first.",
+]
 
 
 @dataclass
 class IntegrationResult:
     success: bool
     objects_created: int = 0
+    error_type: str | None = None
+    execution_allowed: bool = False
+    tcl_sent: bool = False
     errors: list[str] = None
     warnings: list[str] = None
 
@@ -38,7 +47,7 @@ class IntegrationResult:
 
 
 def _generate_mat_tcl(kw: KKeyword) -> list[str]:
-    """Generate Tcl commands for *MAT keyword."""
+    """Build advisory Tcl text lines for a *MAT keyword."""
     lines = []
     pf = kw.parsed_fields
     if not pf:
@@ -65,7 +74,7 @@ def _generate_mat_tcl(kw: KKeyword) -> list[str]:
 
 
 def _generate_section_tcl(kw: KKeyword) -> list[str]:
-    """Generate Tcl commands for *SECTION keyword."""
+    """Build advisory Tcl text lines for a *SECTION keyword."""
     lines = []
     pf = kw.parsed_fields
     if not pf:
@@ -92,7 +101,7 @@ def _generate_section_tcl(kw: KKeyword) -> list[str]:
 
 
 def _generate_part_tcl(kw: KKeyword) -> list[str]:
-    """Generate Tcl commands for *PART keyword."""
+    """Build advisory Tcl text lines for a *PART keyword."""
     lines = []
     pf = kw.parsed_fields
     if not pf:
@@ -117,7 +126,7 @@ def _generate_part_tcl(kw: KKeyword) -> list[str]:
 
 
 def _generate_node_tcl(kw: KKeyword) -> list[str]:
-    """Generate Tcl commands for *NODE keyword."""
+    """Build advisory Tcl text lines for a *NODE keyword."""
     lines = []
     for data_line in kw.data_lines:
         pf = kw.parse_field_values() if not kw.parsed_fields else kw.parsed_fields
@@ -137,7 +146,7 @@ def _generate_node_tcl(kw: KKeyword) -> list[str]:
 
 
 def _generate_element_tcl(kw: KKeyword) -> list[str]:
-    """Generate Tcl commands for *ELEMENT keyword."""
+    """Build advisory Tcl text lines for an *ELEMENT keyword."""
     lines = []
     for data_line in kw.data_lines:
         from program.tools.k_parser import _parse_data_line
@@ -167,7 +176,7 @@ def _generate_element_tcl(kw: KKeyword) -> list[str]:
 
 
 def _generate_contact_tcl(kw: KKeyword) -> list[str]:
-    """Generate Tcl commands for *CONTACT keyword."""
+    """Build advisory Tcl text lines for a *CONTACT keyword."""
     lines = []
     pf = kw.parsed_fields
     if not pf:
@@ -194,7 +203,7 @@ def _generate_contact_tcl(kw: KKeyword) -> list[str]:
 
 
 def _generate_boundary_tcl(kw: KKeyword) -> list[str]:
-    """Generate Tcl commands for *BOUNDARY keyword."""
+    """Build advisory Tcl text lines for a *BOUNDARY keyword."""
     lines = []
     pf = kw.parsed_fields
     if not pf:
@@ -219,7 +228,7 @@ def _generate_boundary_tcl(kw: KKeyword) -> list[str]:
 
 
 def _generate_load_tcl(kw: KKeyword) -> list[str]:
-    """Generate Tcl commands for *LOAD keyword."""
+    """Build advisory Tcl text lines for a *LOAD keyword."""
     lines = []
     pf = kw.parsed_fields
     if not pf:
@@ -243,7 +252,7 @@ def _generate_load_tcl(kw: KKeyword) -> list[str]:
 
 
 def _generate_set_tcl(kw: KKeyword) -> list[str]:
-    """Generate Tcl commands for *SET keyword."""
+    """Build advisory Tcl text lines for a *SET keyword."""
     lines = []
     pf = kw.parsed_fields
     if not pf:
@@ -271,12 +280,13 @@ def integrate_k_file(
     timeout: int = 30,
     dry_run: bool = True,
 ) -> IntegrationResult:
-    """Integrate a K file into HyperMesh.
+    """Plan K-file integration, but block real HyperMesh execution.
 
     Args:
         k_file_path: Path to .k file
         timeout: Timeout for each Tcl command
-        dry_run: If True, only generate commands without executing
+        dry_run: Kept for legacy callers. Real execution is blocked even when
+            dry_run=False.
 
     Returns:
         IntegrationResult with success status and details
@@ -296,7 +306,7 @@ def integrate_k_file(
     if errors:
         result.warnings.extend(errors)
 
-    # Generate Tcl commands for each keyword
+    # Build advisory Tcl text lines for each keyword.
     all_commands: list[str] = []
 
     # Order: MATERIAL → SECTION → PART → NODE → ELEMENT → SET → BOUNDARY → LOAD → CONTACT
@@ -320,23 +330,29 @@ def integrate_k_file(
                     all_commands.extend(commands)
                     result.objects_created += 1
 
-    # Execute commands
     if not dry_run:
-        for cmd in all_commands:
-            r = execute_tcl_gui(cmd, timeout=timeout)
-            if not r.get("success"):
-                result.errors.append(f"Failed: {cmd[:50]}... → {r.get('error', '')[:100]}")
-                # Don't set success=False for non-critical commands
-                if "createmark" not in cmd and "element" not in cmd:
-                    result.success = False
+        result.success = False
+        result.error_type = "k_file_integration_execution_not_verified"
+        result.execution_allowed = False
+        result.tcl_sent = False
+        result.errors.append(
+            "K-file integration execution is outside the current HyperMesh GUI-only MCP scope."
+        )
+        result.warnings.append(
+            "Use verified HyperMesh command routes or recording promotion; do not execute K-derived Tcl."
+        )
 
     return result
 
 
 def generate_integration_script(k_file_path: str | Path) -> str:
-    """Generate a complete Tcl script for K file integration.
+    """Generate non-executable advisory Tcl text for K file integration review.
 
-    Returns the script as a string (for manual execution or batch mode).
+    The returned text is not a verified HyperMesh command route and must not be
+    executed by an agent. Generated Tcl commands are deliberately returned as
+    comments so copy/paste does not silently bypass verified MAP routes. Use
+    it only for offline review while promoting routes through command recording
+    and verified MAP evidence.
     """
     kfile = parse_k_file(k_file_path)
     all_commands: list[str] = []
@@ -360,4 +376,5 @@ def generate_integration_script(k_file_path: str | Path) -> str:
                 if commands:
                     all_commands.extend(commands)
 
-    return "\n".join(all_commands)
+    commented_commands = [f"# {line}" if line.strip() else "#" for line in all_commands]
+    return "\n".join([*_ADVISORY_HEADER, *commented_commands])

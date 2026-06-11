@@ -43,7 +43,7 @@ def auto_save(
 
     save_path = Path(model_path)
     script = f'*writefile "{quote_tcl_path(save_path)}" 1'
-    result = execute_tcl_gui(script, timeout=timeout)
+    result = execute_tcl_gui(script, timeout=timeout, allow_file_io=True)
 
     if result.get("success") and save_path.exists():
         logger.info(f"Auto-saved after '{step_name}': {model_path}")
@@ -69,25 +69,32 @@ def safe_execute(
     timeout: int = 30,
     save_after: bool = True,
 ) -> dict:
-    """Execute a Tcl script with auto-save on success.
+    """Blocked compatibility helper for arbitrary Tcl execution plus save.
 
-    Args:
-        description: Human-readable step description
-        script: Tcl script to execute
-        model_path: Path to save after execution
-        timeout: Socket timeout
-        save_after: Whether to auto-save after success
-
-    Returns:
-        dict with execution result and save status.
+    Arbitrary Tcl execution must go through verified modeling tools or explicit
+    user-provided ``execute_tcl_gui`` fallback. This helper is kept importable
+    for legacy callers but must not send Tcl.
     """
-    result = execute_tcl_gui(script, timeout=timeout)
-
-    if result.get("success") and save_after:
-        save_result = auto_save(description, model_path, timeout=timeout)
-        result["auto_save"] = save_result
-
-    return result
+    return {
+        "success": False,
+        "description": description,
+        "error_type": "safe_execute_not_verified",
+        "error": (
+            "safe_execute is a legacy arbitrary Tcl helper and is blocked. "
+            "Use verified modeling tools for execution and hm_auto_save for .hm saves."
+        ),
+        "execution_allowed": False,
+        "tcl_sent": False,
+        "auto_save_attempted": False,
+        "required_tool": "hm_modeling_action",
+        "save_tool": "hm_auto_save",
+        "requested": {
+            "script_length": len(script or ""),
+            "model_path": model_path,
+            "timeout": timeout,
+            "save_after": save_after,
+        },
+    }
 
 
 def safe_batch_execute(
@@ -95,32 +102,26 @@ def safe_batch_execute(
     model_path: str | None = None,
     timeout: int = 30,
 ) -> dict:
-    """Execute multiple steps with auto-save after each.
+    """Blocked compatibility helper for arbitrary batch Tcl execution.
 
-    Args:
-        steps: List of {"description": "...", "script": "..."}
-        model_path: Base path for saves
-        timeout: Per-step timeout
-
-    Returns:
-        dict with results for each step.
+    Kept importable for legacy callers, but it must not dispatch Tcl.
     """
-    results = []
-    for i, step in enumerate(steps):
-        desc = step.get("description", f"step_{i+1}")
-        script = step.get("script", "")
-
-        logger.info(f"Executing step {i+1}/{len(steps)}: {desc}")
-        r = safe_execute(desc, script, model_path, timeout, save_after=True)
-        results.append(r)
-
-        if not r.get("success"):
-            logger.error(f"Step {desc} failed, stopping batch")
-            break
-
+    results = [
+        safe_execute(
+            step.get("description", f"step_{i+1}"),
+            step.get("script", ""),
+            model_path=model_path,
+            timeout=timeout,
+            save_after=True,
+        )
+        for i, step in enumerate(steps)
+    ]
     return {
-        "success": all(r.get("success") for r in results),
-        "steps_completed": sum(1 for r in results if r.get("success")),
+        "success": False,
+        "error_type": "safe_execute_not_verified",
+        "execution_allowed": False,
+        "tcl_sent": False,
+        "steps_completed": 0,
         "total_steps": len(steps),
         "results": results,
     }

@@ -1,6 +1,8 @@
-"""Mixed workflow: NL request → Plan → HM preprocess → .k extract → Solve → Post → Log.
+"""Offline mixed-workflow fixture helpers.
 
-This module orchestrates the full CAE pipeline combining HyperMesh, LS-DYNA, and LS-PrePost.
+Current MCP scope is HyperMesh GUI-only. This module may inspect existing
+K files and dry-run solver command metadata for tests, but it must not report
+solver execution as completed.
 """
 
 from __future__ import annotations
@@ -40,7 +42,7 @@ def plan_from_k_file(filepath: str) -> dict[str, Any]:
         suggestions.append("No elements defined — add *ELEMENT_* cards")
 
     if kfile.get_materials() and kfile.get_parts() and kfile.get_nodes() and kfile.get_elements():
-        suggestions.append("Model looks complete — ready to solve")
+        suggestions.append("Model looks complete for offline review; solver execution remains blocked")
 
     return {
         "filepath": filepath,
@@ -51,6 +53,9 @@ def plan_from_k_file(filepath: str) -> dict[str, Any]:
         "n_elements": len(kfile.get_elements()),
         "errors": errors,
         "suggestions": suggestions,
+        "offline_review_only": True,
+        "mcp_execution_allowed": False,
+        "solver_execution_allowed": False,
     }
 
 
@@ -59,17 +64,18 @@ def execute_pipeline(
     dry_run: bool = True,
     log_to_obsidian: bool = False,
 ) -> dict[str, Any]:
-    """Execute the full mixed workflow.
+    """Plan the offline mixed workflow.
 
     Steps:
     1. Parse and validate .k file
-    2. Generate solver command
-    3. Optionally execute solver
+    2. Generate solver command metadata
+    3. Keep real solver execution blocked
     4. Log results to Obsidian
 
     Args:
         k_file: Path to .k input file.
-        dry_run: If True, only generate commands.
+        dry_run: If True, only generate commands. If False, solver execution
+            remains blocked by project scope.
         log_to_obsidian: If True, write execution log.
 
     Returns:
@@ -98,10 +104,25 @@ def execute_pipeline(
             modified_files=[k_file],
             commands=[solve_result.get("command_str", "")],
             test_results=f"Parts={parse_result['n_parts']}, Materials={parse_result['n_materials']}",
-            next_steps="Review solver output" if not dry_run else "Run with dry_run=False to execute",
+            next_steps=(
+                "Solver execution is outside the current HyperMesh GUI-only MCP scope."
+                if solve_result.get("error_type") == "lsdyna_solver_execution_out_of_scope"
+                else "Review dry-run command metadata"
+            ),
         )
         results["obsidian_log"] = log_entry
         results["steps"].append("log")
 
-    results["status"] = "dry_run" if dry_run else "completed"
+    if solve_result.get("error_type") == "lsdyna_solver_execution_out_of_scope":
+        results["status"] = "blocked"
+        results["error_type"] = solve_result["error_type"]
+        results["execution_allowed"] = False
+        results["solver_execution_allowed"] = False
+        results["mcp_execution_allowed"] = False
+        results["offline_review_only"] = True
+    else:
+        results["status"] = "offline_plan"
+        results["offline_review_only"] = True
+        results["mcp_execution_allowed"] = False
+        results["solver_execution_allowed"] = False
     return results

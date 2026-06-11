@@ -1,11 +1,9 @@
-"""Write LS-DYNA keyword data to HyperMesh GUI.
+"""Write verified FE entities to the HyperMesh GUI.
 
-Provides high-level functions to set materials, properties, contacts,
-boundary conditions, loads, control cards, and database cards in the
-currently loaded HyperMesh model via the GUI socket listener.
-
-Each function builds a Tcl script using HyperMesh *setvalue / *createentity
-commands and sends it through execute_tcl_gui().
+Legacy helpers for LS-DYNA materials, properties, contacts, boundary
+conditions, loads, control cards, and database cards are kept importable for
+compatibility, but they must return blocked results until their routes are
+promoted through command recording and verified MAP evidence.
 """
 
 from __future__ import annotations
@@ -21,7 +19,14 @@ except ImportError:
     logger = logging.getLogger(__name__)
 
 from program.tools.hm_gui import execute_tcl_gui
-from program.tools.hm_command_map import get_route_limits, get_unsupported_route, require_verified_route
+from program.tools.hm_command_map import (
+    get_route_limits,
+    get_experimental_route,
+    get_unsupported_route,
+    require_executable_route,
+    require_verified_route,
+)
+from program.tools.hm_policy import check_meshing_rules
 
 
 # ---------------------------------------------------------------------------
@@ -120,6 +125,55 @@ def _execute_script(lines: list[str], timeout: int = 15, batch_size: int = 50, b
     return last_result
 
 
+def _blocked_card_route(action: str, route_name: str, **requested: Any) -> dict[str, Any]:
+    """Return a blocked result for unverified LS-DYNA card helper calls."""
+    return {
+        "success": False,
+        "error_type": "dyna_card_route_not_verified",
+        "blocked_route_name": route_name,
+        "blocked_route_status": "unsupported",
+        "action": action,
+        "execution_allowed": False,
+        "tcl_sent": False,
+        "required_tool": "hm_modeling_action",
+        "next_supported_actions": [
+            {"tool": "hm_modeling_action", "action": "recording_requirements", "route_name": route_name},
+            {"tool": "hm_modeling_action", "action": "validate_recording", "route_name": route_name},
+        ],
+        "error": (
+            f"{action} is not verified for MCP execution. Record and validate "
+            f"{route_name} before enabling this route."
+        ),
+        "requested": requested,
+    }
+
+
+def _execute_verified_modeling_script(script: str, *, timeout: int, route_name: str) -> dict:
+    """Execute an internally generated, verified modeling script.
+
+    Several direct FE/visual routes intentionally bypass the generic Tcl
+    whitelist because old HyperMesh display/count commands are noisy across
+    versions. They still must not bypass meshing policy: unsupported automesh,
+    tetmesh, and legacy generated mesh scripts are rejected before any socket
+    send.
+    """
+    violation = check_meshing_rules(script)
+    if violation:
+        message = violation.get("error", violation.get("message", "Rule violation"))
+        return {
+            "success": False,
+            "route_name": route_name,
+            "response": "",
+            "error": message,
+            "error_type": violation.get("error_type", "mesh_route_not_verified"),
+            "policy_violation": violation.get("policy_violation", True),
+            "blocked_route_name": violation.get("blocked_route_name"),
+            "execution_allowed": violation.get("execution_allowed", False),
+            "tcl_sent": violation.get("tcl_sent", False),
+        }
+    return execute_tcl_gui(script, timeout=timeout, mode="safe", enforce_rules=False)
+
+
 # ---------------------------------------------------------------------------
 # Material
 # ---------------------------------------------------------------------------
@@ -160,33 +214,15 @@ def set_material(
     params: dict[str, Any],
     timeout: int = 15,
 ) -> dict:
-    """Set or update a material card in HyperMesh.
-
-    Args:
-        mid: Material ID.
-        mat_type: LS-DYNA material cardimage, e.g. "MAT_ELASTIC", "MATL24".
-        params: Field values, e.g. {"RHO": 7.85e-9, "E": 210000, "PR": 0.3}.
-        timeout: Socket timeout in seconds.
-
-    Returns:
-        dict with success, mid, mat_type, response.
-    """
-    lines = [
-        f"*setvalue mats id={mid} cardimage={mat_type}",
-        f"*setvalue mats id={mid} STATUS=2",
-    ]
-    for key, value in params.items():
-        hm_name = _map_field_name(key)
-        lines.append(f"*setvalue mats id={mid} dataname={hm_name} value={value}")
-
-    result = _execute_script(lines, timeout=timeout)
-    return {
-        "success": result.get("success", False),
-        "mid": mid,
-        "mat_type": mat_type,
-        "response": result.get("response", ""),
-        "error": result.get("error"),
-    }
+    """Blocked compatibility helper for unverified material card assignment."""
+    return _blocked_card_route(
+        "set_material",
+        "assign_material_to_hex_part",
+        mid=mid,
+        mat_type=mat_type,
+        params=dict(params),
+        timeout=timeout,
+    )
 
 
 def create_material(
@@ -195,33 +231,15 @@ def create_material(
     params: dict[str, Any],
     timeout: int = 15,
 ) -> dict:
-    """Create a new material card in HyperMesh.
-
-    Args:
-        name: Material name.
-        mat_type: LS-DYNA material cardimage, e.g. "MAT_ELASTIC".
-        params: Field values to set after creation.
-        timeout: Socket timeout in seconds.
-
-    Returns:
-        dict with success, name, mat_type, new_id (parsed from response), response.
-    """
-    lines = [
-        f"*createentity mats name={name} cardimage={mat_type}",
-    ]
-    # Set STATUS=2 to mark card as populated
-    lines.append(f"*setvalue mats name={name} STATUS=2")
-    for key, value in params.items():
-        lines.append(f"*setvalue mats name={name} dataname={key} value={value}")
-
-    result = _execute_script(lines, timeout=timeout)
-    return {
-        "success": result.get("success", False),
-        "name": name,
-        "mat_type": mat_type,
-        "response": result.get("response", ""),
-        "error": result.get("error"),
-    }
+    """Blocked compatibility helper for unverified material card creation."""
+    return _blocked_card_route(
+        "create_material",
+        "assign_material_to_hex_part",
+        name=name,
+        mat_type=mat_type,
+        params=dict(params),
+        timeout=timeout,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -234,34 +252,15 @@ def set_property(
     params: dict[str, Any],
     timeout: int = 15,
 ) -> dict:
-    """Set or update a property (section) card in HyperMesh.
-
-    Args:
-        pid: Property ID.
-        sec_type: LS-DYNA section cardimage, e.g. "SECTION_SHELL", "SECTION_SOLID".
-        params: Field values, e.g. {"ELFORM": 2, "SHRF": 0.833, "NIP": 3}.
-        timeout: Socket timeout in seconds.
-
-    Returns:
-        dict with success, pid, sec_type, response.
-    """
-    # For properties, HyperMesh uses 'props' entity type
-    # and 'sects' for section cards attached to props.
-    lines = [
-        f"*setvalue props id={pid} cardimage={sec_type}",
-        f"*setvalue props id={pid} STATUS=2",
-    ]
-    for key, value in params.items():
-        lines.append(f"*setvalue props id={pid} dataname={key} value={value}")
-
-    result = _execute_script(lines, timeout=timeout)
-    return {
-        "success": result.get("success", False),
-        "pid": pid,
-        "sec_type": sec_type,
-        "response": result.get("response", ""),
-        "error": result.get("error"),
-    }
+    """Blocked compatibility helper for unverified property/section assignment."""
+    return _blocked_card_route(
+        "set_property",
+        "assign_material_to_hex_part",
+        pid=pid,
+        sec_type=sec_type,
+        params=dict(params),
+        timeout=timeout,
+    )
 
 
 def create_property(
@@ -270,32 +269,15 @@ def create_property(
     params: dict[str, Any],
     timeout: int = 15,
 ) -> dict:
-    """Create a new property (section) card in HyperMesh.
-
-    Args:
-        name: Property name.
-        sec_type: LS-DYNA section cardimage.
-        params: Field values to set after creation.
-        timeout: Socket timeout in seconds.
-
-    Returns:
-        dict with success, name, sec_type, response.
-    """
-    lines = [
-        f"*createentity props name={name} cardimage={sec_type}",
-        f"*setvalue props name={name} STATUS=2",
-    ]
-    for key, value in params.items():
-        lines.append(f"*setvalue props name={name} dataname={key} value={value}")
-
-    result = _execute_script(lines, timeout=timeout)
-    return {
-        "success": result.get("success", False),
-        "name": name,
-        "sec_type": sec_type,
-        "response": result.get("response", ""),
-        "error": result.get("error"),
-    }
+    """Blocked compatibility helper for unverified property/section creation."""
+    return _blocked_card_route(
+        "create_property",
+        "assign_material_to_hex_part",
+        name=name,
+        sec_type=sec_type,
+        params=dict(params),
+        timeout=timeout,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -319,41 +301,14 @@ def set_contact(
     params: dict[str, Any],
     timeout: int = 15,
 ) -> dict:
-    """Create or update a contact definition in HyperMesh.
-
-    In HyperMesh, contacts are represented as 'groups' entity type
-    with the appropriate LS-DYNA cardimage.
-
-    Args:
-        contact_type: Contact keyword type, e.g. "AUTOMATIC_SURFACE_TO_SURFACE".
-        params: Field values, e.g. {"SSID": 1, "MSID": 2, "FS": 0.2, "FD": 0.2}.
-        timeout: Socket timeout in seconds.
-
-    Returns:
-        dict with success, contact_type, response.
-    """
-    cardimage = CONTACT_CARD_MAP.get(contact_type, contact_type)
-    # If user passes full keyword name like "CONTACT_AUTOMATIC_SURFACE_TO_SURFACE", use as-is
-    if not cardimage.startswith("CONTACT_"):
-        cardimage = f"CONTACT_{cardimage}"
-
-    # Contacts are typically created as groups in HyperMesh
-    name = params.pop("NAME", cardimage)
-    lines = [
-        f"*createentity groups name={name} cardimage={cardimage}",
-        f"*setvalue groups name={name} STATUS=2",
-    ]
-    for key, value in params.items():
-        lines.append(f"*setvalue groups name={name} dataname={key} value={value}")
-
-    result = _execute_script(lines, timeout=timeout)
-    return {
-        "success": result.get("success", False),
-        "contact_type": contact_type,
-        "cardimage": cardimage,
-        "response": result.get("response", ""),
-        "error": result.get("error"),
-    }
+    """Blocked compatibility helper for unverified contact card creation."""
+    return _blocked_card_route(
+        "set_contact",
+        "mixed_material_assignment",
+        contact_type=contact_type,
+        params=dict(params),
+        timeout=timeout,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -373,40 +328,14 @@ def set_boundary(
     params: dict[str, Any],
     timeout: int = 15,
 ) -> dict:
-    """Set boundary conditions in HyperMesh.
-
-    Boundary conditions are represented as 'loads' entity type in HyperMesh.
-
-    Args:
-        bc_type: Boundary condition type, e.g. "SPC", "SPC_SET",
-                 "PRESCRIBED_MOTION".
-        params: Field values, e.g. {"NSID": 1, "DOFX": 1, "DOFY": 1, "DOFZ": 1}.
-        timeout: Socket timeout in seconds.
-
-    Returns:
-        dict with success, bc_type, response.
-    """
-    cardimage = BOUNDARY_CARD_MAP.get(bc_type, bc_type)
-    if not cardimage.startswith("BOUNDARY_"):
-        cardimage = f"BOUNDARY_{cardimage}"
-
-    # Boundary conditions are loadcol entities in HyperMesh
-    name = params.pop("NAME", cardimage)
-    lines = [
-        f"*createentity loadcols name={name} cardimage={cardimage}",
-        f"*setvalue loadcols name={name} STATUS=2",
-    ]
-    for key, value in params.items():
-        lines.append(f"*setvalue loadcols name={name} dataname={key} value={value}")
-
-    result = _execute_script(lines, timeout=timeout)
-    return {
-        "success": result.get("success", False),
-        "bc_type": bc_type,
-        "cardimage": cardimage,
-        "response": result.get("response", ""),
-        "error": result.get("error"),
-    }
+    """Blocked compatibility helper for unverified boundary conditions."""
+    return _blocked_card_route(
+        "set_boundary",
+        "apply_constraint_spc",
+        bc_type=bc_type,
+        params=dict(params),
+        timeout=timeout,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -428,38 +357,14 @@ def set_load(
     params: dict[str, Any],
     timeout: int = 15,
 ) -> dict:
-    """Set loads in HyperMesh.
-
-    Loads are represented as 'loadcols' entity type in HyperMesh.
-
-    Args:
-        load_type: Load type, e.g. "NODE", "SEGMENT", "BODY".
-        params: Field values, e.g. {"LCID": 1, "SF": 1.0, "DOF": 2}.
-        timeout: Socket timeout in seconds.
-
-    Returns:
-        dict with success, load_type, response.
-    """
-    cardimage = LOAD_CARD_MAP.get(load_type, load_type)
-    if not cardimage.startswith("LOAD_"):
-        cardimage = f"LOAD_{cardimage}"
-
-    name = params.pop("NAME", cardimage)
-    lines = [
-        f"*createentity loadcols name={name} cardimage={cardimage}",
-        f"*setvalue loadcols name={name} STATUS=2",
-    ]
-    for key, value in params.items():
-        lines.append(f"*setvalue loadcols name={name} dataname={key} value={value}")
-
-    result = _execute_script(lines, timeout=timeout)
-    return {
-        "success": result.get("success", False),
-        "load_type": load_type,
-        "cardimage": cardimage,
-        "response": result.get("response", ""),
-        "error": result.get("error"),
-    }
+    """Blocked compatibility helper for unverified loads."""
+    return _blocked_card_route(
+        "set_load",
+        "apply_load_nodal_or_pressure",
+        load_type=load_type,
+        params=dict(params),
+        timeout=timeout,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -482,41 +387,14 @@ def set_control(
     params: dict[str, Any],
     timeout: int = 15,
 ) -> dict:
-    """Set control cards in HyperMesh.
-
-    Control cards are global cards. In HyperMesh they are set via
-    *setvalue on the 'cards' entity type with the profile-specific cardimage.
-
-    Args:
-        control_type: Control card type, e.g. "TERMINATION", "TIMESTEP".
-        params: Field values, e.g. {"ENDTIM": 0.01, "DTMIN": 0.001}.
-        timeout: Socket timeout in seconds.
-
-    Returns:
-        dict with success, control_type, response.
-    """
-    cardimage = CONTROL_CARD_MAP.get(control_type, control_type)
-
-    # Control cards are cards entities in HyperMesh with profile-specific cardimage
-    lines = [
-        f"*createentity cards name=CONTROL_{control_type} cardimage={cardimage}",
-        f"*createmark cards 1 \"by name\" \"CONTROL_{control_type}\"",
-        "set _ctrl_ids [hm_getmark cards 1]",
-        "set _ctrl_id [lindex $_ctrl_ids end]",
-        f"*setvalue cards id=$_ctrl_id STATUS=2",
-    ]
-    for key, value in params.items():
-        lines.append(f"*setvalue cards id=$_ctrl_id dataname={key} value={value}")
-    lines.append(f'puts "HM_CONTROL_CREATED type={control_type} id=$_ctrl_id"')
-
-    result = _execute_script(lines, timeout=timeout)
-    return {
-        "success": result.get("success", False),
-        "control_type": control_type,
-        "cardimage": cardimage,
-        "response": result.get("response", ""),
-        "error": result.get("error"),
-    }
+    """Blocked compatibility helper for unverified control cards."""
+    return _blocked_card_route(
+        "set_control",
+        "mixed_material_assignment",
+        control_type=control_type,
+        params=dict(params),
+        timeout=timeout,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -543,42 +421,14 @@ def set_database(
     params: dict[str, Any],
     timeout: int = 15,
 ) -> dict:
-    """Set database output cards in HyperMesh.
-
-    Database cards control LS-DYNA output intervals and formats.
-    They are cards entities similar to control cards.
-
-    Args:
-        db_type: Database card type, e.g. "D3PLOT", "GLSTAT", "MATSUM".
-        params: Field values, e.g. {"DT": 1e-3}.
-        timeout: Socket timeout in seconds.
-
-    Returns:
-        dict with success, db_type, response.
-    """
-    cardimage = DATABASE_CARD_MAP.get(db_type, db_type)
-
-    # Database cards are cards entities in HyperMesh with profile-specific cardimage
-    full_name = db_type if db_type.startswith("DATABASE_") else f"DATABASE_{db_type}"
-    lines = [
-        f"*createentity cards name={full_name} cardimage={cardimage}",
-        f"*createmark cards 1 \"by name\" \"{full_name}\"",
-        "set _db_ids [hm_getmark cards 1]",
-        "set _db_id [lindex $_db_ids end]",
-        f"*setvalue cards id=$_db_id STATUS=2",
-    ]
-    for key, value in params.items():
-        lines.append(f"*setvalue cards id=$_db_id dataname={key} value={value}")
-    lines.append(f'puts "HM_DATABASE_CREATED type={db_type} id=$_db_id"')
-
-    result = _execute_script(lines, timeout=timeout)
-    return {
-        "success": result.get("success", False),
-        "db_type": db_type,
-        "cardimage": cardimage,
-        "response": result.get("response", ""),
-        "error": result.get("error"),
-    }
+    """Blocked compatibility helper for unverified database cards."""
+    return _blocked_card_route(
+        "set_database",
+        "mixed_material_assignment",
+        db_type=db_type,
+        params=dict(params),
+        timeout=timeout,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -645,27 +495,14 @@ def assign_material_to_component(
     mid: int,
     timeout: int = 15,
 ) -> dict:
-    """Assign a material to a component (part) in HyperMesh.
-
-    Args:
-        comp_id: Component ID.
-        mid: Material ID to assign.
-        timeout: Socket timeout in seconds.
-
-    Returns:
-        dict with success, comp_id, mid.
-    """
-    lines = [
-        f"*setvalue comps id={comp_id} materialid={mid}",
-    ]
-    result = _execute_script(lines, timeout=timeout)
-    return {
-        "success": result.get("success", False),
-        "comp_id": comp_id,
-        "mid": mid,
-        "response": result.get("response", ""),
-        "error": result.get("error"),
-    }
+    """Blocked compatibility helper for unverified material binding."""
+    return _blocked_card_route(
+        "assign_material_to_component",
+        "assign_material_to_hex_part",
+        comp_id=comp_id,
+        mid=mid,
+        timeout=timeout,
+    )
 
 
 def assign_property_to_component(
@@ -673,27 +510,14 @@ def assign_property_to_component(
     pid: int,
     timeout: int = 15,
 ) -> dict:
-    """Assign a property to a component (part) in HyperMesh.
-
-    Args:
-        comp_id: Component ID.
-        pid: Property ID to assign.
-        timeout: Socket timeout in seconds.
-
-    Returns:
-        dict with success, comp_id, pid.
-    """
-    lines = [
-        f"*setvalue comps id={comp_id} propertyid={pid}",
-    ]
-    result = _execute_script(lines, timeout=timeout)
-    return {
-        "success": result.get("success", False),
-        "comp_id": comp_id,
-        "pid": pid,
-        "response": result.get("response", ""),
-        "error": result.get("error"),
-    }
+    """Blocked compatibility helper for unverified property binding."""
+    return _blocked_card_route(
+        "assign_property_to_component",
+        "assign_material_to_hex_part",
+        comp_id=comp_id,
+        pid=pid,
+        timeout=timeout,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -970,7 +794,7 @@ def _build_visualization_refresh_tcl() -> str:
 def refresh_visualization(timeout: int = 15) -> dict:
     """Ask the current HyperMesh GUI to redraw and fit visible FE/solid entities."""
     script = _build_visualization_refresh_tcl()
-    result = execute_tcl_gui(script, timeout=timeout, mode="safe", enforce_rules=False)
+    result = _execute_verified_modeling_script(script, timeout=timeout, route_name="visual_refresh")
     response = result.get("response", "")
     visual = _parse_visualization_response(response)
     return {
@@ -1200,16 +1024,19 @@ def _build_visual_diagnostics(
 
 
 def _smoke_visual_counts_ok(visual_counts: object) -> tuple[bool, str | None]:
-    """Require both FE elements and geometry solids after the smoke build."""
+    """Require FE elements after the smoke build.
+
+    Geometry solid creation is currently an experimental blocked route, so
+    solids are not a hard gate for the ordinary connected GUI smoke.
+    """
     if not isinstance(visual_counts, dict):
         return False, "visual_counts_missing"
-    for key in ("elements", "solids"):
-        try:
-            value = int(visual_counts.get(key) or 0)
-        except (TypeError, ValueError):
-            return False, f"{key}_count_invalid"
-        if value <= 0:
-            return False, f"{key}_count_absent"
+    try:
+        value = int(visual_counts.get("elements") or 0)
+    except (TypeError, ValueError):
+        return False, "elements_count_invalid"
+    if value <= 0:
+        return False, "elements_count_absent"
     return True, None
 
 
@@ -1218,26 +1045,24 @@ def _smoke_visual_display_ok(
     visual_displayed_counts: object,
     visibility: object,
 ) -> tuple[bool, str | None]:
-    """Require both smoke entity classes to be reported as displayed."""
+    """Require FE elements to be reported as displayed."""
     counts_ok, counts_reason = _smoke_visual_counts_ok(visual_counts)
     if not counts_ok:
         return False, counts_reason
     if not isinstance(visibility, dict):
         return False, "visibility_missing"
     displayed_counts = visual_displayed_counts if isinstance(visual_displayed_counts, dict) else {}
-    for key in ("elements", "solids"):
-        state = visibility.get(key)
-        if state == "displayed":
-            continue
-        if key in displayed_counts and displayed_counts.get(key) is not None:
-            try:
-                displayed = int(displayed_counts.get(key) or 0)
-            except (TypeError, ValueError):
-                return False, f"{key}_display_count_invalid"
-            if displayed > 0:
-                continue
-        return False, f"{key}_not_displayed"
-    return True, None
+    state = visibility.get("elements")
+    if state == "displayed":
+        return True, None
+    if "elements" in displayed_counts and displayed_counts.get("elements") is not None:
+        try:
+            displayed = int(displayed_counts.get("elements") or 0)
+        except (TypeError, ValueError):
+            return False, "elements_display_count_invalid"
+        if displayed > 0:
+            return True, None
+    return False, "elements_not_displayed"
 
 
 def run_gui_modeling_smoke(
@@ -1246,7 +1071,7 @@ def run_gui_modeling_smoke(
     element_size: float = 10.0,
     timeout: int = 30,
 ) -> dict:
-    """Create one FE cube and one geometry solid box, then refresh the GUI.
+    """Create one FE cube, record solid-route state, then refresh the GUI.
 
     This is intentionally a GUI-only smoke workflow. It does not touch the
     HyperMesh Python API path, solver export, or LS-DYNA execution.
@@ -1288,15 +1113,10 @@ def run_gui_modeling_smoke(
         timeout=timeout,
     )
     stages["solid_box"] = solid_result
-    if not solid_result.get("success"):
-        stages["visual_refresh"] = {"success": False, "stage": "not_run", "reason": "solid_box_failed"}
-        return {
-            "success": False,
-            "stage": "solid_box",
-            "entity_paths": ["fe_mesh", "geometry_solid"],
-            "stages": stages,
-            "error": solid_result.get("error") or "Geometry solid smoke stage failed.",
-        }
+    solid_blocked_experimental = (
+        solid_result.get("success") is False
+        and solid_result.get("error_type") == "experimental_route_not_executable"
+    )
 
     refresh_result = refresh_visualization(timeout=timeout)
     stages["visual_refresh"] = refresh_result
@@ -1317,8 +1137,14 @@ def run_gui_modeling_smoke(
         visibility,
     )
     ok = refresh_ok and visual_counts_ok and visual_display_ok
+    solid_promotion_ok = (
+        ok
+        and bool(solid_result.get("success"))
+        and bool((solid_result.get("created_count") or 0) > 0)
+        and _solid_visible_for_promotion(visual_counts, visual_displayed_counts, visibility)
+    )
     runtime_validation_evidence = _build_runtime_validation_evidence(
-        success=ok,
+        success=solid_promotion_ok,
         solid_result=solid_result,
         visual_counts=visual_counts,
         visual_displayed_counts=visual_displayed_counts,
@@ -1334,15 +1160,19 @@ def run_gui_modeling_smoke(
     if not refresh_ok:
         error = refresh_result.get("error") or "GUI visual refresh smoke stage failed."
     elif not visual_counts_ok:
-        error = "GUI visual refresh did not report both FE elements and geometry solids."
+        error = "GUI visual refresh did not report visible FE elements."
     elif not visual_display_ok:
-        error = "GUI visual refresh reported FE/solid entities but display state is hidden or unknown."
+        error = "GUI visual refresh reported FE elements but display state is hidden or unknown."
     else:
         error = None
     return {
         "success": ok,
         "stage": "complete" if ok else "visual_refresh",
         "entity_paths": ["fe_mesh", "geometry_solid"],
+        "solid_route_state": "experimental_blocked" if solid_blocked_experimental else (
+            "created" if solid_result.get("success") else "failed"
+        ),
+        "solid_route_required_for_success": False,
         "visual_counts": visual_counts,
         "visual_displayed_counts": visual_displayed_counts,
         "visual_count_methods": visual_count_methods,
@@ -1386,8 +1216,8 @@ def _build_runtime_validation_evidence(
         "criteria": {
             "solid_route_success": bool(solid_result.get("success")),
             "solid_created_count_gt_0": bool((solid_result.get("created_count") or 0) > 0),
-            "visual_counts_have_elements_and_solids": bool(visual_counts_ok),
-            "visual_display_has_elements_and_solids": bool(visual_display_ok),
+            "visual_counts_have_elements": bool(visual_counts_ok),
+            "visual_display_has_elements": bool(visual_display_ok),
             "visual_refresh_steps_have_no_errors": bool(visual_refresh_ok),
         },
         "solid": {
@@ -1423,7 +1253,7 @@ def _build_runtime_validation_evidence(
             },
             "requires": [
                 "runtime_validation_evidence.runtime_validated=true",
-                "connected HyperMesh GUI smoke succeeded",
+                "connected HyperMesh GUI solid promotion smoke succeeded",
                 "visual_counts.elements > 0",
                 "visual_counts.solids > 0",
                 "visibility.elements=displayed",
@@ -1441,6 +1271,28 @@ def _build_runtime_validation_evidence(
     }
 
 
+def _solid_visible_for_promotion(
+    visual_counts: object,
+    visual_displayed_counts: object,
+    visibility: object,
+) -> bool:
+    if not isinstance(visual_counts, dict):
+        return False
+    try:
+        if int(visual_counts.get("solids") or 0) <= 0:
+            return False
+    except (TypeError, ValueError):
+        return False
+    if isinstance(visibility, dict) and visibility.get("solids") == "displayed":
+        return True
+    if isinstance(visual_displayed_counts, dict) and visual_displayed_counts.get("solids") is not None:
+        try:
+            return int(visual_displayed_counts.get("solids") or 0) > 0
+        except (TypeError, ValueError):
+            return False
+    return False
+
+
 def create_solid_box(
     name: str,
     x_min: float, y_min: float, z_min: float,
@@ -1448,7 +1300,11 @@ def create_solid_box(
     comp_name: str | None = None,
     timeout: int = 30,
 ) -> dict:
-    """Create a geometry solid box through the verified ``*solidblock`` route."""
+    """Report or execute geometry solid creation only after route promotion.
+
+    While ``create_geometry_solid_box`` remains in ``experimental_routes`` this
+    function must return a blocked result before sending any Tcl.
+    """
     route_name = "create_geometry_solid_box"
     unsupported = get_unsupported_route(route_name)
     if unsupported:
@@ -1469,19 +1325,68 @@ def create_solid_box(
             ],
         }
 
-    require_verified_route(route_name)
+    experimental = get_experimental_route(route_name)
+    if experimental:
+        target_comp = _safe_tcl_name(comp_name or name)
+        dimension_error = _solid_box_dimension_error(x_min, y_min, z_min, x_max, y_max, z_max)
+        if dimension_error:
+            return {
+                "success": False,
+                "supported": False,
+                "route_name": route_name,
+                "name": name,
+                "component": target_comp,
+                "entity_kind": "geometry_solid",
+                "error_type": "invalid_geometry_dimensions",
+                "error": dimension_error,
+            }
+        return {
+            "success": False,
+            "supported": False,
+            "route_name": route_name,
+            "name": name,
+            "component": target_comp,
+            "entity_kind": "geometry_solid",
+            "error_type": "experimental_route_not_executable",
+            "error": experimental.get("execution_block_reason", "Geometry solid route is experimental."),
+            "execution_stage": "experimental",
+            "mcp_execution_allowed": False,
+            "agent_execution_allowed": False,
+            "verification_required": experimental.get("promotion_required", []),
+        }
+
     target_comp = _safe_tcl_name(comp_name or name)
     dimension_error = _solid_box_dimension_error(x_min, y_min, z_min, x_max, y_max, z_max)
     if dimension_error:
         return {
             "success": False,
-            "supported": True,
+            "supported": False,
             "route_name": route_name,
             "name": name,
             "component": target_comp,
             "entity_kind": "geometry_solid",
             "error_type": "invalid_geometry_dimensions",
             "error": dimension_error,
+        }
+
+    try:
+        require_executable_route(route_name)
+    except ValueError as exc:
+        return {
+            "success": False,
+            "supported": False,
+            "route_name": route_name,
+            "name": name,
+            "component": _safe_tcl_name(comp_name or name),
+            "entity_kind": "geometry_solid",
+            "error_type": "experimental_route_not_executable",
+            "error": str(exc),
+            "verification_required": [
+                "Record geometry solid creation in HyperMesh command recording.",
+                "Replay the recorded Tcl through the GUI listener.",
+                "Verify solids_count increases and the solid is visible in the target HyperMesh GUI session.",
+                "Only then set mcp_execution_allowed=true and agent_execution_allowed=true in templates/hm_command_map.json.",
+            ],
         }
     script = _build_solid_box_tcl(
         comp_name=target_comp,
@@ -1492,7 +1397,7 @@ def create_solid_box(
         y_max=y_max,
         z_max=z_max,
     )
-    result = execute_tcl_gui(script, timeout=timeout, mode="safe", enforce_rules=False)
+    result = _execute_verified_modeling_script(script, timeout=timeout, route_name=route_name)
     response = result.get("response", "")
     before = _parse_last_int(response, "SOLIDS_BEFORE")
     after = _parse_last_int(response, "SOLIDS_AFTER")
@@ -1581,7 +1486,7 @@ def create_surface_plate(
         origin_y=origin_y,
         origin_z=origin_z,
     )
-    result = execute_tcl_gui(script, timeout=timeout, mode="safe", enforce_rules=False)
+    result = _execute_verified_modeling_script(script, timeout=timeout, route_name=route_name)
     response = result.get("response", "")
     before = _parse_last_int(response, "SURFACES_BEFORE")
     after = _parse_last_int(response, "SURFACES_AFTER")
@@ -1798,7 +1703,7 @@ def _execute_structured_quad4_shell_plate(
         nx=nx,
         ny=ny,
     )
-    result = execute_tcl_gui(script, timeout=timeout, mode="safe", enforce_rules=False)
+    result = _execute_verified_modeling_script(script, timeout=timeout, route_name="create_shell_quad4")
     response = result.get("response", "")
     elem_count = _parse_last_int(response, "SHELL_ELEM_COUNT")
     node_count = _parse_last_int(response, "SHELL_NODE_COUNT")
@@ -2033,7 +1938,7 @@ def _execute_structured_beam_line(
         direction_z=direction_z,
         divisions=divisions,
     )
-    result = execute_tcl_gui(script, timeout=timeout, mode="safe", enforce_rules=False)
+    result = _execute_verified_modeling_script(script, timeout=timeout, route_name="create_beam_line")
     response = result.get("response", "")
     elem_count = _parse_last_int(response, "BEAM_ELEM_COUNT")
     node_count = _parse_last_int(response, "BEAM_NODE_COUNT")
@@ -2156,6 +2061,275 @@ def _structured_beam_line_limit_error(divisions: int) -> str | None:
     return None
 
 
+def create_tria3(
+    name: str,
+    *,
+    node1: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    node2: tuple[float, float, float] = (100.0, 0.0, 0.0),
+    node3: tuple[float, float, float] = (0.0, 100.0, 0.0),
+    comp_name: str | None = None,
+    timeout: int = 60,
+) -> dict:
+    """Create one direct TRIA3 shell element in the current GUI session."""
+    nodes = _coerce_node_tuple_list([node1, node2, node3])
+    if len(nodes) != 3:
+        return {"success": False, "error": "TRIA3 requires exactly 3 nodes.", "error_type": "invalid_node_coordinates"}
+    if _triangle_area2(nodes[0], nodes[1], nodes[2]) <= 0:
+        return {"success": False, "error": "TRIA3 nodes must be non-collinear.", "error_type": "invalid_node_coordinates"}
+
+    tria = _execute_direct_element(
+        name=name,
+        comp_name=comp_name or name,
+        route_name="create_shell_tria3",
+        element_config=103,
+        label="TRIA3",
+        nodes=nodes,
+        timeout=timeout,
+    )
+    if not tria.get("success"):
+        return {
+            "success": False,
+            "stage": "create_tria3",
+            "tria3": tria,
+            "next_steps": ["Ensure HyperMesh listener is sourced, then retry hm_create_tria3."],
+        }
+    return _direct_element_success_payload(
+        name=name,
+        result=tria,
+        entity_kind="fe_shell_element",
+        semantics="direct_tria3_shell_config_103",
+        nodes=nodes,
+        result_key="tria3",
+        blocked_next_capabilities={
+            "surface_automesh": "unsupported until command recording verifies a surface automesh route",
+            "section_shell_thickness": "unsupported until SECTION_SHELL datanames are execution-verified",
+            "material_assignment": "unsupported until shell property/material assignment is verified",
+        },
+        save_step="tria3_done",
+    )
+
+
+def create_tet4(
+    name: str,
+    *,
+    node1: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    node2: tuple[float, float, float] = (100.0, 0.0, 0.0),
+    node3: tuple[float, float, float] = (0.0, 100.0, 0.0),
+    node4: tuple[float, float, float] = (0.0, 0.0, 100.0),
+    comp_name: str | None = None,
+    timeout: int = 60,
+) -> dict:
+    """Create one direct TET4 solid element in the current GUI session."""
+    nodes = _coerce_node_tuple_list([node1, node2, node3, node4])
+    if len(nodes) != 4:
+        return {"success": False, "error": "TET4 requires exactly 4 nodes.", "error_type": "invalid_node_coordinates"}
+    if _tet_signed_volume6(nodes[0], nodes[1], nodes[2], nodes[3]) == 0:
+        return {"success": False, "error": "TET4 nodes must be non-coplanar.", "error_type": "invalid_node_coordinates"}
+
+    tet = _execute_direct_element(
+        name=name,
+        comp_name=comp_name or name,
+        route_name="create_tet_element",
+        element_config=204,
+        label="TET4",
+        nodes=nodes,
+        timeout=timeout,
+    )
+    if not tet.get("success"):
+        return {
+            "success": False,
+            "stage": "create_tet4",
+            "tet4": tet,
+            "next_steps": ["Ensure HyperMesh listener is sourced, then retry hm_create_tet4."],
+        }
+    return _direct_element_success_payload(
+        name=name,
+        result=tet,
+        entity_kind="fe_tet_element",
+        semantics="direct_tet4_solid_config_204",
+        nodes=nodes,
+        result_key="tet4",
+        blocked_next_capabilities={
+            "tetmesh_geometry_solid": "unsupported until command recording verifies *tetmesh workflow",
+            "section_solid_property": "unsupported until SECTION_SOLID datanames are execution-verified",
+            "material_assignment": "unsupported until solid property/material assignment is verified",
+        },
+        save_step="tet4_done",
+    )
+
+
+def _coerce_node_tuple_list(nodes: list[tuple[float, float, float]]) -> list[tuple[float, float, float]]:
+    coerced = []
+    for node in nodes:
+        if len(node) != 3:
+            return []
+        coerced.append(tuple(float(value) for value in node))
+    return coerced
+
+
+def _triangle_area2(a: tuple[float, float, float], b: tuple[float, float, float], c: tuple[float, float, float]) -> float:
+    ab = (b[0] - a[0], b[1] - a[1], b[2] - a[2])
+    ac = (c[0] - a[0], c[1] - a[1], c[2] - a[2])
+    cross = (
+        ab[1] * ac[2] - ab[2] * ac[1],
+        ab[2] * ac[0] - ab[0] * ac[2],
+        ab[0] * ac[1] - ab[1] * ac[0],
+    )
+    return cross[0] * cross[0] + cross[1] * cross[1] + cross[2] * cross[2]
+
+
+def _tet_signed_volume6(
+    a: tuple[float, float, float],
+    b: tuple[float, float, float],
+    c: tuple[float, float, float],
+    d: tuple[float, float, float],
+) -> float:
+    ab = (b[0] - a[0], b[1] - a[1], b[2] - a[2])
+    ac = (c[0] - a[0], c[1] - a[1], c[2] - a[2])
+    ad = (d[0] - a[0], d[1] - a[1], d[2] - a[2])
+    cross = (
+        ac[1] * ad[2] - ac[2] * ad[1],
+        ac[2] * ad[0] - ac[0] * ad[2],
+        ac[0] * ad[1] - ac[1] * ad[0],
+    )
+    return ab[0] * cross[0] + ab[1] * cross[1] + ab[2] * cross[2]
+
+
+def _execute_direct_element(
+    *,
+    name: str,
+    comp_name: str | None,
+    route_name: str,
+    element_config: int,
+    label: str,
+    nodes: list[tuple[float, float, float]],
+    timeout: int,
+) -> dict:
+    target_comp = _safe_tcl_name(comp_name or name)
+    script = _build_direct_element_tcl(
+        comp_name=target_comp,
+        route_name=route_name,
+        element_config=element_config,
+        label=label,
+        nodes=nodes,
+    )
+    result = _execute_verified_modeling_script(script, timeout=timeout, route_name=route_name)
+    response = result.get("response", "")
+    elem_count = _parse_last_int(response, f"{label}_ELEM_COUNT")
+    node_count = _parse_last_int(response, f"{label}_NODE_COUNT")
+    elem_id = _parse_last_int(response, f"{label}_ELEM_ID")
+    elem_type = _parse_last_value(response, f"{label}_LAST_TYPE")
+    elem_config = _parse_last_int(response, f"{label}_LAST_CONFIG")
+    visual = _parse_visualization_response(response)
+    ok = (
+        bool(result.get("success"))
+        and elem_count == 1
+        and node_count == len(nodes)
+        and bool(elem_id and elem_id > 0)
+        and elem_config == element_config
+    )
+    return {
+        "success": ok,
+        "name": name,
+        "component": target_comp,
+        "node_count": node_count,
+        "element_count": elem_count,
+        "element_id": elem_id,
+        "element_type": elem_type,
+        "element_config": elem_config,
+        **visual,
+        "response": response,
+        "error": None if ok else result.get("error") or f"{label} creation did not report config={element_config}.",
+    }
+
+
+def _build_direct_element_tcl(
+    *,
+    comp_name: str,
+    route_name: str,
+    element_config: int,
+    label: str,
+    nodes: list[tuple[float, float, float]],
+) -> str:
+    """Build Tcl that creates one direct FE element from explicit nodes."""
+    require_verified_route(route_name)
+    node_var = f"_hdm_{label.lower()}_nodes"
+    elem_var = f"_hdm_{label.lower()}_elem_id"
+    type_var = f"_hdm_{label.lower()}_type"
+    config_var = f"_hdm_{label.lower()}_config"
+    lines = [
+        f'catch {{*collectorcreateonly comps "{comp_name}" "" 7}}',
+        f'*currentcollector comps "{comp_name}"',
+        f"set {node_var} {{}}",
+    ]
+    for x, y, z in nodes:
+        lines.extend([
+            f"*createnode {x:.12g} {y:.12g} {z:.12g} 0 0 0",
+            f"lappend {node_var} [hm_latestentityid nodes]",
+        ])
+    lines.extend([
+        f"*createlist nodes 1 ${node_var}",
+        f"*createelement {element_config} 1 1 1",
+        f"set {elem_var} [hm_latestentityid elements]",
+        f"set {type_var} unknown",
+        f"set {config_var} -1",
+        f"catch {{set {type_var} [hm_getvalue elements id=${elem_var} dataname=typename]}}",
+        f"catch {{set {config_var} [hm_getvalue elements id=${elem_var} dataname=config]}}",
+        f'puts "{label}_NODE_COUNT=[llength ${node_var}]"',
+        f'puts "{label}_ELEM_COUNT=[expr {{${elem_var} > 0 ? 1 : 0}}]"',
+        f'puts "{label}_ELEM_ID=${elem_var}"',
+        f'puts "{label}_LAST_TYPE=${type_var}"',
+        f'puts "{label}_LAST_CONFIG=${config_var}"',
+        _build_visualization_refresh_tcl(),
+    ])
+    return "\n".join(lines)
+
+
+def _direct_element_success_payload(
+    *,
+    name: str,
+    result: dict,
+    entity_kind: str,
+    semantics: str,
+    nodes: list[tuple[float, float, float]],
+    result_key: str,
+    blocked_next_capabilities: dict[str, str],
+    save_step: str,
+) -> dict:
+    payload = {
+        "success": True,
+        "stage": "complete",
+        "name": name,
+        "component": result.get("component"),
+        "entity_kind": entity_kind,
+        "element_semantics": semantics,
+        "node_count": result.get("node_count"),
+        "element_count": result.get("element_count"),
+        "element_id": result.get("element_id"),
+        "element_type": result.get("element_type"),
+        "element_config": result.get("element_config"),
+        "nodes": [list(node) for node in nodes],
+        "visual_counts": result.get("visual_counts"),
+        "visual_displayed_counts": result.get("visual_displayed_counts"),
+        "visual_count_methods": result.get("visual_count_methods"),
+        "visual_display_count_methods": result.get("visual_display_count_methods"),
+        "visibility": result.get("visibility"),
+        "visual_steps": result.get("visual_steps"),
+        "visual_diagnostics": result.get("visual_diagnostics"),
+        "visual_refresh_ok": result.get("visual_refresh_ok"),
+        "visual_refresh_reason": result.get("visual_refresh_reason"),
+        "visual_failed_steps": result.get("visual_failed_steps"),
+        "visual_failed_step_count": result.get("visual_failed_step_count"),
+        result_key: result,
+        "blocked_next_capabilities": blocked_next_capabilities,
+        "next_steps": [
+            "Call hm_check_model to verify entity counts.",
+            f"Call hm_auto_save(step_name='{save_step}') to save the HyperMesh model.",
+        ],
+    }
+    return payload
+
+
 def create_discrete_spring(
     name: str,
     *,
@@ -2233,7 +2407,7 @@ def _execute_discrete_spring(
 ) -> dict:
     target_comp = _safe_tcl_name(comp_name or name)
     script = _build_discrete_spring_tcl(comp_name=target_comp, node_a=node_a, node_b=node_b)
-    result = execute_tcl_gui(script, timeout=timeout, mode="safe", enforce_rules=False)
+    result = _execute_verified_modeling_script(script, timeout=timeout, route_name="create_discrete_spring")
     response = result.get("response", "")
     elem_count = _parse_last_int(response, "DISCRETE_ELEM_COUNT")
     node_count = _parse_last_int(response, "DISCRETE_NODE_COUNT")
@@ -2382,7 +2556,7 @@ def _execute_lumped_mass(
 ) -> dict:
     target_comp = _safe_tcl_name(comp_name or name)
     script = _build_lumped_mass_tcl(comp_name=target_comp, mass=mass, x=x, y=y, z=z)
-    result = execute_tcl_gui(script, timeout=timeout, mode="safe", enforce_rules=False)
+    result = _execute_verified_modeling_script(script, timeout=timeout, route_name="create_lumped_mass")
     response = result.get("response", "")
     elem_count = _parse_last_int(response, "MASS_ELEM_COUNT")
     node_count = _parse_last_int(response, "MASS_NODE_COUNT")
@@ -2583,7 +2757,7 @@ def _execute_structured_hex_box(
         ny=ny,
         nz=nz,
     )
-    result = execute_tcl_gui(script, timeout=timeout, mode="safe", enforce_rules=False)
+    result = _execute_verified_modeling_script(script, timeout=timeout, route_name="create_structured_hex8_box")
     response = result.get("response", "")
     elem_count = _parse_last_int(response, "ELEM_COUNT")
     node_count = _parse_last_int(response, "NODE_COUNT")

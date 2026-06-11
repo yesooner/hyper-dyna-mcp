@@ -1,8 +1,9 @@
-"""Parse LS-DYNA .k keyword files.
+"""Offline LS-DYNA .k fixture/review parser.
 
-Based on LS-DYNA Keyword User's Manual Volume I (R13), pages 365-394.
-Supports standard format (8 fields × 10 chars), free format (comma-separated),
-long format (20-char fields), and I10 format (10-char integers).
+This module reads keyword files for validation, fixture tests, and planning
+review only. It is not a HyperMesh GUI route, not an MCP modeling/export tool,
+and must not be used to satisfy final K export or model-creation requests in
+the GUI-only MCP.
 """
 
 from __future__ import annotations
@@ -350,7 +351,11 @@ def _parse_data_line(line: str) -> list[str]:
 
 
 def parse_k_file(filepath: str | Path) -> KFile:
-    """Parse an LS-DYNA .k file and return structured data."""
+    """Parse an offline/review .k file and return structured data.
+
+    Parsing is not model creation and is not evidence that HyperMesh imported,
+    created, or exported the model through the GUI listener.
+    """
     path = Path(filepath)
     if not path.exists():
         raise FileNotFoundError(f"K file not found: {path}")
@@ -360,7 +365,10 @@ def parse_k_file(filepath: str | Path) -> KFile:
 
 
 def parse_k_content(content: str) -> KFile:
-    """Parse LS-DYNA .k file content string.
+    """Parse offline/review LS-DYNA .k content.
+
+    Parsing is for validation and planning only. It must not be treated as a
+    HyperMesh GUI import route, modeling route, or final K export route.
 
     Handles:
     - Standard format (8 fields × 10 chars)

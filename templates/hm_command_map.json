@@ -214,42 +214,88 @@
         "This route creates the MASS element only; material/property assignment remains blocked."
       ]
     },
-    "create_geometry_solid_box": {
+    "create_tet_element": {
       "status": "verified",
-      "description": "Create an axis-aligned HyperMesh geometry solid box using *solidblock. This creates CAD/geometry solid entities, not FE elements.",
-      "entity_kind": "geometry_solid",
+      "description": "Create one direct TET4 finite element from four nodes using *createelement 204. This is direct FE creation, not *tetmesh geometry meshing.",
+      "entity_kind": "fe_mesh",
+      "element_config": 204,
+      "limits": {
+        "max_elements": 1,
+        "max_nodes": 4
+      },
       "commands": [
         "*collectorcreateonly comps",
         "*currentcollector comps",
-        "*solidblock",
-        "hm_entitylist solids id",
-        "hm_marklength solids",
-        "hm_latestentityid solids"
+        "*createnode",
+        "*createlist nodes",
+        "*createelement 204",
+        "hm_getvalue elements id typename",
+        "hm_getvalue elements id config",
+        "hm_latestentityid"
       ],
       "source_evidence": [
         {
-          "path": "Altair/hwdesktop/hm/scripts/context/src/moldflow/mdsmap.tcl",
-          "evidence": "*solidblock $Xmin $Ymin $Zmin $Xaxis 0 0 0 $Yaxis 0 0 0 $Zaxis"
+          "path": "E:/HM2025/program/hwdesktop/hm/scripts/context/widgets/filter.tcl",
+          "evidence": "tetra4 204 \"3d\""
         },
         {
-          "path": "Altair/hwdesktop/hm/scripts/context/src/nvh/nvhextcavmeshcreate.tcl",
-          "evidence": "*solidblock $x2 $y2 $z2 $x_mag 0 0 0 $y_mag 0 0 0 $z_mag"
-        },
-        {
-          "path": "Altair/hwdesktop/hm/scripts/nvh/assembler/seam/nvh_api_seamParameters.tcl",
-          "evidence": "#*solidblock 1498.957 -1009.175 -28.6187 300 0 0 0 300 0 0 0 300"
+          "path": "D:/Zotero/ZoteroNote/Agent/dyna mcp/handoff/handoff_260610.md",
+          "evidence": "Direct TET creation was previously unsupported; this route must validate config=204 at runtime before reporting success."
         }
       ],
       "tested_in_session": false,
       "runtime_validation": [
-        "Capture SOLIDS_BEFORE from hm_entitylist solids id, with *createmark/hm_marklength fallback for older HyperMesh Tcl.",
-        "Execute *solidblock with axis vectors.",
-        "Capture SOLIDS_AFTER and SOLID_ID; hm_latestentityid is wrapped in catch.",
-        "Treat the route as failed unless solids_count increases."
+        "Create four non-coplanar nodes in the current component.",
+        "Execute *createlist nodes 1 n1 n2 n3 n4; *createelement 204 1 1 1.",
+        "Verify hm_latestentityid elements is non-zero.",
+        "Verify hm_getvalue reports config=204.",
+        "Do not treat this as geometry tetmesh; *tetmesh remains blocked until separately recorded and verified."
       ],
       "notes": [
-        "This route is source-verified from local Altair HM2025 scripts and still requires GUI runtime validation in the target HyperMesh 2024/older session.",
-        "Do not reuse this route for FE mesh creation."
+        "Source-verified from local Altair HM2025 config mapping. Connected HyperMesh 2021 execution still validates config=204 before success.",
+        "Material/property assignment remains blocked until datanames are execution-verified."
+      ]
+    },
+    "create_shell_tria3": {
+      "status": "verified",
+      "description": "Create one direct TRIA3 shell finite element from three nodes using *createelement 103. This is direct FE creation, not surface automesh.",
+      "entity_kind": "fe_mesh",
+      "element_config": 103,
+      "limits": {
+        "max_elements": 1,
+        "max_nodes": 3
+      },
+      "commands": [
+        "*collectorcreateonly comps",
+        "*currentcollector comps",
+        "*createnode",
+        "*createlist nodes",
+        "*createelement 103",
+        "hm_getvalue elements id typename",
+        "hm_getvalue elements id config",
+        "hm_latestentityid"
+      ],
+      "source_evidence": [
+        {
+          "path": "E:/HM2025/program/hwdesktop/hm/scripts/context/widgets/filter.tcl",
+          "evidence": "tria3 103 \"2d\""
+        },
+        {
+          "path": "D:/Zotero/ZoteroNote/Agent/dyna mcp/handoff/handoff_260610.md",
+          "evidence": "QUAD4 used *createelement 104 from node list; TRIA3 uses the same direct FE creation pattern with source-verified config=103."
+        }
+      ],
+      "tested_in_session": false,
+      "runtime_validation": [
+        "Create three non-collinear nodes in the current component.",
+        "Execute *createlist nodes 1 n1 n2 n3; *createelement 103 1 1 1.",
+        "Verify hm_latestentityid elements is non-zero.",
+        "Verify hm_getvalue reports config=103.",
+        "Do not treat this as surface automesh; *automesh remains blocked until separately recorded and verified."
+      ],
+      "notes": [
+        "Source-verified from local Altair HM2025 config mapping. Connected HyperMesh 2021 execution still validates config=103 before success.",
+        "Shell property/material/thickness assignment remains blocked until datanames are execution-verified."
       ]
     },
     "create_geometry_surface_rect_nurbs": {
@@ -290,6 +336,56 @@
       ]
     }
   },
+  "experimental_routes": {
+    "create_geometry_solid_box": {
+      "status": "experimental",
+      "description": "Create an axis-aligned HyperMesh geometry solid box using *solidblock. This creates CAD/geometry solid entities, not FE elements.",
+      "execution_stage": "experimental",
+      "agent_execution_allowed": false,
+      "mcp_execution_allowed": false,
+      "execution_block_reason": "Geometry solid route is source-evidence only. It must be confirmed by HyperMesh command recording and connected-GUI runtime evidence before entering routes as verified.",
+      "entity_kind": "geometry_solid",
+      "commands": [
+        "*collectorcreateonly comps",
+        "*currentcollector comps",
+        "*solidblock",
+        "hm_entitylist solids id",
+        "hm_marklength solids",
+        "hm_latestentityid solids"
+      ],
+      "source_evidence": [
+        {
+          "path": "Altair/hwdesktop/hm/scripts/context/src/moldflow/mdsmap.tcl",
+          "evidence": "*solidblock $Xmin $Ymin $Zmin $Xaxis 0 0 0 $Yaxis 0 0 0 $Zaxis"
+        },
+        {
+          "path": "Altair/hwdesktop/hm/scripts/context/src/nvh/nvhextcavmeshcreate.tcl",
+          "evidence": "*solidblock $x2 $y2 $z2 $x_mag 0 0 0 $y_mag 0 0 0 $z_mag"
+        },
+        {
+          "path": "Altair/hwdesktop/hm/scripts/nvh/assembler/seam/nvh_api_seamParameters.tcl",
+          "evidence": "#*solidblock 1498.957 -1009.175 -28.6187 300 0 0 0 300 0 0 0 300"
+        }
+      ],
+      "tested_in_session": false,
+      "runtime_validation": [
+        "Capture SOLIDS_BEFORE from hm_entitylist solids id, with *createmark/hm_marklength fallback for older HyperMesh Tcl.",
+        "Execute *solidblock with axis vectors from HyperMesh command recording.",
+        "Capture SOLIDS_AFTER and SOLID_ID; hm_latestentityid is wrapped in catch.",
+        "Treat the route as failed unless solids_count increases and the solid is visible."
+      ],
+      "promotion_required": [
+        "Record geometry solid creation in HyperMesh command recording.",
+        "Replay the recorded Tcl through the GUI listener.",
+        "Verify solids_count increases and GUI geometry display is visible.",
+        "Move this record into routes with status=verified only after connected-GUI evidence is reviewed."
+      ],
+      "notes": [
+        "This route is source-evidence only and must not be used by default MCP/agent execution.",
+        "Do not reuse this route for FE mesh creation."
+      ]
+    }
+  },
   "unsupported_routes": {
     "tetmesh_geometry_solid": {
       "status": "unsupported",
@@ -314,32 +410,6 @@
       "required_verification": [
         "Record the surface meshing workflow in HyperMesh command recording.",
         "Verify surface marks, mesh controls, created element count, and display state.",
-        "Add a dedicated verified route before exposing an execution tool."
-      ]
-    },
-    "create_tet_element": {
-      "status": "unsupported",
-      "entity_kind": "solid_tet",
-      "commands": [
-        "*createelement"
-      ],
-      "reason": "Direct TET element creation is not verified in the current HyperMesh profile.",
-      "required_verification": [
-        "Record direct TET element creation from selected nodes in HyperMesh.",
-        "Verify element config, node order, property assignment, and created element count.",
-        "Add a dedicated verified route before exposing an execution tool."
-      ]
-    },
-    "create_shell_tria3": {
-      "status": "unsupported",
-      "entity_kind": "shell_tria",
-      "commands": [
-        "*createelement"
-      ],
-      "reason": "Direct TRIA3 shell creation is not verified in the current HyperMesh profile.",
-      "required_verification": [
-        "Record TRIA3 shell creation from three nodes in HyperMesh.",
-        "Verify element config, node order, normal direction, property assignment, and created element count.",
         "Add a dedicated verified route before exposing an execution tool."
       ]
     },
@@ -374,6 +444,42 @@
         "Verify node pair or node set selection route.",
         "Verify discrete element creation and property assignment.",
         "Add a dedicated verified route before exposing an execution tool."
+      ]
+    },
+    "mixed_element_workflow": {
+      "status": "unsupported",
+      "entity_kind": "mixed_workflow",
+      "commands": [],
+      "reason": "Mixed element creation is not a single verified MCP route and must not be auto-split by agents.",
+      "required_verification": [
+        "Define the mixed workflow inputs and which regions are HEX, TET, SHELL, BEAM, MASS, or DISCRETE.",
+        "Verify each element-family route independently in HyperMesh command recording.",
+        "Verify shared-node, tie/contact/interface, and component ownership rules before exposing one workflow."
+      ]
+    },
+    "mixed_mesh_workflow": {
+      "status": "unsupported",
+      "entity_kind": "mixed_mesh",
+      "commands": [],
+      "reason": "Mixed HEX/TET/SHELL/BEAM meshing requires transition/interface rules that are not verified.",
+      "required_verification": [
+        "Record each mesh-region workflow in HyperMesh command recording.",
+        "Verify HEX/TET/SHELL/BEAM transition rules, shared nodes, ties, contacts, or interfaces.",
+        "Verify element count, connectivity, component ownership, and display state for every region.",
+        "Promote the mixed workflow only after connected-GUI runtime validation proves the full model state."
+      ]
+    },
+    "mixed_material_assignment": {
+      "status": "unsupported",
+      "entity_kind": "material_assignment",
+      "commands": [
+        "*setvalue"
+      ],
+      "reason": "Mixed model material/property/section assignment requires per-family verified datanames and binding rules.",
+      "required_verification": [
+        "Record material, section/property, and part/component binding for each element family.",
+        "Verify solid, shell, beam, mass, and discrete datanames separately.",
+        "Verify the final component -> property/section -> material links for every region."
       ]
     },
     "assign_material_to_hex_part": {
@@ -451,6 +557,48 @@
       "required_verification": [
         "Record discrete element property/card assignment.",
         "Verify whether material assignment is applicable for the selected LS-DYNA discrete formulation.",
+        "Add a dedicated verified route before exposing an execution tool."
+      ]
+    },
+    "assign_eos_to_material": {
+      "status": "unsupported",
+      "entity_kind": "eos_assignment",
+      "commands": [
+        "*setvalue"
+      ],
+      "reason": "EOS cardimage, datanames, and material-to-EOS binding are not execution-verified.",
+      "required_verification": [
+        "Record placeholder MAT_NULL or target material creation in HyperMesh command recording.",
+        "Record placeholder EOS creation and verify EOS cardimage and datanames.",
+        "Verify material_id -> eos_id binding in the connected HyperMesh GUI session.",
+        "Do not use real explosive parameters while validating the MCP route."
+      ]
+    },
+    "apply_constraint_spc": {
+      "status": "unsupported",
+      "entity_kind": "constraint",
+      "commands": [
+        "*setvalue"
+      ],
+      "reason": "SPC constraint collector, target set, and datanames are not execution-verified.",
+      "required_verification": [
+        "Record load/constraint collector creation in HyperMesh command recording.",
+        "Record target node or node-set selection.",
+        "Verify constraint datanames, values, target binding, created count, and query/display state.",
+        "Add a dedicated verified route before exposing an execution tool."
+      ]
+    },
+    "apply_load_nodal_or_pressure": {
+      "status": "unsupported",
+      "entity_kind": "load",
+      "commands": [
+        "*setvalue"
+      ],
+      "reason": "Load collector, load cardimage, target entity, values, and datanames are not execution-verified.",
+      "required_verification": [
+        "Record load collector creation in HyperMesh command recording.",
+        "Record one nodal force or pressure load workflow.",
+        "Verify load datanames, values, target binding, created count, and query/display state.",
         "Add a dedicated verified route before exposing an execution tool."
       ]
     }

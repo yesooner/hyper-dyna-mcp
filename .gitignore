@@ -87,7 +87,6 @@ reports/
 output/
 models/
 workflows/
-tests/
 *.hm
 
 # CAE solver outputs

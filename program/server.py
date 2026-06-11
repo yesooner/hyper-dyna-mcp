@@ -1,4 +1,4 @@
-"""hyperdyna_mcp: HyperMesh-only MCP server.
+﻿"""hyperdyna_mcp: HyperMesh-only MCP server.
 
 The MCP surface is intentionally limited to tools that operate inside a
 running HyperMesh GUI through the Tcl listener or the project IPC queue.
@@ -23,9 +23,13 @@ from program.tools.dyna_keyword_map import (
     validate_dyna_keyword_map,
 )
 from program.tools.hm_command_map import (
+    canonical_element_type,
     command_map_stats,
     element_capability_matrix,
+    get_experimental_route,
+    get_unsupported_route,
     get_verified_route,
+    known_element_types,
     list_verified_routes,
 )
 from program.tools.hm_gui import (
@@ -55,6 +59,8 @@ from program.tools.hm_model_writer import (
     create_shell_plate,
     create_surface_plate,
     create_solid_box,
+    create_tet4,
+    create_tria3,
     mesh_box,
     refresh_visualization,
     run_gui_modeling_smoke,
@@ -64,6 +70,10 @@ from program.tools.hm_python_api import (
     check_python_api_environment,
     query_current_gui_model_info_via_python,
     run_python_api_script,
+)
+from program.tools.hm_recording_requirements import (
+    recording_requirements,
+    validate_recorded_route,
 )
 from program.tools.hm_safe_save import auto_save
 from program.tools.hm_template_engine import HmTemplateEngine
@@ -170,8 +180,14 @@ class ExecuteTclGuiInput(BaseModel):
     """Input for executing Tcl in HyperMesh GUI."""
 
     script: str = Field(..., description="Tcl script to execute in HyperMesh.", min_length=1)
-    model_path: Optional[str] = Field(default=None, description="Optional .hm file to load first.")
-    output_hm_path: Optional[str] = Field(default=None, description="Optional .hm save path after execution.")
+    model_path: Optional[str] = Field(
+        default=None,
+        description="Compatibility field only. Loading files through execute_tcl_gui is blocked; use dedicated verified tools.",
+    )
+    output_hm_path: Optional[str] = Field(
+        default=None,
+        description="Compatibility field only. Saving/export through execute_tcl_gui is blocked; use hm_auto_save for .hm saves.",
+    )
     timeout: int = Field(default=120, description="Timeout in seconds.", ge=1)
     mode: str = Field(
         default="safe",
@@ -181,15 +197,18 @@ class ExecuteTclGuiInput(BaseModel):
 
 
 class ExecuteHmPythonApiInput(BaseModel):
-    """Input for executing a HyperMesh 2024+ Python API script."""
+    """Input for generating a HyperMesh 2024+ Python API script/command."""
 
     script: Optional[str] = Field(
         default=None,
         description="Python API script. If omitted, a model-info smoke script is generated.",
     )
     model_path: Optional[str] = Field(default=None, description="Optional .hm file for the smoke script.")
-    dry_run: bool = Field(default=True, description="Do not launch HyperMesh unless explicitly false.")
-    timeout: int = Field(default=300, description="Timeout in seconds when dry_run is false.", ge=1)
+    dry_run: bool = Field(
+        default=True,
+        description="Keep true for script/command planning. False is accepted for compatibility but returns hypermesh_python_api_launch_out_of_scope.",
+    )
+    timeout: int = Field(default=300, description="Compatibility timeout field; external launch is blocked.", ge=1)
     mode: str = Field(
         default="safe",
         description="Execution policy: 'safe' requires import hm; 'raw' skips that import check. Dangerous Python remains blocked.",
@@ -366,6 +385,43 @@ class HmCreateLumpedMassInput(BaseModel):
     timeout: int = Field(default=60, description="Timeout in seconds for the GUI operation.", ge=1, le=180)
 
 
+class HmCreateTria3Input(BaseModel):
+    """Input for creating one direct TRIA3 shell element."""
+
+    name: str = Field(default="tria3", description="Model/component name.", min_length=1)
+    node1_x: float = Field(default=0.0, description="Node 1 X coordinate.")
+    node1_y: float = Field(default=0.0, description="Node 1 Y coordinate.")
+    node1_z: float = Field(default=0.0, description="Node 1 Z coordinate.")
+    node2_x: float = Field(default=100.0, description="Node 2 X coordinate.")
+    node2_y: float = Field(default=0.0, description="Node 2 Y coordinate.")
+    node2_z: float = Field(default=0.0, description="Node 2 Z coordinate.")
+    node3_x: float = Field(default=0.0, description="Node 3 X coordinate.")
+    node3_y: float = Field(default=100.0, description="Node 3 Y coordinate.")
+    node3_z: float = Field(default=0.0, description="Node 3 Z coordinate.")
+    comp_name: Optional[str] = Field(default=None, description="Optional component name.")
+    timeout: int = Field(default=60, description="Timeout in seconds for the GUI operation.", ge=1, le=180)
+
+
+class HmCreateTet4Input(BaseModel):
+    """Input for creating one direct TET4 solid element."""
+
+    name: str = Field(default="tet4", description="Model/component name.", min_length=1)
+    node1_x: float = Field(default=0.0, description="Node 1 X coordinate.")
+    node1_y: float = Field(default=0.0, description="Node 1 Y coordinate.")
+    node1_z: float = Field(default=0.0, description="Node 1 Z coordinate.")
+    node2_x: float = Field(default=100.0, description="Node 2 X coordinate.")
+    node2_y: float = Field(default=0.0, description="Node 2 Y coordinate.")
+    node2_z: float = Field(default=0.0, description="Node 2 Z coordinate.")
+    node3_x: float = Field(default=0.0, description="Node 3 X coordinate.")
+    node3_y: float = Field(default=100.0, description="Node 3 Y coordinate.")
+    node3_z: float = Field(default=0.0, description="Node 3 Z coordinate.")
+    node4_x: float = Field(default=0.0, description="Node 4 X coordinate.")
+    node4_y: float = Field(default=0.0, description="Node 4 Y coordinate.")
+    node4_z: float = Field(default=100.0, description="Node 4 Z coordinate.")
+    comp_name: Optional[str] = Field(default=None, description="Optional component name.")
+    timeout: int = Field(default=60, description="Timeout in seconds for the GUI operation.", ge=1, le=180)
+
+
 class HmSearchKeywordsInput(BaseModel):
     """Input for searching keyword index."""
 
@@ -400,6 +456,41 @@ class HmElementCapabilityInput(BaseModel):
     )
 
 
+class HmModelingActionInput(BaseModel):
+    """Unified guarded modeling action input.
+
+    This is the preferred agent-facing entry for deciding whether a modeling
+    action can execute. It dispatches only to verified routes and blocks
+    material/EOS/load/constraint actions until command recording verifies them.
+    """
+
+    action: str = Field(
+        ...,
+        description="Action: capability, create_mesh, create_element, recording_requirements, validate_recording, assign_material, assign_eos, apply_constraint, or apply_load.",
+        pattern=r"^(capability|create_mesh|create_element|recording_requirements|validate_recording|assign_material|assign_eos|apply_constraint|apply_load)$",
+    )
+    element_type: Optional[str] = Field(
+        default=None,
+        description="Element family/type, such as solid_hex, HEX8, shell_quad, QUAD4, beam, TET4, TRIA3, lumped_mass, or discrete.",
+    )
+    parameters: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Action-specific parameters. Use dry_run=true to get the verified route and required parameters without executing Tcl.",
+    )
+    dry_run: bool = Field(default=False, description="Return the planned verified route without sending Tcl.")
+    timeout: int = Field(default=90, description="Timeout in seconds for executable GUI actions.", ge=1, le=180)
+
+    @field_validator("action")
+    @classmethod
+    def lowercase_action(cls, v: str) -> str:
+        return v.lower()
+
+    @field_validator("element_type")
+    @classmethod
+    def normalize_element_type_text(cls, v: Optional[str]) -> Optional[str]:
+        return v.strip() if isinstance(v, str) else v
+
+
 class HmVisualRefreshInput(BaseModel):
     """Input for refreshing HyperMesh GUI visualization."""
 
@@ -426,6 +517,447 @@ class HmReadComponentsInput(BaseModel):
 
     limit: Optional[int] = Field(default=50, description="Max results to return.", ge=1, le=500)
     offset: Optional[int] = Field(default=0, description="Number to skip.", ge=0)
+
+
+# ===========================================================================
+# Guarded modeling action dispatcher
+# ===========================================================================
+
+def _modeling_element_key(element_type: Optional[str]) -> Optional[str]:
+    return canonical_element_type(element_type)
+
+
+def _modeling_blocked(
+    *,
+    action: str,
+    element_type: Optional[str],
+    error_type: str,
+    reason: str,
+    required_verification: list[str],
+    next_supported_actions: Optional[list[dict[str, Any]]] = None,
+    extra: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
+    result = {
+        "success": False,
+        "action": action,
+        "element_type": element_type,
+        "error_type": error_type,
+        "error": reason,
+        "execution_allowed": False,
+        "tcl_sent": False,
+        "required_verification": required_verification,
+        "policy": "Only verified HyperMesh command-map routes may execute Tcl.",
+    }
+    if next_supported_actions:
+        result["next_supported_actions"] = next_supported_actions
+    if extra:
+        result.update(extra)
+    return result
+
+
+def _verified_alternative_actions(element_key: Optional[str], requested_action: str) -> list[dict[str, Any]]:
+    if requested_action != "create_mesh":
+        return []
+    direct_element_metadata = {
+        "solid_tet": {
+            "scope": "direct single TET4 FE element, not geometry tetmesh",
+            "required_parameters": ["node1", "node2", "node3", "node4"],
+        },
+        "shell_tria": {
+            "scope": "direct single TRIA3 FE element, not surface automesh",
+            "required_parameters": ["node1", "node2", "node3"],
+        },
+        "lumped_mass": {
+            "scope": "direct one-node MASS FE element, not node-set meshing",
+            "required_parameters": ["mass"],
+        },
+        "discrete": {
+            "scope": "direct two-node DISCRETE spring element, not geometry meshing",
+            "required_parameters": ["node_a", "node_b"],
+        },
+        "line_beam": {
+            "scope": "direct generated straight BAR2/BEAM line, not existing-line meshing",
+            "required_parameters": ["length", "element_size"],
+        },
+    }
+    metadata = direct_element_metadata.get(element_key)
+    if not metadata:
+        return []
+    capability = element_capability_matrix(element_key)
+    creation = capability.get("capability", {}).get("creation", {})
+    if (
+        creation.get("supported") is not True
+        or creation.get("route_status") != "verified"
+        or not creation.get("tool")
+        or not creation.get("route_name")
+    ):
+        return []
+    return [
+        {
+            "action": "create_element",
+            "tool": creation["tool"],
+            "route_name": creation["route_name"],
+            **metadata,
+        }
+    ]
+
+
+def _blocked_recording_actions(route_name: str, scope: str) -> list[dict[str, Any]]:
+    return [
+        {
+            "action": "recording_requirements",
+            "route_name": route_name,
+            "scope": scope,
+        },
+        {
+            "action": "validate_recording",
+            "route_name": route_name,
+            "scope": "validate HyperMesh command recording text and runtime evidence before route promotion",
+        },
+    ]
+
+
+def _material_assignment_route_name(element_key: Optional[str]) -> Optional[str]:
+    if element_key is None:
+        return None
+    capability = element_capability_matrix(element_key)
+    material = capability.get("capability", {}).get("material_assignment", {})
+    route_name = material.get("route_name")
+    return str(route_name) if route_name else None
+
+
+def _mesh_route_name(element_key: Optional[str]) -> Optional[str]:
+    if element_key is None:
+        return None
+    capability = element_capability_matrix(element_key)
+    meshing = capability.get("capability", {}).get("meshing", {})
+    route_name = meshing.get("route_name")
+    return str(route_name) if route_name else None
+
+
+def _blocked_workflow_route_name(action: str, element_key: Optional[str]) -> Optional[str]:
+    if action == "create_mesh":
+        if element_key == "mixed":
+            return "mixed_mesh_workflow"
+        return _mesh_route_name(element_key)
+    if action == "assign_material":
+        if element_key == "mixed":
+            return "mixed_material_assignment"
+        return _material_assignment_route_name(element_key)
+    if action == "assign_eos":
+        return "assign_eos_to_material"
+    if action == "apply_constraint":
+        return "apply_constraint_spc"
+    if action == "apply_load":
+        return "apply_load_nodal_or_pressure"
+    return None
+
+
+def _required_modeling_param(parameters: dict[str, Any], key: str) -> Any:
+    if key not in parameters:
+        raise ValueError(f"missing required parameter: {key}")
+    return parameters[key]
+
+
+def _modeling_plan(
+    *,
+    action: str,
+    element_type: str,
+    tool: str,
+    route_name: str,
+    required_parameters: list[str],
+) -> dict[str, Any]:
+    return {
+        "success": True,
+        "action": action,
+        "element_type": element_type,
+        "tool": tool,
+        "route_name": route_name,
+        "dry_run": True,
+        "execution_allowed": True,
+        "tcl_sent": False,
+        "required_parameters": required_parameters,
+        "policy": "Execution will dispatch only through the verified command-map route.",
+    }
+
+
+def run_modeling_action(params: HmModelingActionInput) -> dict[str, Any]:
+    """Run one guarded modeling action or return a blocked/planning result."""
+    element_key = _modeling_element_key(params.element_type)
+    p = params.parameters
+
+    if params.action == "capability":
+        return element_capability_matrix(params.element_type)
+
+    if params.action == "recording_requirements":
+        return recording_requirements(element_key, p)
+
+    if params.action == "validate_recording":
+        return validate_recorded_route(element_key, p)
+
+    if element_key is not None and element_key not in known_element_types():
+        return _modeling_blocked(
+            action=params.action,
+            element_type=element_key,
+            error_type="unknown_element_type",
+            reason=f"{params.element_type} is not a known HyperMesh MCP element type.",
+            required_verification=[
+                "Use hm_element_capability_matrix without element_type to list supported canonical element types and aliases.",
+                "Do not record or execute Tcl for unknown element families until the capability matrix is extended.",
+            ],
+            next_supported_actions=[
+                {
+                    "action": "capability",
+                    "tool": "hm_element_capability_matrix",
+                    "scope": "list known element types and aliases before planning modeling actions",
+                }
+            ],
+            extra={"known_types": known_element_types()},
+        )
+
+    if params.action in {"assign_material", "assign_eos", "apply_constraint", "apply_load"}:
+        verification_target = {
+            "assign_material": "material/property/part binding datanames",
+            "assign_eos": "EOS cardimage, datanames, and material/EOS binding",
+            "apply_constraint": "constraint collector/cardimage, entity marks, and datanames",
+            "apply_load": "load collector/cardimage, entity marks, load values, and datanames",
+        }[params.action]
+        blocked_route_name = _blocked_workflow_route_name(params.action, element_key)
+        unsupported_route = get_unsupported_route(blocked_route_name) if blocked_route_name else None
+        return _modeling_blocked(
+            action=params.action,
+            element_type=element_key,
+            error_type=f"{params.action}_not_verified",
+            reason=f"{params.action} is not executable until {verification_target} are command-recorded and runtime-verified.",
+            required_verification=(
+                unsupported_route.get("required_verification", [])
+                if unsupported_route
+                else [
+                    "Record the workflow in HyperMesh command recording for the target LS-DYNA profile.",
+                    f"Verify {verification_target}.",
+                    "Replay through the GUI listener and prove the model state changes as expected.",
+                    "Add a verified route to templates/hm_command_map.json before allowing MCP execution.",
+                ]
+            ),
+            next_supported_actions=(
+                _blocked_recording_actions(blocked_route_name, f"inspect evidence required before {params.action} can execute")
+                if blocked_route_name
+                else [
+                    {
+                        "action": "capability",
+                        "tool": "hm_element_capability_matrix",
+                        "scope": "choose a supported element_type before material assignment planning",
+                    }
+                ]
+            ),
+            extra={
+                "blocked_route_name": blocked_route_name,
+                "blocked_route_status": unsupported_route.get("status") if unsupported_route else "missing",
+                "blocked_route_entity_kind": unsupported_route.get("entity_kind") if unsupported_route else None,
+            },
+        )
+
+    if element_key in {None, "mixed"}:
+        return _modeling_blocked(
+            action=params.action,
+            element_type=element_key,
+            error_type="unsupported_element_type",
+            reason="Mixed or unspecified element workflows are not a single verified MCP route.",
+            required_verification=[
+                "Split the workflow into verified element-family routes.",
+                "Verify transition rules between HEX/TET/SHELL/BEAM regions in HyperMesh command recording.",
+                "Promote the mixed workflow only after connected-GUI runtime validation.",
+            ],
+            next_supported_actions=[
+                {
+                    "action": "capability",
+                    "tool": "hm_element_capability_matrix",
+                    "scope": "inspect per-family verified creation and blocked workflow routes",
+                },
+                {
+                    "action": "recording_requirements",
+                    "route_name": "mixed_mesh_workflow",
+                    "scope": "inspect evidence required before mixed mesh can be promoted",
+                },
+            ],
+        )
+
+    if params.action == "create_mesh":
+        if element_key == "solid_hex":
+            if params.dry_run:
+                return _modeling_plan(
+                    action=params.action,
+                    element_type=element_key,
+                    tool="hm_create_fe_cube",
+                    route_name="create_structured_hex8_box",
+                    required_parameters=["size", "element_size"],
+                )
+            return create_fe_cube(
+                str(p.get("name", "solid_hex_mesh")),
+                float(_required_modeling_param(p, "size")),
+                float(_required_modeling_param(p, "element_size")),
+                origin_x=float(p.get("origin_x", 0.0)),
+                origin_y=float(p.get("origin_y", 0.0)),
+                origin_z=float(p.get("origin_z", 0.0)),
+                comp_name=p.get("comp_name"),
+                timeout=params.timeout,
+            )
+        if element_key == "shell_quad":
+            if params.dry_run:
+                return _modeling_plan(
+                    action=params.action,
+                    element_type=element_key,
+                    tool="hm_create_shell_plate",
+                    route_name="create_structured_quad4_shell_plate",
+                    required_parameters=["width", "height", "element_size"],
+                )
+            return create_shell_plate(
+                str(p.get("name", "shell_quad_mesh")),
+                float(_required_modeling_param(p, "width")),
+                float(_required_modeling_param(p, "height")),
+                float(_required_modeling_param(p, "element_size")),
+                origin_x=float(p.get("origin_x", 0.0)),
+                origin_y=float(p.get("origin_y", 0.0)),
+                origin_z=float(p.get("origin_z", 0.0)),
+                comp_name=p.get("comp_name"),
+                timeout=params.timeout,
+            )
+        blocked_route_name = _blocked_workflow_route_name(params.action, element_key)
+        unsupported_route = get_unsupported_route(blocked_route_name) if blocked_route_name else None
+        next_supported_actions = _verified_alternative_actions(element_key, params.action)
+        if blocked_route_name:
+            next_supported_actions.extend(
+                _blocked_recording_actions(
+                    blocked_route_name,
+                    f"inspect evidence required before {element_key} automatic meshing can execute",
+                )
+            )
+        return _modeling_blocked(
+            action=params.action,
+            element_type=element_key,
+            error_type="mesh_route_not_verified",
+            reason=f"{element_key} automatic meshing is not verified for MCP execution.",
+            required_verification=(
+                unsupported_route.get("required_verification", [])
+                if unsupported_route
+                else [
+                    "Record the meshing workflow in HyperMesh command recording.",
+                    "Verify entity marks, mesh controls, element count increase, and GUI display state.",
+                    "Add a verified route before allowing MCP execution.",
+                ]
+            ),
+            next_supported_actions=next_supported_actions,
+            extra={
+                "blocked_route_name": blocked_route_name,
+                "blocked_route_status": unsupported_route.get("status") if unsupported_route else "missing",
+                "blocked_route_entity_kind": unsupported_route.get("entity_kind") if unsupported_route else None,
+            },
+        )
+
+    if params.action == "create_element":
+        if element_key == "solid_tet":
+            if params.dry_run:
+                return _modeling_plan(
+                    action=params.action,
+                    element_type=element_key,
+                    tool="hm_create_tet4",
+                    route_name="create_tet_element",
+                    required_parameters=["node1", "node2", "node3", "node4"],
+                )
+            return create_tet4(
+                str(p.get("name", "tet4")),
+                node1=tuple(p.get("node1", (0.0, 0.0, 0.0))),
+                node2=tuple(p.get("node2", (100.0, 0.0, 0.0))),
+                node3=tuple(p.get("node3", (0.0, 100.0, 0.0))),
+                node4=tuple(p.get("node4", (0.0, 0.0, 100.0))),
+                comp_name=p.get("comp_name"),
+                timeout=params.timeout,
+            )
+        if element_key == "shell_tria":
+            if params.dry_run:
+                return _modeling_plan(
+                    action=params.action,
+                    element_type=element_key,
+                    tool="hm_create_tria3",
+                    route_name="create_shell_tria3",
+                    required_parameters=["node1", "node2", "node3"],
+                )
+            return create_tria3(
+                str(p.get("name", "tria3")),
+                node1=tuple(p.get("node1", (0.0, 0.0, 0.0))),
+                node2=tuple(p.get("node2", (100.0, 0.0, 0.0))),
+                node3=tuple(p.get("node3", (0.0, 100.0, 0.0))),
+                comp_name=p.get("comp_name"),
+                timeout=params.timeout,
+            )
+        if element_key == "discrete":
+            if params.dry_run:
+                return _modeling_plan(
+                    action=params.action,
+                    element_type=element_key,
+                    tool="hm_create_discrete_spring",
+                    route_name="create_discrete_element",
+                    required_parameters=["node_a", "node_b"],
+                )
+            return create_discrete_spring(
+                str(p.get("name", "discrete_spring")),
+                node_a=tuple(p.get("node_a", (0.0, 0.0, 0.0))),
+                node_b=tuple(p.get("node_b", (100.0, 0.0, 0.0))),
+                comp_name=p.get("comp_name"),
+                timeout=params.timeout,
+            )
+        if element_key == "lumped_mass":
+            if params.dry_run:
+                return _modeling_plan(
+                    action=params.action,
+                    element_type=element_key,
+                    tool="hm_create_lumped_mass",
+                    route_name="create_lumped_mass",
+                    required_parameters=["mass"],
+                )
+            return create_lumped_mass(
+                str(p.get("name", "lumped_mass")),
+                float(_required_modeling_param(p, "mass")),
+                x=float(p.get("x", 0.0)),
+                y=float(p.get("y", 0.0)),
+                z=float(p.get("z", 0.0)),
+                comp_name=p.get("comp_name"),
+                timeout=params.timeout,
+            )
+        if element_key == "line_beam":
+            if params.dry_run:
+                return _modeling_plan(
+                    action=params.action,
+                    element_type=element_key,
+                    tool="hm_create_beam_line",
+                    route_name="create_beam_line",
+                    required_parameters=["length", "element_size"],
+                )
+            return create_beam_line(
+                str(p.get("name", "beam_line")),
+                float(_required_modeling_param(p, "length")),
+                float(_required_modeling_param(p, "element_size")),
+                origin_x=float(p.get("origin_x", 0.0)),
+                origin_y=float(p.get("origin_y", 0.0)),
+                origin_z=float(p.get("origin_z", 0.0)),
+                direction_x=float(p.get("direction_x", 1.0)),
+                direction_y=float(p.get("direction_y", 0.0)),
+                direction_z=float(p.get("direction_z", 0.0)),
+                comp_name=p.get("comp_name"),
+                timeout=params.timeout,
+            )
+
+    return _modeling_blocked(
+        action=params.action,
+        element_type=element_key,
+        error_type="action_not_supported_for_element_type",
+        reason=f"{params.action} is not supported for {element_key}.",
+        required_verification=[
+            "Check hm_element_capability_matrix for the current supported route.",
+            "Add a verified command-map route before exposing execution.",
+        ],
+    )
+
 
 
 # ===========================================================================
@@ -512,14 +1044,18 @@ async def check_hypermesh_connection_tool() -> str:
     port = current_gui_port()
     result = send_tcl_to_gui("__HDM_PING__", port=port, timeout=5, mode="raw")
     listener_info = parse_listener_ping_response(result.get("response", ""))
+    listener_pong = listener_info.get("pong") == "true"
+    connected = bool(result.get("success", False) and listener_pong)
     return _success({
-        "connected": result.get("success", False),
+        "success": connected,
+        "connected": connected,
         "host": DEFAULT_GUI_HOST,
         "port": port,
         "listener_version": listener_info.get("listener_version"),
         "tcl_version": listener_info.get("tcl_version"),
         "tcl_patchlevel": listener_info.get("tcl_patchlevel"),
-        "listener_pong": listener_info.get("pong") == "true",
+        "listener_pong": listener_pong,
+        "socket_success": result.get("success", False),
         "response": result.get("response", ""),
         "error": result.get("error"),
     })
@@ -559,18 +1095,17 @@ async def get_model_info_tool() -> str:
 
 @mcp.tool(
     name="execute_tcl_gui",
-    annotations={"title": "Execute Tcl in GUI", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
+    annotations={"title": "Execute Tcl in GUI", "readOnlyHint": False, "destructiveHint": True, "idempotentHint": False, "openWorldHint": False},
 )
 async def execute_tcl_gui_tool(params: ExecuteTclGuiInput) -> str:
     """Execute Tcl in the running HyperMesh GUI listener.
 
-    DO NOT guess HyperMesh commands. Use these instead:
-    - hm_set_keyword for keyword cards (MAT_*, SECTION_*, CONTROL_*, etc.)
-    - hm_create_box for geometry creation
-    - hm_mesh_box for meshing
-    - hm_search_keywords / hm_keyword_map to discover available keywords
-
-    Only use this for Tcl commands that have no dedicated tool.
+    High-risk fallback only. Do not use this for agent-planned modeling,
+    meshing, material/property, EOS, load, constraint, export, file I/O, or
+    solver workflows. Use hm_modeling_action first; it dispatches verified
+    routes and returns recording_requirements/validate_recording for blocked
+    routes. Only call execute_tcl_gui for explicit, user-provided Tcl that is
+    outside the dedicated tool surface and is safe to run in the current GUI.
     """
     result = execute_tcl_gui(
         script=params.script,
@@ -593,14 +1128,16 @@ async def hm_python_api_status_tool() -> str:
 
 @mcp.tool(
     name="execute_hm_python_api",
-    annotations={"title": "Execute HyperMesh Python API", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
+    annotations={"title": "Plan HyperMesh Python API Script", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
 )
 async def execute_hm_python_api_tool(params: ExecuteHmPythonApiInput) -> str:
-    """Generate or run a HyperMesh 2024+ Python API script.
+    """Generate a HyperMesh 2024+ Python API script and launch command.
 
     The hm module is available inside HyperMesh 2024+ / 2025, not in the
     project conda interpreter. This tool writes the script and, by default,
-    returns the launch command without starting HyperMesh.
+    returns the launch command without starting HyperMesh. Real external
+    launch is outside the current GUI-only MCP scope, so dry_run=false is
+    blocked by run_python_api_script with hypermesh_python_api_launch_out_of_scope.
     """
     script = params.script or build_model_info_script(params.model_path)
     result = run_python_api_script(
@@ -695,10 +1232,14 @@ async def hm_read_components_tool(params: HmReadComponentsInput) -> str:
 
 @mcp.tool(
     name="hm_convert_model",
-    annotations={"title": "Convert Model to LS-DYNA Profile", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+    annotations={"title": "Blocked LS-DYNA Profile Conversion", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
 )
 async def hm_convert_model_tool() -> str:
-    """Activate the LS-DYNA profile inside HyperMesh and set card images."""
+    """Return a blocked compatibility result for unverified profile conversion.
+
+    LS-DYNA profile activation and bulk cardimage conversion are outside the
+    current verified HyperMesh GUI-only MCP routes.
+    """
     return _safe_call(convert_model_to_lsdyne)
 
 
@@ -706,10 +1247,10 @@ async def hm_convert_model_tool() -> str:
 
 @mcp.tool(
     name="hm_set_keyword",
-    annotations={"title": "Set Keyword Card", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+    annotations={"title": "MAP-Gated Keyword Card", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
 )
 async def hm_set_keyword_tool(params: HmSetKeywordInput) -> str:
-    """Create or update a keyword card inside HyperMesh."""
+    """Set a keyword card only when the structured keyword MAP is execution-ready."""
     return _safe_call(hm_set_keyword, params.keyword, params.params, params.timeout)
 
 
@@ -729,7 +1270,7 @@ async def hm_keyword_help_tool(params: HmKeywordHelpInput) -> str:
     annotations={"title": "Create Box Solid", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
 )
 async def hm_create_box_tool(params: HmCreateBoxInput) -> str:
-    """Create a box solid in HyperMesh from corner coordinates."""
+    """Legacy geometry tool. Prefer hm_modeling_action before direct use."""
     if params.x_min >= params.x_max or params.y_min >= params.y_max or params.z_min >= params.z_max:
         return _error("Min coordinates must be less than max coordinates.")
     return _safe_call(
@@ -747,6 +1288,10 @@ async def hm_create_box_tool(params: HmCreateBoxInput) -> str:
 async def hm_mesh_box_tool(params: HmMeshBoxInput) -> str:
     """Report that geometry-solid tetmesh is not verified yet.
 
+    Prefer hm_modeling_action(action=create_mesh, element_type=TET4) for
+    planning; it returns the direct TET4 alternative and tetmesh recording
+    requirements.
+
     Current executable mesh support is hm_create_fe_cube, which directly
     creates structured HEX8 FE mesh. Geometry-solid meshing must first be
     verified through HyperMesh command recording before this tool can send Tcl.
@@ -759,7 +1304,7 @@ async def hm_mesh_box_tool(params: HmMeshBoxInput) -> str:
     annotations={"title": "Create Geometry Solid Box", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
 )
 async def hm_create_solid_box_tool(params: HmCreateBoxInput) -> str:
-    """Create a geometry solid box only after the Tcl route is verified."""
+    """Geometry solid target. Prefer hm_modeling_action before direct use."""
     if params.x_min >= params.x_max or params.y_min >= params.y_max or params.z_min >= params.z_max:
         return _error("Min coordinates must be less than max coordinates.")
     return _safe_call(
@@ -775,7 +1320,10 @@ async def hm_create_solid_box_tool(params: HmCreateBoxInput) -> str:
     annotations={"title": "Create FE Cube", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
 )
 async def hm_create_fe_cube_tool(params: HmCreateFeCubeInput) -> str:
-    """Create a structured HEX8 finite-element cube, not a geometry solid."""
+    """Create a structured HEX8 finite-element cube, not a geometry solid.
+
+    Verified execution target. Prefer hm_modeling_action before direct use.
+    """
     return _safe_call(
         create_fe_cube,
         params.name,
@@ -794,7 +1342,7 @@ async def hm_create_fe_cube_tool(params: HmCreateFeCubeInput) -> str:
     annotations={"title": "Create Geometry Surface Plate", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
 )
 async def hm_create_surface_plate_tool(params: HmCreateSurfacePlateInput) -> str:
-    """Create a rectangular HyperMesh geometry surface, not shell FE elements."""
+    """Geometry surface target. Prefer hm_modeling_action before direct use."""
     return _safe_call(
         create_surface_plate,
         params.name,
@@ -813,7 +1361,7 @@ async def hm_create_surface_plate_tool(params: HmCreateSurfacePlateInput) -> str
     annotations={"title": "Create QUAD4 Shell FE Plate", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
 )
 async def hm_create_shell_plate_tool(params: HmCreateShellPlateInput) -> str:
-    """Create a structured QUAD4 shell FE plate, not a geometry surface."""
+    """Verified QUAD4 shell target. Prefer hm_modeling_action before direct use."""
     return _safe_call(
         create_shell_plate,
         params.name,
@@ -833,7 +1381,7 @@ async def hm_create_shell_plate_tool(params: HmCreateShellPlateInput) -> str:
     annotations={"title": "Create BEAM Line", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
 )
 async def hm_create_beam_line_tool(params: HmCreateBeamLineInput) -> str:
-    """Create a straight structured BAR2/BEAM line using config 60."""
+    """Verified BAR2/BEAM target. Prefer hm_modeling_action before direct use."""
     return _safe_call(
         create_beam_line,
         params.name,
@@ -855,7 +1403,7 @@ async def hm_create_beam_line_tool(params: HmCreateBeamLineInput) -> str:
     annotations={"title": "Create DISCRETE Spring", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
 )
 async def hm_create_discrete_spring_tool(params: HmCreateDiscreteSpringInput) -> str:
-    """Create a two-node DISCRETE spring element using the verified *spring route."""
+    """Verified DISCRETE target. Prefer hm_modeling_action before direct use."""
     return _safe_call(
         create_discrete_spring,
         params.name,
@@ -871,7 +1419,7 @@ async def hm_create_discrete_spring_tool(params: HmCreateDiscreteSpringInput) ->
     annotations={"title": "Create Lumped MASS", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
 )
 async def hm_create_lumped_mass_tool(params: HmCreateLumpedMassInput) -> str:
-    """Create a one-node MASS element using the verified *masselement route."""
+    """Verified MASS target. Prefer hm_modeling_action before direct use."""
     return _safe_call(
         create_lumped_mass,
         params.name,
@@ -879,6 +1427,41 @@ async def hm_create_lumped_mass_tool(params: HmCreateLumpedMassInput) -> str:
         x=params.x,
         y=params.y,
         z=params.z,
+        comp_name=params.comp_name,
+        timeout=params.timeout,
+    )
+
+
+@mcp.tool(
+    name="hm_create_tria3",
+    annotations={"title": "Create TRIA3 Shell", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
+)
+async def hm_create_tria3_tool(params: HmCreateTria3Input) -> str:
+    """Verified TRIA3 target. Prefer hm_modeling_action before direct use."""
+    return _safe_call(
+        create_tria3,
+        params.name,
+        node1=(params.node1_x, params.node1_y, params.node1_z),
+        node2=(params.node2_x, params.node2_y, params.node2_z),
+        node3=(params.node3_x, params.node3_y, params.node3_z),
+        comp_name=params.comp_name,
+        timeout=params.timeout,
+    )
+
+
+@mcp.tool(
+    name="hm_create_tet4",
+    annotations={"title": "Create TET4 Solid", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
+)
+async def hm_create_tet4_tool(params: HmCreateTet4Input) -> str:
+    """Verified TET4 target. Prefer hm_modeling_action before direct use."""
+    return _safe_call(
+        create_tet4,
+        params.name,
+        node1=(params.node1_x, params.node1_y, params.node1_z),
+        node2=(params.node2_x, params.node2_y, params.node2_z),
+        node3=(params.node3_x, params.node3_y, params.node3_z),
+        node4=(params.node4_x, params.node4_y, params.node4_z),
         comp_name=params.comp_name,
         timeout=params.timeout,
     )
@@ -939,13 +1522,17 @@ async def hm_command_map_tool(params: HmCommandRouteInput) -> str:
     """List or inspect verified HyperMesh Tcl command routes."""
     if params.route_name:
         route = get_verified_route(params.route_name)
+        if route is not None:
+            return _success({"route_name": params.route_name, "route": route})
+        experimental = get_experimental_route(params.route_name)
+        if experimental is not None:
+            return _success({"route_name": params.route_name, "route": experimental, "experimental": True})
         if route is None:
             return _error(
                 f"HyperMesh Tcl command route is not verified: {params.route_name}",
                 route_name=params.route_name,
                 stats=command_map_stats(),
             )
-        return _success({"route_name": params.route_name, "route": route})
     routes = list_verified_routes()
     return _success({"stats": command_map_stats(), "routes": routes})
 
@@ -962,6 +1549,21 @@ async def hm_element_capability_matrix_tool(params: HmElementCapabilityInput) ->
     meshed, or assigned materials through MCP.
     """
     return _success(element_capability_matrix(params.element_type))
+
+
+@mcp.tool(
+    name="hm_modeling_action",
+    annotations={"title": "Guarded Modeling Action", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
+)
+async def hm_modeling_action_tool(params: HmModelingActionInput) -> str:
+    """Unified guarded modeling entry.
+
+    Use this before choosing narrow create tools. It only dispatches to verified
+    command-map routes. Material, EOS, constraint, load, mixed mesh, tetmesh, and
+    surface automesh requests return blocked results until command recording
+    and connected-GUI validation promote those routes.
+    """
+    return _safe_call(run_modeling_action, params)
 
 
 @mcp.tool(

@@ -76,6 +76,11 @@ _DANGEROUS_CMD_RE = re.compile(
     re.IGNORECASE,
 )
 
+_FILE_IO_CMD_RE = re.compile(
+    r'(?m)^\s*(\*readfile|\*writefile|\*feoutput|\*feoutputwithdata)\b',
+    re.IGNORECASE,
+)
+
 
 def _check_forbidden(script: str) -> str | None:
     """Check script against blocked commands. Returns error or None."""
@@ -97,6 +102,18 @@ def _check_forbidden(script: str) -> str | None:
         )
 
     return None
+
+
+def _check_file_io(script: str) -> str | None:
+    """Check for HyperMesh file I/O commands that require a dedicated tool."""
+    m = _FILE_IO_CMD_RE.search(script)
+    if not m:
+        return None
+    return (
+        f"Blocked file I/O command: {m.group(1)}. "
+        "Use a dedicated verified tool such as hm_auto_save; K export and "
+        "general file I/O are not allowed through execute_tcl_gui."
+    )
 
 
 def _check_whitelist(script: str) -> str | None:
@@ -742,6 +759,7 @@ def send_tcl_to_gui(
     port: int | None = None,
     timeout: int = 120,
     mode: str = "safe",
+    allow_file_io: bool = False,
 ) -> dict:
     """Send a Tcl script to the HyperMesh GUI listener via TCP socket.
 
@@ -753,6 +771,8 @@ def send_tcl_to_gui(
         mode: "safe" (default) enforces whitelist + dictionary validation.
               "raw" skips whitelist + dictionary validation, but still blocks
               destructive commands.
+        allow_file_io: Internal escape hatch for dedicated verified helpers.
+            Direct socket/IPC calls must leave this false.
 
     Returns:
         dict with success, response, etc.
@@ -761,6 +781,38 @@ def send_tcl_to_gui(
         return {"success": False, "error": "Empty script"}
     if port is None:
         port = current_gui_port()
+
+    if not allow_file_io:
+        file_io_error = _check_file_io(script)
+        if file_io_error:
+            return {
+                "success": False,
+                "error": file_io_error,
+                "error_type": "file_io_route_not_allowed",
+                "execution_allowed": False,
+                "tcl_sent": False,
+                "retry_allowed": False,
+                "required_tool": "hm_auto_save",
+            }
+
+    # Meshing policy is enforced for both MCP tool execution and IPC fallback.
+    # Raw mode skips dictionary/whitelist checks, but it must not bypass
+    # verified MAP promotion for automesh/tetmesh workflows.
+    violation = check_meshing_rules(script)
+    if violation:
+        message = violation.get("error", violation.get("message", "Rule violation"))
+        return {
+            "success": False,
+            "error": message,
+            "error_type": violation.get("error_type", "mesh_route_not_verified"),
+            "policy_violation": violation.get("policy_violation", True),
+            "blocked_command": violation.get("blocked_command"),
+            "blocked_route_name": violation.get("blocked_route_name"),
+            "execution_allowed": violation.get("execution_allowed", False),
+            "tcl_sent": violation.get("tcl_sent", False),
+            "retry_allowed": False,
+            "required_tool": "hm_modeling_action",
+        }
 
     # Always block destructive commands
     forbidden = _check_forbidden(script)
@@ -965,47 +1017,27 @@ def _candidate_lsdyna_templates() -> list[str]:
 
 
 def activate_lsdyne_template(host: str = DEFAULT_GUI_HOST, port: int | None = None, timeout: int = 15) -> dict:
-    """Activate LS-DYNA solver template in HyperMesh.
-
-    Must be called before any LS-DYNA card image operations.
-    Uses *templatefileset to load the HyperMesh LS-DYNA template.
-    """
+    """Blocked compatibility helper for LS-DYNA solver template activation."""
     if port is None:
         port = current_gui_port()
     template_paths = _candidate_lsdyna_templates()
-    if not template_paths:
-        return {
-            "success": False,
-            "response": "",
-            "error": "No HyperMesh LS-DYNA template candidates configured in path/hypermesh_paths.yaml",
-        }
-
-    tcl_candidates = " ".join(f'"{quote_tcl_path(path)}"' for path in template_paths)
-    script = "\n".join(
-        [
-            'set template_path ""',
-            f"foreach candidate {{{tcl_candidates}}} {{",
-            "    if {[file exists $candidate]} {",
-            "        set template_path $candidate",
-            "        break",
-            "    }",
-            "}",
-            'if {$template_path eq ""} {',
-            f'    error "LS-DYNA template not found. Checked: {tcl_candidates}"',
-            "}",
-            "set code [catch {*templatefileset $template_path} err]",
-            'puts "TEMPLATE_RESULT=$code"',
-            'puts "TEMPLATE_PATH=$template_path"',
-            'puts "TEMPLATE_MESSAGE=$err"',
-            'catch {puts "SOLVER=[hm_getsolver]"}',
-            'catch {puts "TEMPLATE_TYPE=[hm_info templatetype]"}',
-        ]
-    )
-    result = send_tcl_to_gui(script, host=host, port=port, timeout=timeout)
     return {
-        "success": result.get("success", False),
-        "response": result.get("response", ""),
-        "error": result.get("error"),
+        "success": False,
+        "response": "",
+        "error_type": "lsdyna_template_activation_not_verified",
+        "error": (
+            "LS-DYNA template/profile activation is blocked in the current "
+            "HyperMesh GUI-only MCP scope. Verify template activation, cardimage "
+            "routes, and datanames through command recording before promotion."
+        ),
+        "execution_allowed": False,
+        "tcl_sent": False,
+        "blocked_command": "templatefileset",
+        "blocked_route_name": "activate_lsdyna_template",
+        "required_tool": "hm_modeling_action",
+        "host": host,
+        "port": port,
+        "timeout": timeout,
         "candidates": template_paths,
     }
 
@@ -1022,6 +1054,7 @@ def execute_tcl_gui(
     timeout: int = 120,
     enforce_rules: bool = True,
     mode: str = "safe",
+    allow_file_io: bool = False,
 ) -> dict:
     """Execute a Tcl script in HyperMesh GUI with automatic fallback.
 
@@ -1033,7 +1066,8 @@ def execute_tcl_gui(
     Args:
         script: Tcl script to execute.
         model_path: Optional .hm file to load first (*readfile).
-        output_hm_path: Optional .hm file to save after (*writefile).
+        output_hm_path: Deprecated compatibility argument. Blocked unless
+            allow_file_io is explicitly true for an internal verified helper.
         host: Listener host.
         port: Listener port.
         timeout: Socket timeout.
@@ -1041,6 +1075,8 @@ def execute_tcl_gui(
         mode: "safe" (default) enforces whitelist + dictionary validation.
               "raw" skips whitelist + dictionary validation, but still blocks
               destructive commands.
+        allow_file_io: Internal escape hatch for dedicated verified helpers
+            such as hm_auto_save. MCP execute_tcl_gui calls must leave this false.
 
     Returns:
         Unified dict: success, command_id, transport, fallback_used,
@@ -1049,6 +1085,22 @@ def execute_tcl_gui(
     """
     if port is None:
         port = current_gui_port()
+
+    if not allow_file_io and (model_path or output_hm_path):
+        return {
+            "success": False,
+            "command_id": None,
+            "transport": None,
+            "fallback_used": False,
+            "retry_count": 0,
+            "response": "",
+            "error": "model_path/output_hm_path file I/O is not allowed through execute_tcl_gui.",
+            "error_type": "file_io_route_not_allowed",
+            "message": "Use dedicated verified tools such as hm_auto_save; do not use execute_tcl_gui for file I/O.",
+            "execution_allowed": False,
+            "tcl_sent": False,
+            "required_tool": "hm_auto_save",
+        }
 
     # Validate script
     if not script.strip():
@@ -1064,11 +1116,9 @@ def execute_tcl_gui(
             "message": "Empty script",
         }
 
-    # Enforce meshing rules
-    if enforce_rules:
-        violation = check_meshing_rules(script)
-        if violation:
-            # Wrap legacy violation dict in unified format
+    if not allow_file_io:
+        file_io_error = _check_file_io(script)
+        if file_io_error:
             return {
                 "success": False,
                 "command_id": None,
@@ -1076,9 +1126,34 @@ def execute_tcl_gui(
                 "fallback_used": False,
                 "retry_count": 0,
                 "response": "",
-                "error": violation.get("error", violation.get("message", "Rule violation")),
-                "error_type": "execution_error",
-                "message": violation.get("error", violation.get("message", "Rule violation")),
+                "error": file_io_error,
+                "error_type": "file_io_route_not_allowed",
+                "message": file_io_error,
+                "execution_allowed": False,
+                "tcl_sent": False,
+                "required_tool": "hm_auto_save",
+            }
+
+    # Enforce meshing rules
+    if enforce_rules:
+        violation = check_meshing_rules(script)
+        if violation:
+            # Wrap legacy violation dict in unified format
+            message = violation.get("error", violation.get("message", "Rule violation"))
+            return {
+                "success": False,
+                "command_id": None,
+                "transport": None,
+                "fallback_used": False,
+                "retry_count": 0,
+                "response": "",
+                "error": message,
+                "error_type": violation.get("error_type", "execution_error"),
+                "message": message,
+                "policy_violation": violation.get("policy_violation", True),
+                "blocked_route_name": violation.get("blocked_route_name"),
+                "execution_allowed": violation.get("execution_allowed", False),
+                "tcl_sent": violation.get("tcl_sent", False),
             }
 
     # Safe mode validation (before building GUI script)
@@ -1119,8 +1194,19 @@ def execute_tcl_gui(
 
     state = get_state()
 
+    if allow_file_io and not state.should_use_socket():
+        return _unified_result(
+            success=False,
+            transport="ipc",
+            fallback_used=False,
+            retry_count=0,
+            response="",
+            error_type="file_io_ipc_not_allowed",
+            message="File I/O helpers require a live socket listener; IPC fallback is not allowed for file I/O.",
+        )
+
     if state.should_use_socket():
-        return _execute_via_socket(gui_script, state, host, port, timeout, mode)
+        return _execute_via_socket(gui_script, state, host, port, timeout, mode, allow_file_io=allow_file_io)
     else:
         return _execute_via_ipc(gui_script, state, timeout, mode=mode)
 
@@ -1132,11 +1218,12 @@ def _execute_via_socket(
     port: int,
     timeout: int,
     mode: str,
+    allow_file_io: bool = False,
 ) -> dict:
     """Try socket transport with up to 3 retries; fallback to IPC on failure."""
     max_retries = 3
     for attempt in range(max_retries):
-        result = send_tcl_to_gui(gui_script, host, port, timeout, mode=mode)
+        result = send_tcl_to_gui(gui_script, host, port, timeout, mode=mode, allow_file_io=allow_file_io)
 
         if result.get("success"):
             state.record_success()
@@ -1186,8 +1273,25 @@ def _execute_via_socket(
         )
 
     # All socket attempts exhausted or state switched to IPC -> fallback
+    if allow_file_io:
+        return _unified_result(
+            success=False,
+            transport="socket",
+            fallback_used=False,
+            retry_count=max_retries,
+            response="",
+            error_type="file_io_ipc_not_allowed",
+            message="File I/O helpers require a live socket listener; IPC fallback is not allowed for file I/O.",
+        )
+
     logger.info("Falling back to IPC transport")
-    return _execute_via_ipc(gui_script, state, timeout, fallback_used=True, mode=mode)
+    return _execute_via_ipc(
+        gui_script,
+        state,
+        timeout,
+        fallback_used=True,
+        mode=mode,
+    )
 
 
 def _execute_via_ipc(
@@ -1200,7 +1304,12 @@ def _execute_via_ipc(
     """Execute via IPC file-queue (plugin_loop submit_command + wait_result)."""
     from program.plugin_loop import submit_command, wait_result
 
-    cmd_id = submit_command("execute_tcl", script=gui_script, timeout=timeout, mode=mode)
+    cmd_id = submit_command(
+        "execute_tcl",
+        script=gui_script,
+        timeout=timeout,
+        mode=mode,
+    )
     result = wait_result(cmd_id, timeout=float(timeout) + 10)
 
     if result is None:

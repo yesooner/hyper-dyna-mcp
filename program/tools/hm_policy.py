@@ -1,7 +1,9 @@
 """HyperMesh Tcl script safety policy layer.
 
-Adapted from times1234/hypermesh-mcp _meshing_rule_violation pattern.
-Enforces that only trusted MCP-generated Tcl scripts can execute meshing commands.
+Generated Tcl can be useful as offline recording/review evidence, but current
+MCP execution must still go through verified command-map routes. Unsupported
+meshing workflows such as surface automesh and geometry tetmesh are blocked
+even when they come from an old MCP generator wrapper.
 """
 
 from __future__ import annotations
@@ -33,6 +35,14 @@ TRUSTED_NON_MESHING_GENERATORS: set[str] = {
 
 TRUSTED_GENERATORS: set[str] = TRUSTED_MESHING_GENERATORS | TRUSTED_NON_MESHING_GENERATORS
 
+# Legacy generators kept for fixture/review compatibility only. They must not
+# be treated as permission to execute unverified mesh workflows.
+EXECUTION_BLOCKED_GENERATORS: dict[str, str] = {
+    "generate_surface_automesh_tcl": "surface_automesh",
+    "generate_plain_tetra_tcl": "tetmesh_geometry_solid",
+    "generate_batched_plain_tetra_tcl": "tetmesh_geometry_solid",
+}
+
 # Commands that are only allowed inside generated-script boundaries
 FORBIDDEN_MESHING_COMMANDS: list[str] = [
     "*meshdragelements",
@@ -40,8 +50,18 @@ FORBIDDEN_MESHING_COMMANDS: list[str] = [
     "*set_meshedgeparams",
     "*interactiveremeshedge",
     "*defaultmeshsurf_growth",
+    "*interactiveremeshsurf",
+    "*automesh",
+    "*meshsolidsonly",
     "*tetmesh",
 ]
+
+FORBIDDEN_COMMAND_ROUTES: dict[str, str] = {
+    "*interactiveremeshsurf": "surface_automesh",
+    "*automesh": "surface_automesh",
+    "*meshsolidsonly": "tetmesh_geometry_solid",
+    "*tetmesh": "tetmesh_geometry_solid",
+}
 
 
 # --- Helper functions ---
@@ -126,16 +146,44 @@ def check_meshing_rules(script: str) -> dict[str, Any] | None:
                 "policy_violation": True,
                 "message": "Forbidden meshing Tcl detected after MCP_SCRIPT_END.",
             }
+        blocked_route = EXECUTION_BLOCKED_GENERATORS.get(generator_name)
+        if blocked_route and any(token in lowered_clean for token in FORBIDDEN_MESHING_COMMANDS):
+            return {
+                "success": False,
+                "policy_violation": True,
+                "error_type": "mesh_route_not_verified",
+                "blocked_route_name": blocked_route,
+                "generator_name": generator_name,
+                "execution_allowed": False,
+                "tcl_sent": False,
+                "message": (
+                    f"Generated Tcl from {generator_name} is offline evidence only. "
+                    f"Route {blocked_route} must be promoted through verified MAP "
+                    "before execution."
+                ),
+            }
         return None
 
     # Non-generated script — forbid all raw meshing commands
     for token in FORBIDDEN_MESHING_COMMANDS:
         if token in lowered_clean:
+            route_name = FORBIDDEN_COMMAND_ROUTES.get(token)
             return {
                 "success": False,
                 "policy_violation": True,
+                "error_type": "mesh_route_not_verified",
                 "blocked_command": token.lstrip("*"),
-                "message": "Raw meshing Tcl blocked. Use generate_*_tcl tool.",
+                "blocked_route_name": route_name,
+                "execution_allowed": False,
+                "tcl_sent": False,
+                "message": (
+                    "Raw meshing Tcl blocked. "
+                    + (
+                        f"Route {route_name} must be promoted through verified MAP before execution."
+                        if route_name else
+                        "Use recording_requirements/validate_recording before route promotion."
+                    )
+                ),
             }
 
     return None

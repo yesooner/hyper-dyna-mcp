@@ -1,4 +1,8 @@
-"""LS-DYNA solver command generation. All execution defaults to dry_run=True."""
+"""LS-DYNA solver command generation.
+
+Current project scope is HyperMesh GUI-only MCP. Solver commands may be
+generated for offline planning tests, but this module must not launch LS-DYNA.
+"""
 
 from __future__ import annotations
 
@@ -11,7 +15,7 @@ except ImportError:
     import logging
     logger = logging.getLogger(__name__)
 
-from program.tools.path_tools import load_yaml, validate_path
+from program.tools.path_tools import load_yaml
 
 
 @dataclass
@@ -83,11 +87,11 @@ def run_lsdyna(
     memory: str | None = None,
     extra_args: list[str] | None = None,
 ) -> dict:
-    """Generate and optionally execute LS-DYNA solver.
+    """Generate an LS-DYNA command, but block real solver execution.
 
     Args:
         input_file: Path to .k input file
-        dry_run: If True (default), only generate command without executing
+        dry_run: Must remain True in the current GUI-only MCP scope
         ncpus: Number of CPU cores
         memory: Memory allocation string
         extra_args: Additional command line arguments
@@ -95,6 +99,25 @@ def run_lsdyna(
     Returns:
         Dict with command info and execution status
     """
+    if not dry_run:
+        return {
+            "success": False,
+            "error_type": "lsdyna_solver_execution_out_of_scope",
+            "error": "LS-DYNA solver execution is outside the current HyperMesh GUI-only MCP scope.",
+            "command": "",
+            "command_list": [],
+            "input_file": str(input_file),
+            "dry_run": dry_run,
+            "executed": False,
+            "return_code": None,
+            "stdout": None,
+            "stderr": None,
+            "execution_allowed": False,
+            "solver_execution_allowed": False,
+            "mcp_execution_allowed": False,
+            "offline_review_only": True,
+        }
+
     cmd = generate_solver_command(input_file, ncpus, memory, extra_args)
 
     result = {
@@ -106,32 +129,13 @@ def run_lsdyna(
         "return_code": None,
         "stdout": None,
         "stderr": None,
+        "success": True,
+        "execution_allowed": False,
+        "solver_execution_allowed": False,
+        "mcp_execution_allowed": False,
+        "offline_review_only": True,
     }
 
     if dry_run:
         logger.info("dry_run=True — skipping solver execution")
         return result
-
-    # Real execution (only if explicitly requested)
-    import subprocess
-
-    logger.warning(f"Executing LS-DYNA: {cmd.to_command_str()}")
-    try:
-        proc = subprocess.run(
-            cmd.to_command_list(),
-            capture_output=True,
-            text=True,
-            timeout=3600,
-        )
-        result["executed"] = True
-        result["return_code"] = proc.returncode
-        result["stdout"] = proc.stdout
-        result["stderr"] = proc.stderr
-    except subprocess.TimeoutExpired:
-        result["stderr"] = "Solver execution timed out (3600s)"
-        result["return_code"] = -1
-    except FileNotFoundError:
-        result["stderr"] = f"Solver executable not found: {cmd.executable}"
-        result["return_code"] = -1
-
-    return result

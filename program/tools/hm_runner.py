@@ -1,14 +1,14 @@
-"""HyperMesh hmbatch execution.
+"""HyperMesh hmbatch command planning.
 
 Adapted from times1234/hypermesh-mcp _run_hmbatch pattern.
-Supports batch mode (hmbatch.exe -tcl) with environment setup and timeout.
-dry_run=True by default — does not launch real software.
+Current project scope is HyperMesh GUI-only MCP. This module may prepare
+dry-run command metadata for tests and future work, but it must not launch
+hmbatch.
 """
 
 from __future__ import annotations
 
 import os
-import subprocess
 import time
 from pathlib import Path
 
@@ -51,27 +51,6 @@ def _altair_home_from_exe(exe: Path) -> Path:
     return exe.parent.parent.parent.parent
 
 
-def _hmbatch_environment(exe: Path) -> dict[str, str]:
-    """Build environment variables for hmbatch subprocess."""
-    env = os.environ.copy()
-    altair_home = _altair_home_from_exe(exe)
-    env["ALTAIR_HOME"] = str(altair_home)
-    env.setdefault("HW_ROOTDIR", str(altair_home))
-
-    bin_paths = [
-        altair_home / "hm" / "bin" / "win64",
-        altair_home / "hw" / "bin" / "win64",
-    ]
-    existing_bins = [str(p) for p in bin_paths if p.exists()]
-    if existing_bins:
-        env["PATH"] = ";".join(existing_bins + [env.get("PATH", "")])
-
-    tcl_library = altair_home / "hw" / "tcl" / "tcl8.5.9" / "win64" / "lib" / "tcl8.5"
-    if tcl_library.exists():
-        env["TCL_LIBRARY"] = str(tcl_library)
-    return env
-
-
 def _write_run_script(script: str) -> Path:
     """Write Tcl script to runs/ directory with timestamp."""
     run_dir = _ensure_runs_dir()
@@ -110,17 +89,29 @@ def run_hmbatch(
     dry_run: bool = True,
     timeout: int = 300,
 ) -> dict:
-    """Execute a Tcl script via hmbatch.exe.
+    """Prepare a hmbatch command, but block real hmbatch execution.
 
     Args:
         tcl_script: Path to .tcl file or inline Tcl script content.
         model_file: Optional .hm model file.
-        dry_run: If True, only return the command without executing.
+        dry_run: Must remain True in the current GUI-only MCP scope.
         timeout: Subprocess timeout in seconds.
 
     Returns:
         dict with keys: success, command, script_path, stdout, stderr, etc.
     """
+    if not dry_run:
+        return {
+            "success": False,
+            "error_type": "hmbatch_execution_out_of_scope",
+            "error": "HyperMesh hmbatch execution is outside the current HyperMesh GUI-only MCP scope.",
+            "command": [],
+            "command_str": "",
+            "script_path": None,
+            "dry_run": dry_run,
+            "executed": False,
+        }
+
     # If tcl_script is inline content, write to file first
     if "\n" in str(tcl_script) or not Path(str(tcl_script)).exists():
         script_path = _write_run_script(str(tcl_script))
@@ -147,40 +138,6 @@ def run_hmbatch(
     if dry_run:
         logger.info("dry_run=True — skipping hmbatch execution")
         return result
-
-    env = _hmbatch_environment(exe)
-    try:
-        completed = subprocess.run(
-            command,
-            cwd=str(script_path.parent),
-            env=env,
-            capture_output=True,
-            text=True,
-            timeout=max(1, timeout),
-        )
-        result.update({
-            "success": completed.returncode == 0,
-            "returncode": completed.returncode,
-            "stdout": completed.stdout,
-            "stderr": completed.stderr,
-            "executed": True,
-        })
-    except subprocess.TimeoutExpired as exc:
-        result.update({
-            "success": False,
-            "timeout": True,
-            "stdout": exc.stdout or "",
-            "stderr": exc.stderr or "",
-            "message": f"hmbatch did not finish within {timeout} seconds.",
-            "executed": True,
-        })
-    except FileNotFoundError as exc:
-        result.update({
-            "success": False,
-            "error": str(exc),
-        })
-
-    return result
 
 
 def check_hypermesh_connection() -> dict:

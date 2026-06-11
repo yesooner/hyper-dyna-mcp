@@ -1,7 +1,8 @@
-"""LS-PrePost cfile (command file) generation.
+"""Offline LS-PrePost cfile (command file) generation.
 
-cfiles are simple text scripts that LS-PrePost executes line by line.
-Common commands: open, close, view, export, query.
+Current MCP scope is HyperMesh GUI-only. These helpers only generate cfile
+content for fixtures/review; they do not make LS-PrePost execution an allowed
+agent workflow.
 """
 
 from __future__ import annotations
@@ -15,17 +16,28 @@ except ImportError:
     logger = logging.getLogger(__name__)
 
 
+_ADVISORY_HEADER = [
+    "# LS-PREPOST CFILE ADVISORY ONLY",
+    "# These native LS-PrePost commands are intentionally commented out.",
+    "# Do not execute this cfile; LS-PrePost execution is outside MCP scope.",
+]
+
+
+def _comment_commands(commands: list[str]) -> list[str]:
+    return [f"# {cmd}" if cmd.strip() else "#" for cmd in commands]
+
+
 def generate_cfile(commands: list[str], output_path: str | None = None) -> str:
-    """Generate a cfile script from a list of commands.
+    """Generate non-executable advisory cfile text from commands.
 
     Args:
         commands: List of LS-PrePost commands (one per line).
         output_path: Optional path to save the cfile.
 
     Returns:
-        The cfile content string.
+        Advisory text with commands commented out.
     """
-    lines = [cmd for cmd in commands]
+    lines = [*_ADVISORY_HEADER, *_comment_commands(commands)]
     content = "\n".join(lines) + "\n"
 
     if output_path:

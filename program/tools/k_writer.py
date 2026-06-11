@@ -1,7 +1,8 @@
-"""Generate LS-DYNA .k keyword files from structured data.
+"""Offline LS-DYNA .k fixture/review writer.
 
-Based on LS-DYNA Keyword User's Manual Volume I (R13).
-Supports standard format output (8 fields × 10 chars per line).
+This module is not a HyperMesh GUI route, not an MCP modeling/export tool, and
+must not be used to satisfy final K export requests in the GUI-only MCP. It is
+kept for offline fixtures, parser roundtrips, and keyword-format review.
 """
 
 from __future__ import annotations
@@ -310,9 +311,9 @@ def build_shell_plate_model(
 ) -> KModel:
     """Build a rectangular QUAD4 shell plate K model.
 
-    This is an LS-DYNA keyword-file generator, not a HyperMesh GUI creation
-    route. GUI QUAD4 creation remains blocked until command recording verifies
-    the Tcl route in the target profile.
+    This is an offline fixture/review generator, not a HyperMesh GUI creation
+    or final K export route. GUI QUAD4 creation remains blocked until command
+    recording verifies the Tcl route in the target profile.
     """
     if width <= 0 or height <= 0 or mesh_size <= 0 or thickness <= 0:
         raise ValueError("width, height, mesh_size, and thickness must be positive.")
@@ -442,7 +443,11 @@ def _gen_sets(model: KModel) -> list[str]:
 
 
 def write_k_file(model: KModel, filepath: str | Path) -> str:
-    """Write a KModel to a .k file. Returns the generated content string."""
+    """Write an offline fixture .k file and return the generated content.
+
+    This helper is for tests/review only. It is not a HyperMesh GUI export path
+    and must not be used as final K export for MCP modeling requests.
+    """
     content = generate_k_content(model)
     path = Path(filepath)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -452,7 +457,10 @@ def write_k_file(model: KModel, filepath: str | Path) -> str:
 
 
 def generate_k_content(model: KModel) -> str:
-    """Generate .k file content string from a KModel.
+    """Generate offline fixture/review .k content from a KModel.
+
+    The returned text is keyword-format review data only. It is not evidence
+    that HyperMesh created or exported the model through the GUI listener.
 
     Output order follows LS-DYNA convention:
     *KEYWORD → *TITLE → CONTROL → DATABASE → MAT → SECTION → PART

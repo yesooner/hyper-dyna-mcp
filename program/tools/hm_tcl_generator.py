@@ -6,6 +6,7 @@ All generated scripts are wrapped with MCP_SCRIPT_BEGIN/END markers.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 try:
@@ -21,6 +22,10 @@ from program.tools.hm_policy import (
 
 # Template directory (fallback mode)
 _TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "lib" / "tcl_templates"
+_FILE_IO_CMD_RE = re.compile(
+    r'(?m)^\s*(\*readfile|\*writefile|\*feoutput|\*feoutputwithdata)\b',
+    re.IGNORECASE,
+)
 
 
 # --- Tcl helpers (from hypermesh-mcp) ---
@@ -68,7 +73,11 @@ def generate_surface_automesh_tcl(
     element_size: float,
     output_hm_path: str | None = None,
 ) -> str:
-    """Generate Tcl for surface auto-meshing.
+    """Generate candidate Tcl for surface auto-meshing review.
+
+    This legacy helper is fixture/offline evidence only. Current MCP execution
+    must block this route until ``surface_automesh`` is promoted through the
+    verified command map.
 
     Args:
         element_size: Target element size.
@@ -95,7 +104,11 @@ def generate_solid_mesh_tcl(
     element_size: float,
     output_hm_path: str | None = None,
 ) -> str:
-    """Generate Tcl for solid tetrahedral meshing.
+    """Generate candidate Tcl for solid tetrahedral meshing review.
+
+    This legacy helper is fixture/offline evidence only. Current MCP execution
+    must block this route until ``tetmesh_geometry_solid`` is promoted through
+    the verified command map.
 
     Args:
         element_size: Target element size for tetra mesh.
@@ -132,7 +145,11 @@ def generate_info_tcl() -> str:
 
 
 def generate_save_tcl(output_path: str) -> str:
-    """Generate Tcl to save the current model."""
+    """Generate legacy Tcl to save the current model.
+
+    This is offline/advisory text only. Current MCP file I/O must go through a
+    dedicated verified helper such as hm_auto_save.
+    """
     return f'*writefile "{quote_tcl_path(output_path)}" 1'
 
 
@@ -148,4 +165,19 @@ def validate_tcl_script(script: str) -> dict:
     violation = check_meshing_rules(script)
     if violation:
         return {"valid": False, **violation}
+    file_io_match = _FILE_IO_CMD_RE.search(script)
+    if file_io_match:
+        command = file_io_match.group(1).lower()
+        return {
+            "valid": False,
+            "error_type": "file_io_route_not_allowed",
+            "error": (
+                f"File I/O command {command} is not allowed through legacy Tcl generators. "
+                "Use dedicated verified helpers such as hm_auto_save."
+            ),
+            "blocked_command": command,
+            "execution_allowed": False,
+            "tcl_sent": False,
+            "required_tool": "hm_auto_save",
+        }
     return {"valid": True}

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import platform
 import shutil
-import subprocess
 import sys
 from dataclasses import dataclass, field
 

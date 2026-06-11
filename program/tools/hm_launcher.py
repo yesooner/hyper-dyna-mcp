@@ -1,14 +1,13 @@
-"""HyperMesh GUI launcher with auto-loaded MCP listener.
+"""HyperMesh GUI launch planning helpers.
 
-Launches HyperWorks with the listener script pre-loaded.
-No manual Tcl console interaction needed.
+Current MCP scope is GUI-only and expects the user to start HyperMesh manually,
+then source the generated listener in the Tcl Console. This module may prepare
+launch commands for review, but it must not start HyperWorks as an agent
+execution path.
 """
 
 from __future__ import annotations
 
-import subprocess
-import time
-import socket
 from pathlib import Path
 
 try:
@@ -28,17 +27,38 @@ def launch_hm_gui(
     model_path: str | Path | None = None,
     wait_for_listener: bool = True,
     timeout: int = 30,
+    execute: bool = False,
 ) -> dict:
-    """Launch HyperWorks GUI with MCP listener auto-loaded.
+    """Prepare a HyperWorks GUI launch command without executing it by default.
 
     Args:
         model_path: Optional .hm model file to open.
-        wait_for_listener: Wait for listener to be ready.
+        wait_for_listener: Deprecated. Listener readiness requires PONG checks
+            after the user sources the listener in HyperMesh.
         timeout: Max wait time in seconds.
+        execute: Reserved for future explicit UI launch support. Real execution
+            is blocked in the current GUI-only MCP scope.
 
     Returns:
         dict with process info and connection status.
     """
+    if execute:
+        return {
+            "success": False,
+            "executed": False,
+            "dry_run": True,
+            "error_type": "hypermesh_gui_launch_out_of_scope",
+            "error": (
+                "Automatic HyperMesh GUI launch is outside the current MCP execution scope. "
+                "Open HyperMesh manually and source the generated listener Tcl."
+            ),
+            "command": [],
+            "listener": str(_LISTENER_PATH),
+            "model_path": str(model_path) if model_path else None,
+            "wait_for_listener_requested": bool(wait_for_listener),
+            "timeout": timeout,
+        }
+
     # Get paths
     config = load_yaml("hypermesh_paths")
     hm_cfg = config.get("hypermesh", {})
@@ -46,66 +66,40 @@ def launch_hm_gui(
 
     hw_exe = Path(install_dir) / "hw" / "bin" / "win64" / "hw.exe"
     if not hw_exe.exists():
-        return {"success": False, "error": f"hw.exe not found: {hw_exe}"}
+        return {"success": False, "error": f"hw.exe not found: {hw_exe}", "executed": False}
 
     # Build command
     listener = str(_LISTENER_PATH).replace("\\", "/")
     cmd = [str(hw_exe), "-tcl", f'source "{listener}"']
 
-    # Set environment
-    import os
-    env = os.environ.copy()
-    env["ALTAIR_HOME"] = str(install_dir)
-    env.setdefault("HW_ROOTDIR", str(install_dir))
-
-    # Launch
-    try:
-        proc = subprocess.Popen(
-            cmd,
-            env=env,
-            cwd=str(install_dir),
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-    except Exception as e:
-        return {"success": False, "error": f"Failed to launch: {e}"}
-
     result = {
-        "success": True,
-        "pid": proc.pid,
+        "success": not execute,
+        "executed": False,
+        "dry_run": True,
+        "error_type": None if not execute else "hypermesh_gui_launch_out_of_scope",
+        "error": None if not execute else (
+            "Automatic HyperMesh GUI launch is outside the current MCP execution scope. "
+            "Open HyperMesh manually and source the generated listener Tcl."
+        ),
         "command": cmd,
         "listener": str(_LISTENER_PATH),
+        "model_path": str(model_path) if model_path else None,
+        "wait_for_listener_requested": bool(wait_for_listener),
+        "timeout": timeout,
     }
-
-    # Wait for listener
-    if wait_for_listener:
-        start = time.time()
-        while time.time() - start < timeout:
-            try:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.settimeout(2)
-                sock.connect((DEFAULT_GUI_HOST, DEFAULT_GUI_PORT))
-                sock.close()
-                result["listener_ready"] = True
-                result["wait_time"] = round(time.time() - start, 1)
-                logger.info(f"Listener ready on {DEFAULT_GUI_HOST}:{DEFAULT_GUI_PORT}")
-                return result
-            except (ConnectionRefusedError, OSError):
-                time.sleep(1)
-
-        result["listener_ready"] = False
-        result["warning"] = f"Listener not ready after {timeout}s"
-
     return result
 
 
 def check_listener(host: str = DEFAULT_GUI_HOST, port: int = DEFAULT_GUI_PORT) -> dict:
-    """Check if the MCP listener is active."""
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(3)
-        sock.connect((host, port))
-        sock.close()
-        return {"success": True, "host": host, "port": port, "status": "listening"}
-    except (ConnectionRefusedError, OSError) as e:
-        return {"success": False, "host": host, "port": port, "error": str(e)}
+    """Check whether the HyperMesh listener returns the expected PONG."""
+    from program.tools.hm_gui import diagnose_listener_port
+
+    result = diagnose_listener_port(host=host, port=port, timeout=3, include_alternate=False)
+    return {
+        "success": result.get("success", False),
+        "host": host,
+        "port": port,
+        "status": (result.get("diagnosis") or {}).get("reason"),
+        "diagnosis": result.get("diagnosis"),
+        "ping": result.get("ping"),
+    }
