@@ -25,18 +25,55 @@ The current scope is HyperMesh GUI automation only. LS-DYNA solver execution, LS
 
 ```mermaid
 flowchart TD
-    A["Claude Code / Codex"] --> B["FastMCP stdio<br/>program.server"]
-    B --> C["Preferred entry<br/>hm_modeling_action"]
-    C --> D["Capability query<br/>hm_element_capability_matrix"]
-    D --> E{"Is the route verified?"}
-    E -- "Yes" --> F["Send Tcl<br/>HyperMesh GUI listener"]
-    F --> G["HyperMesh GUI<br/>create/display/save .hm"]
-    E -- "No" --> H["Block execution<br/>recording_requirements"]
-    H --> I["HyperMesh command recording"]
-    I --> J["validate_recording"]
-    J --> K{"promotion_ready?"}
-    K -- "Yes" --> L["Add to verified map"]
+    subgraph agent["🤖 Agent Layer"]
+        A["Claude Code / Codex"]
+    end
+
+    subgraph mcp["⚙️ MCP Server"]
+        B["FastMCP stdio<br/>program.server"]
+        C["hm_modeling_action"]
+        D["hm_element_capability_matrix"]
+        R["hm_set_keyword<br/>(curated keywords)"]
+    end
+
+    subgraph decision["🔀 Route Decision"]
+        E{{"Is the route verified?"}}
+    end
+
+    subgraph exec["✅ Verified Execution"]
+        F["execute_tcl_gui / send_tcl_to_gui"]
+        G["HyperMesh GUI<br/>create / display / save .hm"]
+    end
+
+    subgraph blocked["🚫 Recording Promotion Loop"]
+        H["recording_requirements"]
+        I["HyperMesh command recording"]
+        J["validate_recording"]
+        K{{"promotion_ready?"}}
+        L["Add to verified map"]
+    end
+
+    A -->|"MCP protocol"| B
+    B --> C
+    B --> R
+    C --> D
+    D --> E
+    E -- "verified" --> F
+    E -- "curated keyword" --> R
+    R --> F
+    F --> G
+    E -- "unsupported" --> H
+    H --> I
+    I --> J
+    J --> K
+    K -- "Yes" --> L
     K -- "No" --> H
+
+    style agent fill:#e3f2fd,stroke:#1565c0
+    style mcp fill:#f3e5f5,stroke:#6a1b9a
+    style decision fill:#fff8e1,stroke:#f9a825
+    style exec fill:#e8f5e9,stroke:#2e7d32
+    style blocked fill:#fce4ec,stroke:#c62828
 ```
 
 ## Quick Start
