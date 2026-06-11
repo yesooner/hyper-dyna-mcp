@@ -23,24 +23,7 @@ Hyper-Dyna-MCP 是一个面向本机 HyperMesh GUI 的 MCP server。它通过 `F
 
 ## 工作流程
 
-```mermaid
-flowchart LR
-    A["Claude Code / Codex"] -->|"MCP protocol"| B["FastMCP stdio\nprogram.server"]
-    B --> C["hm_modeling_action"]
-    B --> R["hm_set_keyword\n(curated keywords)"]
-    C --> D["hm_element_capability_matrix"]
-    D --> E{{"verified?"}}
-    E -->|"yes"| F["execute_tcl_gui"]
-    E -->|"curated"| R
-    R --> F
-    F --> G["HyperMesh GUI\ncreate / display / save"]
-    E -->|"no"| H["recording_requirements"]
-    H --> I["command recording"]
-    I --> J["validate_recording"]
-    J --> K{{"promotion_ready?"}}
-    K -->|"yes"| L["add to verified map"]
-    K -->|"no"| H
-```
+![Hyper-Dyna-MCP Workflow](docs/images/workflow.svg)
 
 ## 快速使用
 

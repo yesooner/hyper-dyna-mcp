@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="10" markerHeight="7" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#555"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="10" markerHeight="7" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2e7d32"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="10" markerHeight="7" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#c62828"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="10" markerHeight="7" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#e65100"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="360" fill="#fafafa" rx="8"/>
+
+  <!-- Title -->
+  <text x="600" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#333">Hyper-Dyna-MCP Workflow</text>
+
+  <!-- ===== Row 1: Main verified path ===== -->
+
+  <!-- Agent -->
+  <rect x="20" y="100" width="100" height="50" rx="8" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="70" y="122" text-anchor="middle" font-weight="600" fill="#1565c0">Agent</text>
+  <text x="70" y="138" text-anchor="middle" font-size="10" fill="#555">Claude Code</text>
+
+  <!-- Arrow: Agent → MCP -->
+  <line x1="120" y1="125" x2="160" y2="125" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- MCP Server -->
+  <rect x="165" y="80" width="140" height="90" rx="8" fill="#f3e5f5" stroke="#6a1b9a" stroke-width="1.5"/>
+  <text x="235" y="100" text-anchor="middle" font-weight="600" fill="#6a1b9a">MCP Server</text>
+  <line x1="180" y1="108" x2="290" y2="108" stroke="#ce93d8" stroke-width="0.5"/>
+  <text x="235" y="124" text-anchor="middle" font-size="10" fill="#555">hm_modeling_action</text>
+  <text x="235" y="138" text-anchor="middle" font-size="10" fill="#555">hm_set_keyword</text>
+  <text x="235" y="152" text-anchor="middle" font-size="10" fill="#555">capability_matrix</text>
+
+  <!-- Arrow: MCP → Decision -->
+  <line x1="305" y1="125" x2="350" y2="125" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Decision Diamond -->
+  <polygon points="405,80 460,125 405,170 350,125" fill="#fff8e1" stroke="#f57f17" stroke-width="1.5"/>
+  <text x="405" y="122" text-anchor="middle" font-size="11" font-weight="600" fill="#f57f17">route</text>
+  <text x="405" y="135" text-anchor="middle" font-size="11" font-weight="600" fill="#f57f17">status?</text>
+
+  <!-- Arrow: verified → Execute (green, upward) -->
+  <line x1="460" y1="110" x2="530" y2="80" stroke="#2e7d32" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <text x="500" y="85" text-anchor="middle" font-size="10" fill="#2e7d32">verified</text>
+
+  <!-- Arrow: curated → Keyword (amber, horizontal) -->
+  <line x1="460" y1="125" x2="530" y2="125" stroke="#e65100" stroke-width="1.5" marker-end="url(#arrow-amber)"/>
+  <text x="495" y="118" text-anchor="middle" font-size="10" fill="#e65100">curated</text>
+
+  <!-- Arrow: blocked → Recording (red, downward) -->
+  <line x1="460" y1="140" x2="530" y2="190" stroke="#c62828" stroke-width="1.5" marker-end="url(#arrow-red)"/>
+  <text x="500" y="168" text-anchor="middle" font-size="10" fill="#c62828">blocked</text>
+
+  <!-- Execute box (unified size: 150x50) -->
+  <rect x="535" y="55" width="150" height="50" rx="6" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="610" y="77" text-anchor="middle" font-size="11" font-weight="600" fill="#2e7d32">execute_tcl_gui</text>
+  <text x="610" y="93" text-anchor="middle" font-size="10" fill="#2e7d32">send verified Tcl</text>
+
+  <!-- Arrow: Keyword → Execute -->
+  <line x1="610" y1="55" x2="610" y2="105" stroke="#e65100" stroke-width="1" marker-end="url(#arrow-amber)"/>
+
+  <!-- Keyword box (unified size: 150x50) -->
+  <rect x="535" y="105" width="150" height="50" rx="6" fill="#fff3e0" stroke="#e65100" stroke-width="1.5"/>
+  <text x="610" y="127" text-anchor="middle" font-size="11" font-weight="600" fill="#e65100">hm_set_keyword</text>
+  <text x="610" y="143" text-anchor="middle" font-size="10" fill="#885400">MAT/SECTION/EOS/BC/LOAD</text>
+
+  <!-- Arrow: Execute → GUI -->
+  <line x1="685" y1="80" x2="740" y2="80" stroke="#2e7d32" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+
+  <!-- HyperMesh GUI -->
+  <rect x="745" y="55" width="150" height="50" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="820" y="77" text-anchor="middle" font-weight="600" fill="#2e7d32">HyperMesh GUI</text>
+  <text x="820" y="93" text-anchor="middle" font-size="10" fill="#2e7d32">create / display / save</text>
+
+  <!-- ===== Row 2: Recording promotion loop ===== -->
+
+  <!-- Recording box (unified size: 150x60) -->
+  <rect x="535" y="180" width="150" height="60" rx="6" fill="#fce4ec" stroke="#c62828" stroke-width="1.5"/>
+  <text x="610" y="199" text-anchor="middle" font-size="11" font-weight="600" fill="#c62828">recording_requirements</text>
+  <text x="610" y="215" text-anchor="middle" font-size="10" fill="#c62828">command recording</text>
+  <text x="610" y="229" text-anchor="middle" font-size="10" fill="#c62828">validate_recording</text>
+
+  <!-- Arrow: Recording → Decision2 -->
+  <line x1="685" y1="210" x2="740" y2="210" stroke="#c62828" stroke-width="1.5" marker-end="url(#arrow-red)"/>
+
+  <!-- Decision2 Diamond -->
+  <polygon points="795,180 840,210 795,240 750,210" fill="#fff8e1" stroke="#f57f17" stroke-width="1.5"/>
+  <text x="795" y="207" text-anchor="middle" font-size="10" font-weight="600" fill="#f57f17">ready?</text>
+
+  <!-- Arrow: yes → Verified Map (green, right) -->
+  <line x1="840" y1="200" x2="890" y2="180" stroke="#2e7d32" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <text x="868" y="185" text-anchor="middle" font-size="10" fill="#2e7d32">yes</text>
+
+  <!-- Verified Map -->
+  <rect x="895" y="165" width="130" height="40" rx="6" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="960" y="183" text-anchor="middle" font-size="11" font-weight="600" fill="#2e7d32">verified map</text>
+  <text x="960" y="197" text-anchor="middle" font-size="10" fill="#2e7d32">route promoted</text>
+
+  <!-- Arrow: no → back to Recording (red, down and left) -->
+  <line x1="795" y1="240" x2="795" y2="280" stroke="#c62828" stroke-width="1" marker-end="url(#arrow-red)"/>
+  <text x="810" y="265" font-size="10" fill="#c62828">no</text>
+  <line x1="795" y1="280" x2="610" y2="280" stroke="#c62828" stroke-width="1"/>
+  <line x1="610" y1="280" x2="610" y2="240" stroke="#c62828" stroke-width="1" marker-end="url(#arrow-red)"/>
+</svg>
