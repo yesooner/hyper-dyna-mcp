@@ -27,9 +27,9 @@ Hyper-Dyna-MCP 是一个面向本机 HyperMesh GUI 的 MCP server。它通过 `F
 
 ## 快速使用
 
-### 1. 注册 MCP
+### 1. 配置 Claude Code / Codex
 
-让 Claude Code / Codex 通过 stdio 启动：
+在 Claude Code 或 Codex 的 MCP 配置文件中添加以下内容，让它知道如何启动本项目的 MCP server：
 
 ```json
 {
@@ -46,42 +46,36 @@ Hyper-Dyna-MCP 是一个面向本机 HyperMesh GUI 的 MCP server。它通过 `F
 }
 ```
 
-本项目不是 FastAPI/HTTP 服务，不需要手动常驻 Web server。
+Claude Code / Codex 会通过 stdio（标准输入输出）与 MCP server 通信，不需要手动启动 Web 服务。
 
 ### 2. 启动 HyperMesh Listener
 
-在 HyperMesh Tcl Console 中执行：
+两种方式：
+
+**方式 A：GUI 界面启动（推荐）**
+
+首次需要在 HyperMesh Tcl Console 中加载脚本：
+
+```tcl
+source "<repo-root>/hmcustom.tcl"
+```
+
+加载后会自动创建 MCP 标签页，点击 **Start MCP**（Socket 模式）或 **Start Loop**（IPC 模式）即可。
+
+**方式 B：Tcl Console 手动启动**
+
+在 HyperMesh 中打开 Tcl Console（菜单 View → Tcl Console），执行：
 
 ```tcl
 set ::mcp_hm_port 47883
 source "<repo-root>/runs/hm_gui_listener.tcl"
 ```
 
-成功时应能收到：
-
-```text
-HYPERMESH_MCP_PONG
-```
-
-如果端口被占用，使用固定恢复端口 `47884`：
+成功时返回 `HYPERMESH_MCP_PONG`。如果端口被占用：
 
 ```tcl
 catch {mcp_stop}
 if {[llength [info commands mcp_start_on_port]]} {mcp_start_on_port 47884} else {source "<repo-root>/runs/hm_gui_listener_47884.tcl"}
-```
-
-### 3. 验证
-
-连接 HyperMesh 的 smoke：
-
-```powershell
-<python> -B -X utf8 -m program.claude_smoke --config <mcp-config.json> --with-gui --port 47883 --modeling-smoke
-```
-
-只做本地 no-GUI 检查：
-
-```powershell
-<python> -B -X utf8 -m program.claude_smoke --config <mcp-config.json>
 ```
 
 ## 常用工具
@@ -127,80 +121,36 @@ hm_set_keyword
 
 `hm_modeling_action` 是 agent 建模的首选入口，支持以下 action：
 
-| Action | 功能 | 说明 |
+| Action | 功能 | curated keywords |
 | --- | --- | --- |
-| `create_mesh` | 创建结构化 FE 网格 | verified route：HEX8、QUAD4 shell |
+| `create_mesh` | 创建结构化 FE 网格 | HEX8、QUAD4 shell |
 | `create_element` | 创建直接 FE element | TET4、TRIA3、BAR2/BEAM、DISCRETE、MASS |
-| `assign_material` | 分配材料 | curated keywords：`MAT_ELASTIC` 等 |
-| `assign_property` | 分配属性 | curated keywords：`SECTION_SOLID`、`SECTION_SHELL`、`SECTION_BEAM`、`SECTION_DISCRETE` |
-| `assign_section` | 分配截面 | 同 assign_property |
-| `assign_eos` | 分配 EOS | curated keywords：`EOS_LINEAR_POLYNOMIAL` 等 |
-| `apply_constraint` | 施加约束 | curated keywords：`BOUNDARY_SPC`、`BOUNDARY_SPC_SET` |
-| `apply_load` | 施加载荷 | curated keywords：`LOAD_NODE`、`LOAD_SEGMENT`、`LOAD_SHELL` 及其 set 变体 |
+| `assign_material` | 分配材料 | `MAT_ELASTIC` |
+| `assign_property` / `assign_section` | 分配属性/截面 | `SECTION_SOLID`、`SECTION_SHELL`、`SECTION_BEAM`、`SECTION_DISCRETE` |
+| `assign_eos` | 分配 EOS | `EOS_LINEAR_POLYNOMIAL` |
+| `apply_constraint` | 施加约束 | `BOUNDARY_SPC`、`BOUNDARY_SPC_SET` |
+| `apply_load` | 施加载荷 | `LOAD_NODE`、`LOAD_SEGMENT`、`LOAD_SHELL` 及其 set 变体 |
 | `recording_requirements` | 查看录制要求 | 用于 blocked route 的下一步 |
 | `validate_recording` | 校验录制证据 | promotion 闭环 |
 
-材料分配能力矩阵支持所有元素类型：`solid_hex`、`solid_tet`、`shell_quad`、`shell_tria`、`line_beam`、`lumped_mass`、`discrete`。
-
-## Curated Keyword 列表
-
-当前通过 `hm_set_keyword` 可执行的 LS-DYNA keyword：
-
-**材料**
-- `MAT_ELASTIC`
-
-**截面/属性**
-- `SECTION_SOLID`
-- `SECTION_SHELL`
-- `SECTION_BEAM`
-- `SECTION_DISCRETE`
-
-**EOS**
-- `EOS_LINEAR_POLYNOMIAL`
-
-**约束**
-- `BOUNDARY_SPC`
-- `BOUNDARY_SPC_SET`
-
-**载荷**
-- `LOAD_NODE`、`LOAD_NODE_SET`
-- `LOAD_SEGMENT`、`LOAD_SEGMENT_SET`
-- `LOAD_SHELL`、`LOAD_SHELL_SET`
-
-未被 curated 的复杂卡片仍保持 blocked，例如 `MAT_3`、`LOAD_BLAST`。
+材料分配支持所有元素类型：`solid_hex`、`solid_tet`、`shell_quad`、`shell_tria`、`line_beam`、`lumped_mass`、`discrete`。未被 curated 的复杂卡片（如 `MAT_3`、`LOAD_BLAST`）仍保持 blocked。
 
 ## 功能范围
 
 | 类型 | 当前状态 |
 | --- | --- |
-| HEX8 structured FE | 可用，走 verified Tcl route |
-| TET4 / TRIA3 direct element | 可用，只创建直接 FE element，不是自动网格 |
-| QUAD4 shell plate | 可用，结构化 FE shell，不做 surface automesh |
-| BAR2/BEAM line | 可用，创建新直线和 BEAM element |
-| DISCRETE / MASS | 可用，基础 FE element 创建 |
-| Geometry surface | 可用 |
-| Geometry solid box | 可用，走 verified `*solidblock` route |
-| 材料/property/section/EOS/约束/LOAD | 可用，走 `hm_set_keyword` GUI Tcl 模板；复杂卡片仍需验证 |
+| HEX8 structured FE | 已开放，走 verified Tcl route |
+| TET4 / TRIA3 direct element | 已开放，只创建直接 FE element，不是自动网格 |
+| QUAD4 shell plate | 已开放，结构化 FE shell，不做 surface automesh |
+| BAR2/BEAM line | 已开放，创建新直线和 BEAM element |
+| DISCRETE / MASS | 已开放，基础 FE element 创建 |
+| Geometry surface | 已开放 |
+| Geometry solid box | 已开放，走 verified `*solidblock` route |
+| 材料/property/section/EOS/约束/LOAD | 已开放，走 `hm_set_keyword` GUI Tcl 模板；复杂卡片仍需验证 |
 | `*tetmesh` / surface automesh / line mesh / `mixed_mesh_workflow` | 未开放，需要 command recording |
 | K export | 未开放，不能用后端 K writer 代替 GUI 导出 |
 
 FE 网格、几何实体和 K 文件是不同路线。Agent 必须优先走 HyperMesh GUI listener 和 verified route；`program.tools.k_writer`、`program.tools.k_parser`、`program.tools.hm_k_integration` 只能作为离线 fixture/test/review，不能绕过 GUI 建模或伪装成最终 `.k` 导出。
-
-## 录制验证
-
-未开放路线不能靠猜 Tcl 实现。流程是：
-
-1. 用 `hm_modeling_action(action="recording_requirements")` 查看需要的证据。
-2. 在 HyperMesh 中用 command recording 录制真实 Tcl。
-3. 用 `hm_modeling_action(action="validate_recording")` 校验 recording 和 runtime evidence。
-4. 只有 `promotion_ready=true` 后，才能把路线加入 verified map。
-
-## 本地验证
-
-```powershell
-<python> -B -X utf8 -m pytest
-<python> -B -X utf8 -m program.claude_smoke --config <mcp-config.json>
-```
 
 ## 关键文件
 

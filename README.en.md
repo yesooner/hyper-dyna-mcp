@@ -27,9 +27,9 @@ The current scope is HyperMesh GUI automation only. LS-DYNA solver execution, LS
 
 ## Quick Start
 
-### 1. Register MCP
+### 1. Configure Claude Code / Codex
 
-Let Claude Code / Codex start the server through stdio:
+Add the following to your Claude Code or Codex MCP config file, so it knows how to start this MCP server:
 
 ```json
 {
@@ -46,42 +46,36 @@ Let Claude Code / Codex start the server through stdio:
 }
 ```
 
-This project is not a FastAPI/HTTP service. You do not need to keep a Web server running.
+Claude Code / Codex communicates with the MCP server via stdio (standard input/output). No manual web server startup needed.
 
 ### 2. Start The HyperMesh Listener
 
-Run this in the HyperMesh Tcl Console:
+Two ways to start:
+
+**Method A: GUI interface (recommended)**
+
+First load the script in HyperMesh Tcl Console:
+
+```tcl
+source "<repo-root>/hmcustom.tcl"
+```
+
+This auto-creates an MCP tab. Click **Start MCP** (socket mode) or **Start Loop** (IPC mode).
+
+**Method B: Tcl Console manual start**
+
+Open the Tcl Console in HyperMesh (menu View → Tcl Console) and run:
 
 ```tcl
 set ::mcp_hm_port 47883
 source "<repo-root>/runs/hm_gui_listener.tcl"
 ```
 
-Success should return:
-
-```text
-HYPERMESH_MCP_PONG
-```
-
-If the port is occupied, use the fixed recovery port `47884`:
+Success returns `HYPERMESH_MCP_PONG`. If the port is occupied:
 
 ```tcl
 catch {mcp_stop}
 if {[llength [info commands mcp_start_on_port]]} {mcp_start_on_port 47884} else {source "<repo-root>/runs/hm_gui_listener_47884.tcl"}
-```
-
-### 3. Verify
-
-Connected HyperMesh smoke:
-
-```powershell
-<python> -B -X utf8 -m program.claude_smoke --config <mcp-config.json> --with-gui --port 47883 --modeling-smoke
-```
-
-Local no-GUI check:
-
-```powershell
-<python> -B -X utf8 -m program.claude_smoke --config <mcp-config.json>
 ```
 
 ## Common Tools
@@ -127,85 +121,36 @@ hm_set_keyword
 
 `hm_modeling_action` is the preferred agent modeling entry point. It supports the following actions:
 
-| Action | Function | Notes |
+| Action | Function | Curated Keywords |
 | --- | --- | --- |
-| `create_mesh` | Create structured FE mesh | Verified routes: HEX8, QUAD4 shell |
+| `create_mesh` | Create structured FE mesh | HEX8, QUAD4 shell |
 | `create_element` | Create direct FE element | TET4, TRIA3, BAR2/BEAM, DISCRETE, MASS |
-| `assign_material` | Assign material | Curated keywords: `MAT_ELASTIC`, etc. |
-| `assign_property` | Assign property | Curated keywords: `SECTION_SOLID`, `SECTION_SHELL`, `SECTION_BEAM`, `SECTION_DISCRETE` |
-| `assign_section` | Assign section | Same as assign_property |
-| `assign_eos` | Assign EOS | Curated keywords: `EOS_LINEAR_POLYNOMIAL`, etc. |
-| `apply_constraint` | Apply constraint | Curated keywords: `BOUNDARY_SPC`, `BOUNDARY_SPC_SET` |
-| `apply_load` | Apply load | Curated keywords: `LOAD_NODE`, `LOAD_SEGMENT`, `LOAD_SHELL` and their set variants |
+| `assign_material` | Assign material | `MAT_ELASTIC` |
+| `assign_property` / `assign_section` | Assign property/section | `SECTION_SOLID`, `SECTION_SHELL`, `SECTION_BEAM`, `SECTION_DISCRETE` |
+| `assign_eos` | Assign EOS | `EOS_LINEAR_POLYNOMIAL` |
+| `apply_constraint` | Apply constraint | `BOUNDARY_SPC`, `BOUNDARY_SPC_SET` |
+| `apply_load` | Apply load | `LOAD_NODE`, `LOAD_SEGMENT`, `LOAD_SHELL` and set variants |
 | `recording_requirements` | Inspect recording requirements | For blocked routes next step |
 | `validate_recording` | Validate recording evidence | Promotion loop |
 
-Material assignment capability matrix supports all element types: `solid_hex`, `solid_tet`, `shell_quad`, `shell_tria`, `line_beam`, `lumped_mass`, `discrete`.
-
-## Curated Keyword List
-
-LS-DYNA keywords currently executable through `hm_set_keyword`:
-
-**Materials**
-
-- `MAT_ELASTIC`
-
-**Sections / Properties**
-
-- `SECTION_SOLID`
-- `SECTION_SHELL`
-- `SECTION_BEAM`
-- `SECTION_DISCRETE`
-
-**EOS**
-
-- `EOS_LINEAR_POLYNOMIAL`
-
-**Constraints**
-
-- `BOUNDARY_SPC`
-- `BOUNDARY_SPC_SET`
-
-**Loads**
-
-- `LOAD_NODE`, `LOAD_NODE_SET`
-- `LOAD_SEGMENT`, `LOAD_SEGMENT_SET`
-- `LOAD_SHELL`, `LOAD_SHELL_SET`
-
-Complex cards that are not curated remain blocked, e.g. `MAT_3`, `LOAD_BLAST`.
+Material assignment supports all element types: `solid_hex`, `solid_tet`, `shell_quad`, `shell_tria`, `line_beam`, `lumped_mass`, `discrete`. Complex cards that are not curated (e.g. `MAT_3`, `LOAD_BLAST`) remain blocked.
 
 ## Capability Scope
 
-| Type | Current status |
+| Type | Current Status |
 | --- | --- |
-| HEX8 structured FE | Available through a verified Tcl route |
-| TET4 / TRIA3 direct element | Available, direct FE element only, not automesh |
-| QUAD4 shell plate | Available, structured FE shell, no surface automesh |
-| BAR2/BEAM line | Available, creates a new line and BEAM elements |
-| DISCRETE / MASS | Available, basic FE element creation |
-| Geometry surface | Available |
-| Geometry solid | Available through verified `*solidblock` route |
-| Material/property/section/EOS/constraints/LOAD | Available through `hm_set_keyword` GUI Tcl templates; complex cards still require validation |
+| HEX8 structured FE | Open, verified Tcl route |
+| TET4 / TRIA3 direct element | Open, direct FE element only, not automesh |
+| QUAD4 shell plate | Open, structured FE shell, no surface automesh |
+| BAR2/BEAM line | Open, creates a new line and BEAM elements |
+| DISCRETE / MASS | Open, basic FE element creation |
+| Geometry surface | Open |
+| Geometry solid | Open, verified `*solidblock` route |
+| Material/property/section/EOS/constraints/LOAD | Open, `hm_set_keyword` GUI Tcl templates; complex cards still require validation |
 | `*tetmesh` / surface automesh / line mesh / `mixed_mesh_workflow` | Not open, requires command recording |
 | K export | Not open; backend K writer cannot replace GUI export |
 
 FE mesh, geometry entities, and K files are separate routes. Agents must prefer the HyperMesh GUI listener and verified routes. `program.tools.k_writer`, `program.tools.k_parser`, and `program.tools.hm_k_integration` are offline fixture/test/review helpers only and must not bypass GUI modeling or pretend to be final `.k` export.
-
-## Recording Validation
-
-Unopened routes must not be implemented by guessing Tcl. Use this flow:
-
-1. Call `hm_modeling_action(action="recording_requirements")` to inspect required evidence.
-2. Record real Tcl in HyperMesh command recording.
-3. Call `hm_modeling_action(action="validate_recording")` to validate recording and runtime evidence.
-4. Add the route to the verified map only after `promotion_ready=true`.
-
-## Local Validation
-
-```powershell
-<python> -B -X utf8 -m pytest
-<python> -B -X utf8 -m program.claude_smoke --config <mcp-config.json>
-```
 
 ## Key Files
 
